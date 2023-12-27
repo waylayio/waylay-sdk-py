@@ -121,48 +121,6 @@ def request_client_credentials_interactive(
     return credentials
 
 
-def request_client_credentials_interactive_legacy(
-    default_accounts_url: str = DEFAULT_ACCOUNTS_URL
-) -> WaylayCredentials:
-    """Asks interactively for client credentials.
-
-    Default callback provider for an interactive WaylayConfig.
-    """
-    tell("Authenticating to the Waylay Platform")
-
-    accounts_url: str = default_accounts_url
-    acc_validated = False
-    while not acc_validated:
-        tell(f'Using authentication provider at [{accounts_url}]')
-        accounts_url = ask(
-            '> alternative endpoint (press enter to continue)?: '
-        ) or accounts_url
-        accounts_url = _root_url_for(accounts_url)
-        accounts_status_resp = httpx.get(accounts_url)
-        acc_validated = not accounts_status_resp.is_error
-        if acc_validated:
-            tell(f"Authenticating at '{accounts_status_resp.json()['name']}'")
-        else:
-            tell(f"Cannot connect to '{accounts_url}': {accounts_status_resp.reason_phrase}")
-
-    tell("Please provide client credentials for the waylay data client.")
-    credentials = ClientCredentials(api_key='', api_secret='', accounts_url=accounts_url)
-    retry = 0
-    while not credentials.is_well_formed() and retry < 3:
-        api_key = ask(prompt='> apiKey : ').strip()
-        api_secret = ask_secret(prompt='> apiSecret : ').strip()
-        credentials = ClientCredentials(
-            api_key=api_key, api_secret=api_secret, accounts_url=accounts_url
-        )
-        if not credentials.is_well_formed():
-            retry += 1
-            if retry >= 3:
-                tell('Too many attempts, failing authentication')
-                raise AuthError('Too many attempts, failing authentication')
-            tell('Invalid apiKey or apiSecret, please retry')
-    return credentials
-
-
 def request_store_config_interactive(profile, save_callback):
     """Save interactively the storage of credentials as a profile."""
     if ask_yes_no(

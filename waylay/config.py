@@ -82,7 +82,7 @@ class WaylayConfig():
     def credentials(self):
         """Get current credentials.
 
-        As configured or returned by last callback).
+        As configured or returned by last callback.
         """
         return self._auth.credentials
 
@@ -211,7 +211,7 @@ class WaylayConfig():
 
     @property
     def auth(self) -> _http.Auth:
-        """Get the current the http authentication interceptor."""
+        """Get the current http authentication interceptor."""
         return self._auth
 
     @property
