@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "waylay"
+version = "0.0.0"
+description = "Waylay Python SDK."
+requires-python = ">=3.9"
+authors = [{name = "Waylay", email = "info@waylay.io"}]
+dependencies = [
+    'httpx',
+    'appdirs',
+    'python-jose',
+]
+
+
+[tool.setuptools.package-data]
+"waylay" = ["py.typed"]
+
+[tool.setuptools.packages.find]
+exclude = []
+
+[project.optional-dependencies]
+dev = [
+]
+
+[tool.pytest.ini_options]
+env = [
+]
