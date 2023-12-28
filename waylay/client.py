@@ -122,7 +122,8 @@ class WaylayClient():
 
     def load_services(self):
         """Load all services that are installed."""
-        raise NotImplementedError()
+        pass
+        # raise NotImplementedError()
 
     def register_service(self, *service_class: Type[S]) -> Iterable[S]:
         """Create and initialize one or more service of the given class.
