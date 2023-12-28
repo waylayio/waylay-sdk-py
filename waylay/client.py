@@ -2,7 +2,7 @@
 
 from collections import defaultdict
 from typing import (
-    Optional, TypeVar, List, Mapping, Type, Iterable, Dict
+    Optional, TypeVar, List, Mapping, Type, Iterable, Dict, Any
 )
 import logging
 import sys
@@ -11,22 +11,6 @@ if sys.version_info < (3, 10):
 else:
     from importlib.metadata import entry_points
 
-from .service import (
-    WaylayService,
-    WaylayRESTService,
-    WaylayServiceContext,
-    ByomlService,
-    TimeSeriesService,
-    ResourcesService,
-    StorageService,
-    UtilService,
-    ETLService,
-    DataService,
-    QueriesService,
-    SERVICES
-)
-
-from .service.analytics import AnalyticsServiceLegacy
 from .exceptions import ConfigError
 
 from .config import (
@@ -42,23 +26,15 @@ from .auth import (
     TokenCredentials,
 )
 
+WaylayService = Any
+
 S = TypeVar('S', bound=WaylayService)
 logger = logging.getLogger(__name__)
 
 
 class WaylayClient():
     """REST client for the Waylay Platform."""
-
-    analytics: AnalyticsServiceLegacy = AnalyticsServiceLegacy()
-    byoml: ByomlService
     config: WaylayConfig
-    timeseries: TimeSeriesService
-    resources: ResourcesService
-    storage: StorageService
-    util: UtilService
-    etl: ETLService
-    data: DataService
-    queries: QueriesService
 
     @classmethod
     def from_profile(
@@ -118,7 +94,7 @@ class WaylayClient():
         return self._services
 
     @property
-    def service_context(self) -> WaylayServiceContext:
+    def service_context(self):
         """Get the WaylayServiceContext view on this client."""
         return self
 
@@ -145,22 +121,8 @@ class WaylayClient():
         )
 
     def load_services(self):
-        """Load all services that are registered with the `waylay_services` entry point."""
-        registered_service_classes = [
-            srv_class
-            for entry_point in entry_points(group='waylay_services')
-            for srv_class in entry_point.load()
-        ]
-        if not registered_service_classes:
-            logger.warning(
-                "The package %s "
-                "seems not to be installed properly. "
-                "If it was installed during this runtime session, "
-                "please restart the runtime before continuing.",
-                __package__
-            )
-            registered_service_classes = SERVICES
-        self.register_service(*registered_service_classes)
+        """Load all services that are installed."""
+        raise NotImplementedError()
 
     def register_service(self, *service_class: Type[S]) -> Iterable[S]:
         """Create and initialize one or more service of the given class.

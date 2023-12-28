@@ -12,6 +12,7 @@ dependencies = [
     'httpx',
     'appdirs',
     'python-jose',
+    'python_dateutil',
 ]
 
 
