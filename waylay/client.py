@@ -1,24 +1,14 @@
 """REST client for the Waylay Platform."""
 
-from collections import defaultdict
 from typing import List
-import sys
-if sys.version_info < (3, 10):
-    from importlib_metadata import entry_points
-else:
-    from importlib.metadata import entry_points
 
 
-try:
-    from registry import RegistryService
-    registry_available = True
-except ImportError:
-    registry_available = False
-
-from .service.base import WaylayServiceStub, WaylayService
 from .api.api_client import ApiClient
 from .api.api_config import ApiConfig
 from .exceptions import ConfigError
+
+from .service.base import WaylayService
+from .service.registry import RegistryService, registry_available
 
 from .config import (
     WaylayConfig,
@@ -41,7 +31,7 @@ class WaylayClient():
     api_client: ApiClient
 
     ## services
-    registry: RegistryService
+    registry: 'RegistryService'
     # TODO, do we want to load the services dynamically like in previous waylay-py
     # + only register installed services
     # - lose type info
@@ -122,11 +112,9 @@ class WaylayClient():
         """Load all services that are installed."""
         self.api_client = ApiClient(ApiConfig(config))
 
+        self.registry = RegistryService(self.api_client)
         if registry_available:
-            self.registry = RegistryService(self.api_client)
             self._services.append(self._services)
-        else: 
-            self.registry = WaylayServiceStub(self.api_client, 'Registry service is not installed')
 
 
 def _auth_urls(gateway_url=None, accounts_url=None, settings: TenantSettings = None):

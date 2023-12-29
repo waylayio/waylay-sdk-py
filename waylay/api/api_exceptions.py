@@ -3,11 +3,11 @@
 from typing import Any, Optional
 from typing_extensions import Self
 
-class BaseApiException(Exception):
-    """The base exception class for all api exceptions"""
+from httpx import Response as RESTResponse
 
+from waylay.exceptions import RequestError, RestResponseError
 
-class ApiTypeError(BaseApiException, TypeError):
+class ApiTypeError(RequestError, TypeError):
     def __init__(self, msg, path_to_item=None, valid_classes=None,
                  key_type=None) -> None:
         """ Raises an exception for TypeErrors
@@ -36,7 +36,7 @@ class ApiTypeError(BaseApiException, TypeError):
         super(ApiTypeError, self).__init__(full_msg)
 
 
-class ApiValueError(BaseApiException, ValueError):
+class ApiValueError(RequestError, ValueError):
     def __init__(self, msg, path_to_item=None) -> None:
         """
         Args:
@@ -54,7 +54,7 @@ class ApiValueError(BaseApiException, ValueError):
         super(ApiValueError, self).__init__(full_msg)
 
 
-class ApiAttributeError(BaseApiException, AttributeError):
+class ApiAttributeError(RequestError, AttributeError):
     def __init__(self, msg, path_to_item=None) -> None:
         """
         Raised when an attribute reference or assignment fails.
@@ -73,7 +73,7 @@ class ApiAttributeError(BaseApiException, AttributeError):
         super(ApiAttributeError, self).__init__(full_msg)
 
 
-class ApiKeyError(BaseApiException, KeyError):
+class ApiKeyError(RequestError, KeyError):
     def __init__(self, msg, path_to_item=None) -> None:
         """
         Args:
@@ -90,31 +90,38 @@ class ApiKeyError(BaseApiException, KeyError):
         super(ApiKeyError, self).__init__(full_msg)
 
 
-class ApiException(BaseApiException):
+class ApiError(RestResponseError):
 
     def __init__(
         self, 
-        status=None, 
-        reason=None, 
-        http_resp=None,
+        status: Optional[int] = None, 
+        reason: Optional[str] = None, 
+        http_resp: Optional[RESTResponse] = None,
         *,
-        body: Optional[str] = None,
+        content: Optional[bytes] = None,
         data: Optional[Any] = None,
     ) -> None:
         self.status_code = status
         self.reason = reason
-        self.body = body
+        self.content = content
         self.data = data
         self.headers = None
+        self.url = None
+        self.method = None
 
         if http_resp:
+            self.url = http_resp.url
+            try: 
+                self.method = http_resp.request.method
+            except RuntimeError: 
+                pass
             if self.status_code is None:
                 self.status_code = http_resp.status_code
             if self.reason is None:
                 self.reason = http_resp.reason_phrase
-            if self.body is None:
+            if self.content is None:
                 try:
-                    self.body = http_resp.data.decode('utf-8')
+                    self.content = http_resp.content
                 except Exception:
                     pass
             self.headers = http_resp.headers
@@ -123,58 +130,34 @@ class ApiException(BaseApiException):
     def from_response(
         cls, 
         *, 
-        http_resp, 
-        body: Optional[str], 
+        http_resp: Optional[RESTResponse] = None, 
+        content: Optional[bytes], 
         data: Optional[Any],
     ) -> Self:
-        if http_resp.status_code == 400:
-            raise BadRequestException(http_resp=http_resp, body=body, data=data)
-
-        if http_resp.status_code == 401:
-            raise UnauthorizedException(http_resp=http_resp, body=body, data=data)
-
-        if http_resp.status_code == 403:
-            raise ForbiddenException(http_resp=http_resp, body=body, data=data)
-
-        if http_resp.status_code == 404:
-            raise NotFoundException(http_resp=http_resp, body=body, data=data)
+        if 400 <= http_resp.status_code <= 499:
+            # TODO throw specific errors? e.g. `NotFoundException`, `UnauthorizedException` ...
+            raise ApiError(http_resp=http_resp, content=content, data=data)
 
         if 500 <= http_resp.status_code <= 599:
-            raise BaseApiException(http_resp=http_resp, body=body, data=data)
-        raise ApiException(http_resp=http_resp, body=body, data=data)
+            raise ApiError(http_resp=http_resp, content=content, data=data)
+        raise ApiError(http_resp=http_resp, content=content, data=data)
 
     def __str__(self):
         """Custom error messages for exception"""
-        error_message = "({0})\n"\
-                        "Reason: {1}\n".format(self.status_code, self.reason)
+
+        error_message = "{0}({1})\n"\
+                        "Reason: {2}\n".format(self.__class__.__name__, self.status_code, self.reason)
+        if self.url and self.method:
+            error_message += "{0} {1}\n".format(self.method, self.url)
+        
         if self.headers:
             error_message += "HTTP response headers: {0}\n".format(
                 self.headers)
 
-        if self.data or self.body:
-            error_message += "HTTP response body: {0}\n".format(self.data or self.body)
+        if self.data or self.content:
+            error_message += "HTTP response content: {0}\n".format(self.data or str(self.content))
 
-        return error_message
-
-
-class BadRequestException(ApiException):
-    pass
-
-
-class NotFoundException(ApiException):
-    pass
-
-
-class UnauthorizedException(ApiException):
-    pass
-
-
-class ForbiddenException(ApiException):
-    pass
-
-
-class BaseApiException(ApiException):
-    pass
+        return error_message + "\n)"
 
 
 def render_path(path_to_item):
