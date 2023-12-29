@@ -23,7 +23,12 @@ dependencies = [
 exclude = []
 
 [project.optional-dependencies]
-dev = [
+dev = []
+services = [
+    "registry" # TODO 
+]
+all = [
+    "registry[types]" # TODO
 ]
 
 [tool.pytest.ini_options]
