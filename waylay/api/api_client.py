@@ -20,12 +20,7 @@ from waylay.api.api_response import ApiResponse
 from waylay.api import rest
 from waylay.api.api_exceptions import (
     ApiValueError,
-    ApiException,
-    BadRequestException,
-    UnauthorizedException,
-    ForbiddenException,
-    NotFoundException,
-    BaseApiException
+    ApiError,
 )
 
 
@@ -187,7 +182,7 @@ class ApiClient:
                 _request_timeout=_request_timeout
             )
 
-        except ApiException as e:
+        except ApiError as e:
             if e.body:
                 e.body = e.body.decode('utf-8')
             raise e
@@ -222,9 +217,9 @@ class ApiClient:
                 return_data = self.deserialize(response_data, response_type)
         finally:
             if not 200 <= response_data.status_code <= 299:
-                raise ApiException.from_response(
+                raise ApiError.from_response(
                     http_resp=response_data,
-                    body=response_data.content,
+                    content=response_data.content,
                     data=return_data,
                 )
 
@@ -458,7 +453,7 @@ class ApiClient:
         except ImportError:
             return string
         except ValueError:
-            raise rest.ApiException(
+            raise rest.ApiError(
                 status=0,
                 reason="Failed to parse `{0}` as date object".format(string)
             )
@@ -476,7 +471,7 @@ class ApiClient:
         except ImportError:
             return string
         except ValueError:
-            raise rest.ApiException(
+            raise rest.ApiError(
                 status=0,
                 reason=(
                     "Failed to parse `{0}` as datetime object"

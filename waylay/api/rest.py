@@ -3,7 +3,7 @@
 import httpx
 from waylay.api.api_config import ApiConfig
 
-from waylay.api.api_exceptions import ApiException, ApiValueError
+from waylay.api.api_exceptions import ApiValueError
 
 RESTResponse = httpx.Response
 
