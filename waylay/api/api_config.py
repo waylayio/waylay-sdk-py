@@ -55,7 +55,7 @@ class ApiConfig:
         self.logger = {}
         """Logging Settings"""
 
-        self.logger["package_logger"] = logging.getLogger("waylay.service")
+        self.logger["package_logger"] = logging.getLogger("waylay.api")
         self.logger["urllib3_logger"] = logging.getLogger("urllib3")
         
         self.logger_format = '%(asctime)s %(levelname)s %(message)s'
