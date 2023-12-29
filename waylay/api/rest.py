@@ -1,9 +1,9 @@
 """ REST client implementation """
 
 import httpx
-from waylay.service.configuration import ApiConfig
+from waylay.api.api_config import ApiConfig
 
-from waylay.service.exceptions import ApiException, ApiValueError
+from waylay.api.api_exceptions import ApiException, ApiValueError
 
 RESTResponse = httpx.Response
 
