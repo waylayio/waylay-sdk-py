@@ -14,11 +14,11 @@ import tempfile
 from urllib.parse import quote
 
 from waylay import __version__
-from waylay.service.configuration import ApiConfig
-from waylay.service.api_response import ApiResponse
+from waylay.api.api_config import ApiConfig
+from waylay.api.api_response import ApiResponse
 
-from waylay.service import rest
-from waylay.service.exceptions import (
+from waylay.api import rest
+from waylay.api.api_exceptions import (
     ApiValueError,
     ApiException,
     BadRequestException,
