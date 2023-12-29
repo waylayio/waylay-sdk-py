@@ -1,16 +1,23 @@
 """REST client for the Waylay Platform."""
 
 from collections import defaultdict
-from typing import (
-    Optional, TypeVar, List, Mapping, Type, Iterable, Dict, Any
-)
-import logging
+from typing import List
 import sys
 if sys.version_info < (3, 10):
     from importlib_metadata import entry_points
 else:
     from importlib.metadata import entry_points
 
+
+try:
+    from registry import RegistryService
+    registry_available = True
+except ImportError:
+    registry_available = False
+
+from .service.base import WaylayServiceStub, WaylayService
+from .api.api_client import ApiClient
+from .api.api_config import ApiConfig
 from .exceptions import ConfigError
 
 from .config import (
@@ -26,15 +33,18 @@ from .auth import (
     TokenCredentials,
 )
 
-WaylayService = Any
-
-S = TypeVar('S', bound=WaylayService)
-logger = logging.getLogger(__name__)
 
 
 class WaylayClient():
     """REST client for the Waylay Platform."""
     config: WaylayConfig
+    api_client: ApiClient
+
+    ## services
+    registry: RegistryService
+    # TODO, do we want to load the services dynamically like in previous waylay-py
+    # + only register installed services
+    # - lose type info
 
     @classmethod
     def from_profile(
@@ -86,107 +96,37 @@ class WaylayClient():
         """Create a WaylayConfig instance."""
         self._services: List[WaylayService] = []
         self.config = config
-        self.load_services()
-
-    @property
-    def services(self) -> List[WaylayService]:
-        """Get the services that are available through this client."""
-        return self._services
-
-    @property
-    def service_context(self):
-        """Get the WaylayServiceContext view on this client."""
-        return self
-
-    def configure(self, config: WaylayConfig):
-        """Update this client with the given configuration."""
-        self.config = config
-        for srv in self._services:
-            srv.configure(self.config, context=self.service_context)
-
-    def list_root_urls(self) -> Mapping[str, Optional[str]]:
-        """List the currently configured root url for each of the registered REST services."""
-        return {
-            srv.config_key: srv.get_root_url()
-            for srv in self._services if isinstance(srv, WaylayRESTService)
-        }
+        self.load_services(config)
 
     def __repr__(self):
         """Get a technical string representation of this instance."""
         return (
             f"<{self.__class__.__name__}("
-            f"services=[{','.join(list(srv_class.service_key for srv_class in self.services))}],"
+            # f"services=[{','.join(list(srv_class.service_key for srv_class in self.services))}],"
             f"config={self.config}"
             ")>"
         )
+    
+    @property
+    def services(self) -> List[WaylayService]:
+        """Get the services that are available through this client."""
+        return self._services
 
-    def load_services(self):
-        """Load all services that are installed."""
-        pass
-        # raise NotImplementedError()
-
-    def register_service(self, *service_class: Type[S]) -> Iterable[S]:
-        """Create and initialize one or more service of the given class.
-
-        Replaces any existing with the same service_key.
-        """
-        new_services = [srv_class() for srv_class in service_class]
-        new_plugin_priorities: Dict[str, int] = defaultdict(int)
-        for srv in new_services:
-            new_plugin_priorities[srv.service_key] = max(
-                srv.plugin_priority, new_plugin_priorities[srv.service_key]
-            )
-
-        # delete existing services
-        to_delete_service_index = [
-            idx for idx, srv in enumerate(self._services)
-            if (
-                srv.service_key in new_plugin_priorities and
-                srv.plugin_priority <= new_plugin_priorities[srv.service_key]
-            )
-        ]
-
-        for idx in reversed(to_delete_service_index):
-            # delete indexed entries in list from the back
-            del self._services[idx]
-
-        # change service list
-        for srv in new_services:
-            if srv.plugin_priority == new_plugin_priorities[srv.service_key]:
-                self._services.append(srv)
-                setattr(self, srv.service_key, srv)
-
-        # reconfigure
-        self.configure(self.config)
-        return new_services
-
-    # implements WaylayServiceContext protocol
-    def get(self, service_class: Type[S]) -> Optional[S]:
-        """Get the service instance for the provided class, if it is registered.
-
-        Implements the `WaylayServiceContext.get` protocol.
-        """
+    def configure(self, config: WaylayConfig):
+        """Update this client with the given configuration."""
+        self.config = config
         for srv in self._services:
-            if isinstance(srv, service_class):
-                return srv
-        return None
+            srv.configure(ApiClient(ApiConfig(config)))
 
-    def require(self, service_class: Type[S]) -> S:
-        """Get the service instance for the given class or raise a ConfigError.
+    def load_services(self, config: WaylayConfig):
+        """Load all services that are installed."""
+        self.api_client = ApiClient(ApiConfig(config))
 
-        Implements the `WaylayServiceContext.require` protocol.
-        """
-        srv = self.get(service_class)
-        if srv is None:
-            raise ConfigError(f"service {service_class.__name__} is not available.")
-        return srv
-
-    def list(self) -> List[WaylayService]:
-        """List all registered Services.
-
-        Implements the `WaylayServiceContext.list` protocol.
-        """
-        return list(self._services)
+        if registry_available:
+            self.registry = RegistryService(self.api_client)
+            self._services.append(self._services)
+        else: 
+            self.registry = WaylayServiceStub(self.api_client, 'Registry service is not installed')
 
 
 def _auth_urls(gateway_url=None, accounts_url=None, settings: TenantSettings = None):
