@@ -130,34 +130,6 @@ class ApiConfig:
         result.debug = self.debug
         return result
 
-    def __setattr__(self, name, value):
-        object.__setattr__(self, name, value)
-
-    @classmethod
-    def set_default(cls, default):
-        """Set default instance of configuration.
-
-        It stores default configuration, which can be
-        returned by get_default method.
-
-        :param default: object of Configuration
-        """
-        cls._default = default
-
-    @classmethod
-    def get_default(cls):
-        """Return the default configuration.
-
-        This method returns newly created, based on default constructor,
-        object of Configuration class or returns a copy of default
-        configuration.
-
-        :return: The configuration object.
-        """
-        if cls._default is None:
-            cls._default = ApiConfig()
-        return cls._default
-
     @property
     def logger_file(self):
         """The logger file.
@@ -243,20 +215,6 @@ class ApiConfig:
         self.__logger_format = value
         self.logger_formatter = logging.Formatter(self.__logger_format)
 
-    def auth_settings(self):
-        """Gets Auth Settings dict for api client.
-
-        :return: The Auth Settings information dict.
-        """
-        auth = {}
-        if self.username is not None and self.password is not None:
-            auth['waylayApiKeySecret'] = {
-                'type': 'basic',
-                'in': 'header',
-                'key': 'Authorization',
-                'value': str(self.waylay_config.get_valid_token())
-            }
-        return auth
     @property 
     def host(self):
         """Return generated host."""

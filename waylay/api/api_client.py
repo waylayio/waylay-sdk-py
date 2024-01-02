@@ -49,13 +49,9 @@ class ApiClient:
 
     def __init__(
         self,
-        configuration: Optional[ApiConfig] = None,
+        configuration: ApiConfig,
     ) -> None:
-        
-        if configuration is None:
-            configuration = ApiConfig.get_default()
         self.configuration = configuration
-
         self.rest_client = rest.RESTClient(configuration)
         self.default_headers = {}
 
@@ -217,7 +213,7 @@ class ApiClient:
                 return_data = self.deserialize(response_data, response_type)
         finally:
             if not 200 <= response_data.status_code <= 299:
-                raise ApiError.from_response(
+                raise ApiError.from_response( # pylint: disable=raising-bad-type
                     http_resp=response_data,
                     content=response_data.content,
                     data=return_data,
@@ -453,7 +449,7 @@ class ApiClient:
         except ImportError:
             return string
         except ValueError:
-            raise rest.ApiError(
+            raise ApiError(
                 status=0,
                 reason="Failed to parse `{0}` as date object".format(string)
             )
@@ -471,7 +467,7 @@ class ApiClient:
         except ImportError:
             return string
         except ValueError:
-            raise rest.ApiError(
+            raise ApiError(
                 status=0,
                 reason=(
                     "Failed to parse `{0}` as datetime object"
