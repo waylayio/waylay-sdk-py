@@ -91,7 +91,7 @@ CredentialsCallback = Callable[[Optional[str]], WaylayCredentials]
 @dataclass(repr=False)
 class AccountsUrlMixin:
     """Dataclass mixin for the 'gateway_url' (legacy 'accounts_url') property."""
-    
+
     gateway_url: Optional[str] = None
     accounts_url: Optional[str] = None
 

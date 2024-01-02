@@ -26,7 +26,7 @@ from .auth import (
 
 class WaylayClient():
     """REST client for the Waylay Platform."""
-    
+
     config: WaylayConfig
     api_client: ApiClient
 

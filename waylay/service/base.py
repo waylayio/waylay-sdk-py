@@ -18,6 +18,7 @@ class WaylayService:
         """Configure the service."""
         self.api_client = api_client
 
+
 class WaylayServiceStub(WaylayService):
     """Dummy Waylay service stub."""
 

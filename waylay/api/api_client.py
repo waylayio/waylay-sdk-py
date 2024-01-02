@@ -185,7 +185,7 @@ class ApiClient:
     def response_deserialize(
         self,
         response_data: rest.RESTResponse,
-        response_types_map = None,
+        response_types_map=None,
     ) -> ApiResponse:
         """Deserialize response into an object.
 
@@ -409,7 +409,7 @@ class ApiClient:
             filename = re.search(
                 r'filename=[\'"]?([^\'"\s]+)[\'"]?',
                 content_disposition
-            ).group(1) # type: ignore[union-attr]
+            ).group(1)  # type: ignore[union-attr]
             path = os.path.join(os.path.dirname(path), filename)
 
         with open(path, "wb") as f:

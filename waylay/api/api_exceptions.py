@@ -151,7 +151,8 @@ class ApiError(RestResponseError):
         data: Optional[Any],
     ):
         """Create an instance from a REST exception response."""
-        # TODO throw specific errors? e.g. `NotFoundException`, `UnauthorizedException`, etc. based on `http_resp.status_code``
+        # TODO throw specific errors? e.g. `NotFoundException`,
+        # `UnauthorizedException`, etc. based on `http_resp.status_code``
         return cls(http_resp=http_resp, content=content, data=data)
 
     def __str__(self):
