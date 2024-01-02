@@ -1,4 +1,4 @@
-""" Exceptions """
+"""Exceptions."""
 
 from typing import Any, Optional
 from typing_extensions import Self
@@ -9,9 +9,11 @@ from waylay.exceptions import RequestError, RestResponseError
 
 
 class ApiTypeError(RequestError, TypeError):
+    """Inappropriate argument type in a Waylay API request."""
+
     def __init__(self, msg, path_to_item=None, valid_classes=None,
                  key_type=None) -> None:
-        """ Raises an exception for TypeErrors
+        """Raise an exception for TypeErrors.
 
         Args:
             msg (str): the exception message
@@ -27,6 +29,7 @@ class ApiTypeError(RequestError, TypeError):
                              True if it is a key in a dict
                              False if our item is an item in a list
                              None if unset
+
         """
         self.path_to_item = path_to_item
         self.valid_classes = valid_classes
@@ -38,14 +41,18 @@ class ApiTypeError(RequestError, TypeError):
 
 
 class ApiValueError(RequestError, ValueError):
+    """Inappropriate argument value (of correct type) in a Waylay API request."""
+
     def __init__(self, msg, path_to_item=None) -> None:
-        """
+        """Raise a value error.
+
         Args:
             msg (str): the exception message
 
         Keyword Args:
             path_to_item (list) the path to the exception in the
                 received_data dict. None if unset
+
         """
 
         self.path_to_item = path_to_item
@@ -56,9 +63,10 @@ class ApiValueError(RequestError, ValueError):
 
 
 class ApiAttributeError(RequestError, AttributeError):
+    """Attribute not found in a Waylay API request."""
+
     def __init__(self, msg, path_to_item=None) -> None:
-        """
-        Raised when an attribute reference or assignment fails.
+        """Raise a failing attribute reference or assignment.
 
         Args:
             msg (str): the exception message
@@ -66,6 +74,7 @@ class ApiAttributeError(RequestError, AttributeError):
         Keyword Args:
             path_to_item (None/list) the path to the exception in the
                 received_data dict
+
         """
         self.path_to_item = path_to_item
         full_msg = msg
@@ -75,14 +84,18 @@ class ApiAttributeError(RequestError, AttributeError):
 
 
 class ApiKeyError(RequestError, KeyError):
+    """Mapping key not found Waylay API request."""
+
     def __init__(self, msg, path_to_item=None) -> None:
-        """
+        """Raise a key not found error.
+
         Args:
             msg (str): the exception message
 
         Keyword Args:
             path_to_item (None/list) the path to the exception in the
                 received_data dict
+
         """
         self.path_to_item = path_to_item
         full_msg = msg
@@ -92,6 +105,7 @@ class ApiKeyError(RequestError, KeyError):
 
 
 class ApiError(RestResponseError):
+    """Exception class wrapping the response data of a REST call."""
 
     def __init__(
         self,
@@ -102,6 +116,7 @@ class ApiError(RestResponseError):
         content: Optional[bytes] = None,
         data: Optional[Any] = None,
     ) -> None:
+        """Create an instance."""
         self.status_code = status
         self.reason = reason
         self.content = content
@@ -135,11 +150,12 @@ class ApiError(RestResponseError):
         content: Optional[bytes],
         data: Optional[Any],
     ):
+        """Create an instance from a REST exception response."""
         # TODO throw specific errors? e.g. `NotFoundException`, `UnauthorizedException`, etc. based on `http_resp.status_code``
         return cls(http_resp=http_resp, content=content, data=data)
 
     def __str__(self):
-        """Custom error messages for exception"""
+        """Get the string representation of the exception."""
 
         error_message = "{0}({1})\n"\
                         "Reason: {2}\n".format(self.__class__.__name__, self.status_code, self.reason)
@@ -157,7 +173,7 @@ class ApiError(RestResponseError):
 
 
 def render_path(path_to_item):
-    """Returns a string representation of a path"""
+    """Return a string representation of a path."""
     result = ""
     for pth in path_to_item:
         if isinstance(pth, int):

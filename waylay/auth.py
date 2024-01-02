@@ -25,8 +25,10 @@ _http = httpx
 class CredentialsType(str, Enum):
     """Supported Waylay Authentication Methods.
 
-    Note that username/password authentication (as used in our IDP at https://login.waylay.io)
+    Note that username/password authentication (as used in our IDP at
+    https://login.waylay.io)
     is not (yet) supported.
+
     """
 
     CLIENT = 'client_credentials'
@@ -77,7 +79,9 @@ class WaylayCredentials(abc.ABC):
     def is_well_formed(self) -> bool:
         """Validate that these credentials are well-formed.
 
-        This does not assure that they will lead to a succesfull authentication.
+        This does not assure that they will lead to a succesfull
+        authentication.
+
         """
 
 
@@ -87,7 +91,7 @@ CredentialsCallback = Callable[[Optional[str]], WaylayCredentials]
 @dataclass(repr=False)
 class AccountsUrlMixin:
     """Dataclass mixin for the 'gateway_url' (legacy 'accounts_url') property."""
-
+    
     gateway_url: Optional[str] = None
     accounts_url: Optional[str] = None
 
@@ -136,7 +140,9 @@ class ApiKeySecretMixin(AccountsUrlMixin):
     def is_well_formed(self) -> bool:
         """Validate that these credentials are well-formed.
 
-        This does not assure that they will lead to a succesfull authentication.
+        This does not assure that they will lead to a succesfull
+        authentication.
+
         """
         if not (self.api_key and self.api_secret):
             return False
@@ -157,7 +163,7 @@ class ApiKeySecretMixin(AccountsUrlMixin):
 
 @dataclass(repr=False, init=False)
 class NoCredentials(AccountsUrlMixin, WaylayCredentials):
-    """Represents that credentials can be asked via (interactive) callback when required."""
+    """Represents credentials which be asked via (interactive) callback when required."""
 
     credentials_type: ClassVar[CredentialsType] = CredentialsType.CALLBACK
 
@@ -252,8 +258,9 @@ class WaylayToken:
     def validate(self) -> 'WaylayToken':
         """Verify essential assertions, and its expiry state.
 
-        This implementation does not verify the signature of a token,
-        as this is seen the responsability of a server implementation.
+        This implementation does not verify the signature of a token, as
+        this is seen the responsability of a server implementation.
+
         """
         if not self.token_string:
             raise AuthError('no token')
@@ -328,6 +335,7 @@ class WaylayToken:
         """Get the expiration state.
 
         True if a (previously valid) the token has expired.
+
         """
         if not isinstance(self.token_data, dict):
             return True
@@ -339,6 +347,7 @@ class WaylayToken:
         """Get the token validity.
 
         True if essential token data is present and is not expired.
+
         """
         return (
             self.tenant is not None
@@ -374,6 +383,7 @@ class WaylayTokenAuth(_http.Auth):
     """Authentication flow with a waylay token.
 
     Will automatically refresh an expired token.
+
     """
 
     current_token: Optional[WaylayToken]
@@ -404,6 +414,7 @@ class WaylayTokenAuth(_http.Auth):
         """Authenticate a http request.
 
         Implements the authentication callback for the http client.
+
         """
         token = self.assure_valid_token()
         request.headers["Authorization"] = f"Bearer {token}"

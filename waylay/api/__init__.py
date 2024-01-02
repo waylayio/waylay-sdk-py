@@ -1,3 +1,5 @@
+"""Waylay Api Configuration."""
+
 # import ApiClient
 from waylay.api.api_response import ApiResponse
 from waylay.api.api_client import ApiClient

@@ -1,4 +1,4 @@
-""" REST client implementation """
+"""REST client implementation."""
 
 from typing import Any, Optional
 import httpx
@@ -10,9 +10,10 @@ RESTResponse = httpx.Response
 
 
 class RESTClient:
+    """Base REST client."""
 
     def __init__(self, configuration: ApiConfig) -> None:
-
+        """Create an instance."""
         additional_httpx_kwargs = {
             "verify": configuration.ssl_ca_cert,
         }
@@ -40,10 +41,10 @@ class RESTClient:
         :param headers: http request headers
         :param body: request json body, for `application/json`
         :param files: request file parameters (`multipart/form-data`)
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
+        :param _request_timeout: timeout setting for this request. If
+            one number provided, it will be total request timeout. It
+            can also be a pair (tuple) of (connection, read) timeouts.
+
         """
         method = method.upper()
         headers = headers or {}

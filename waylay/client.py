@@ -26,6 +26,7 @@ from .auth import (
 
 class WaylayClient():
     """REST client for the Waylay Platform."""
+    
     config: WaylayConfig
     api_client: ApiClient
 
@@ -42,7 +43,9 @@ class WaylayClient():
     ):
         """Create a WaylayClient named profile.
 
-        Uses credentials from environment variables or a locally stored configuration.
+        Uses credentials from environment variables or a locally stored
+        configuration.
+
         """
         return cls(WaylayConfig.load(
             profile, interactive=interactive, gateway_url=gateway_url

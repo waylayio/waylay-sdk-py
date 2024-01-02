@@ -44,8 +44,9 @@ def waylay_test_gateway_url():
 def waylay_test_client_credentials(waylay_test_user_id, waylay_test_user_secret, waylay_test_gateway_url):
     """Get client credentials.
 
-    As specified in the environment variables
-    WAYLAY_TEST_USER_ID, WAYLAY_TEST_USER_SECRET, WAYLAY_TEST_GATEWAY_URL
+    As specified in the environment variables WAYLAY_TEST_USER_ID,
+    WAYLAY_TEST_USER_SECRET, WAYLAY_TEST_GATEWAY_URL
+
     """
     return ClientCredentials(
         waylay_test_user_id, waylay_test_user_secret, gateway_url=waylay_test_gateway_url
