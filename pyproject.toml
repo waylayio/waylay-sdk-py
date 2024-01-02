@@ -32,6 +32,9 @@ dev = [
     'pydocstyle',
     'mypy',
     'autopep8',
+    'types-python-jose',
+    'types-appdirs',
+    'types-python-dateutil',
 ]
 services = [
     "registry @ git+https://github.com/waylayio/xxx@v1.0.0" # TODO

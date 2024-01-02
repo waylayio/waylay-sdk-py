@@ -1,7 +1,7 @@
 """ API client """
 
 from importlib import import_module
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, Optional, List, cast
 
 import datetime
 from dateutil.parser import parse
@@ -53,7 +53,7 @@ class ApiClient:
     ) -> None:
         self.configuration = configuration
         self.rest_client = rest.RESTClient(configuration)
-        self.default_headers = {}
+        self.default_headers: Dict[str, Any] = {}
 
         # Set default User-Agent.
         self.user_agent = "waylay-sdk/python/{__version__}"
@@ -74,7 +74,7 @@ class ApiClient:
     def user_agent(self, value):
         self.default_headers['User-Agent'] = value
 
-    def set_default_header(self, header_name, header_value):
+    def set_default_header(self, header_name: str, header_value: Any):
         self.default_headers[header_name] = header_value
 
     def param_serialize(
@@ -85,7 +85,7 @@ class ApiClient:
         query_params: Optional[Dict[str, Any]] = None,
         header_params: Optional[Dict[str, Optional[str]]] = None,
         body: Optional[Any] = None,
-        files: Dict[str, str] = None,
+        files: Optional[Dict[str, str]] = None,
     ) -> Dict[str, Any]:
         """Builds the HTTP request params needed by the request.
         :param method: Method to call.
@@ -112,7 +112,7 @@ class ApiClient:
         if path_params:
             path_params = self._sanitize_for_serialization(path_params)
 
-            for k, v in path_params.items():
+            for k, v in path_params.items() if path_params else []:
                 # specified safe chars, encode everything
                 resource_path = resource_path.replace(
                     '{%s}' % k,
@@ -177,16 +177,14 @@ class ApiClient:
             )
 
         except ApiError as e:
-            if e.body:
-                e.body = e.body.decode('utf-8')
             raise e
 
         return response_data
 
     def response_deserialize(
         self,
-        response_data: rest.RESTResponse = None,
-        response_types_map=None
+        response_data: rest.RESTResponse,
+        response_types_map = None,
     ) -> ApiResponse:
         """Deserializes response into an object.
         :param response_data: RESTResponse object to be deserialized.
@@ -219,7 +217,7 @@ class ApiClient:
         return ApiResponse(
             status_code=response_data.status_code,
             data=return_data,
-            headers=response_data.headers,
+            headers=cast(dict[str, str], response_data.headers),
             raw_data=response_data.content
         )
 
@@ -405,7 +403,7 @@ class ApiClient:
             filename = re.search(
                 r'filename=[\'"]?([^\'"\s]+)[\'"]?',
                 content_disposition
-            ).group(1)
+            ).group(1) # type: ignore[union-attr]
             path = os.path.join(os.path.dirname(path), filename)
 
         with open(path, "wb") as f:

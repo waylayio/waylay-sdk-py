@@ -1,5 +1,6 @@
 """ REST client implementation """
 
+from typing import Any, Optional
 import httpx
 from waylay.api.api_config import ApiConfig
 
@@ -13,7 +14,6 @@ class RESTClient:
     def __init__(self, configuration: ApiConfig) -> None:
 
         additional_httpx_kwargs = {
-            "cert": configuration.cert_file,
             "verify": configuration.ssl_ca_cert,
         }
 
@@ -63,7 +63,7 @@ class RESTClient:
                 "body parameter cannot be used with files parameter."
             )
 
-        timeout = None
+        timeout: Optional[Any] = None
         if _request_timeout:
             if isinstance(_request_timeout, (int, float)):
                 timeout = _request_timeout

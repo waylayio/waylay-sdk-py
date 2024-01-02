@@ -244,7 +244,7 @@ class WaylayToken:
         self.token_string = token_string
         if token_data is None:
             try:
-                token_data = jwt.decode(token_string, None, options=dict(verify_signature=False))
+                token_data = jwt.decode(token_string, '', options=dict(verify_signature=False))
             except (TypeError, ValueError, JWTError) as exc:
                 raise AuthError(_auth_message_for_exception(exc)) from exc
         self.token_data = token_data

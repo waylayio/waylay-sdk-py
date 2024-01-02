@@ -1,6 +1,6 @@
 """REST client for the Waylay Platform."""
 
-from typing import List
+from typing import List, Optional
 
 
 from .api.api_client import ApiClient
@@ -52,7 +52,7 @@ class WaylayClient():
     def from_client_credentials(
         cls, api_key: str, api_secret: str, *,
         gateway_url=None, accounts_url=None,
-        settings: TenantSettings = None
+        settings: Optional[TenantSettings] = None
     ):
         """Create a WaylayClient using the given client credentials."""
         credentials = ClientCredentials(
@@ -63,7 +63,7 @@ class WaylayClient():
     @classmethod
     def from_token(
         cls, token_string: str, *,
-        gateway_url=None, accounts_url=None, settings: TenantSettings = None
+        gateway_url=None, accounts_url=None, settings: Optional[TenantSettings] = None
     ):
         """Create a WaylayClient using a waylay token."""
         credentials = TokenCredentials(
@@ -73,7 +73,7 @@ class WaylayClient():
 
     @classmethod
     def from_credentials(
-        cls, credentials: WaylayCredentials, settings: TenantSettings = None
+        cls, credentials: WaylayCredentials, settings: Optional[TenantSettings] = None
     ):
         """Create a WaylayClient using the given client credentials."""
         return cls(WaylayConfig(
@@ -113,10 +113,10 @@ class WaylayClient():
 
         self.registry = RegistryService(self.api_client)
         if registry_available:
-            self._services.append(self._services)
+            self._services.append(self.registry)
 
 
-def _auth_urls(gateway_url=None, accounts_url=None, settings: TenantSettings = None):
+def _auth_urls(gateway_url=None, accounts_url=None, settings: Optional[TenantSettings] = None):
     if settings:
         gateway_url = gateway_url or settings.get(SERVICE_KEY_GATEWAY)
         accounts_url = accounts_url or settings.get(SERVICE_KEY_ACCOUNTS)

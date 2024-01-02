@@ -61,8 +61,8 @@ class WaylayConfig():
     _token_auth_provider: Type[WaylayTokenAuth] = WaylayTokenAuth
 
     def __init__(
-        self, credentials: WaylayCredentials = None, profile: str = DEFAULT_PROFILE,
-        settings: TenantSettings = None, fetch_tenant_settings=True,
+        self, credentials: Optional[WaylayCredentials] = None, profile: str = DEFAULT_PROFILE,
+        settings: Optional[TenantSettings] = None, fetch_tenant_settings=True,
         credentials_callback: Optional[CredentialsCallback] = None
     ):
         """Create a WaylayConfig."""

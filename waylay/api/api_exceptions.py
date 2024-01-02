@@ -134,14 +134,9 @@ class ApiError(RestResponseError):
         http_resp: Optional[RESTResponse] = None,
         content: Optional[bytes],
         data: Optional[Any],
-    ) -> Self:
-        if 400 <= http_resp.status_code <= 499:
-            # TODO throw specific errors? e.g. `NotFoundException`, `UnauthorizedException` ...
-            raise ApiError(http_resp=http_resp, content=content, data=data)
-
-        if 500 <= http_resp.status_code <= 599:
-            raise ApiError(http_resp=http_resp, content=content, data=data)
-        raise ApiError(http_resp=http_resp, content=content, data=data)
+    ):
+        # TODO throw specific errors? e.g. `NotFoundException`, `UnauthorizedException`, etc. based on `http_resp.status_code``
+        return cls(http_resp=http_resp, content=content, data=data)
 
     def __str__(self):
         """Custom error messages for exception"""
