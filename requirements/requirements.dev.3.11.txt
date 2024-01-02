@@ -1,5 +1,8 @@
 astroid==3.0.2
+autopep8==2.0.4
+charset-normalizer==3.3.2
 dill==0.3.7
+docformatter==1.7.5
 iniconfig==2.0.0
 isort==5.13.2
 mccabe==0.7.0
@@ -15,3 +18,8 @@ pytest-mock==3.12.0
 pytest==7.4.4
 snowballstemmer==2.2.0
 tomlkit==0.12.3
+types-appdirs==1.4.3.5
+types-pyasn1==0.5.0.20231222
+types-python-dateutil==2.8.19.14
+types-python-jose==3.3.4.8
+untokenize==0.1.1

@@ -171,7 +171,7 @@ freeze-dependencies: ## perform a full reinstall procedure and regenerate the 'r
 	make upgrade-buildtools
 	# install with dependencies specified in setup.py
 	make install-pkg 
-	pip uninstall waylay-beta -y
+	pip uninstall waylay -y
 	bin/freeze-dependencies
 	# install with dependencies specified in setup.py (development mode)
 	make dev-install-pkg
