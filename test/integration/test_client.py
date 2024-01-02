@@ -31,9 +31,7 @@ def test_create_client_from_credentials(
     assert cred.gateway_url == waylay_test_gateway_url
     assert cred.accounts_url is None
 
-    query_version = waylay_client.queries.about.version()
-
-    assert re.match(VERSION_STRING_PATTERN, query_version), query_version
+    assert isinstance(waylay_client.services, list)
 
 
 def test_create_client_from_profile(
@@ -60,5 +58,4 @@ def test_create_client_from_profile(
     monkeypatch.setattr(waylay.auth_interactive, 'ask_secret', mock_ask_secret)
 
     waylay_client = WaylayClient.from_profile('example', gateway_url=waylay_test_gateway_url)
-    root_url = waylay_client.list_root_urls()
-    assert 'query' in root_url
+    assert waylay_test_gateway_url == waylay_client.config.gateway_url

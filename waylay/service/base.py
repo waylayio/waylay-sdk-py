@@ -4,10 +4,12 @@ from waylay.api.api_client import ApiClient
 class WaylayService:
     """Base Waylay service class."""
 
+    name: str
     api_client: ApiClient
 
-    def __init__(self, api_client: ApiClient):
+    def __init__(self, api_client: ApiClient, name = ''):
         self.api_client = api_client
+        self.name = name
 
     def configure(self, api_client: ApiClient):
         self.api_client = api_client
@@ -15,14 +17,12 @@ class WaylayService:
 class WaylayServiceStub(WaylayService):
     """Dummy Waylay service stub."""
 
-    message: str
-
-    def __init__(self, api_client: ApiClient, message):
-        super().__init__(api_client)
-        self.message = message
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     def __getattr__(self, name):
-        raise ImportError(self.message)
+        raise ImportError('{0} service is not installed'.format(
+            self.name.capitalize() if self.name else 'This'))
 
     def __bool__(self):
         return False

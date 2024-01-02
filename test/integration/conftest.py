@@ -9,10 +9,4 @@ from fixtures import (
     waylay_test_token_string,
     waylay_test_client,
     waylay_session_test_client,
-    waylay_storage,
-    waylay_etl,
-    waylay_resources,
-    waylay_data,
-    waylay_byoml,
-    waylay_queries,
 )
