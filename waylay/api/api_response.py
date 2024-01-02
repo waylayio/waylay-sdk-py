@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 
 T = TypeVar("T")
 
+
 @dataclass
 class ApiResponse(Generic[T]):
     """
@@ -20,4 +21,3 @@ class ApiResponse(Generic[T]):
     """Raw data (HTTP response body)"""
     headers: Optional[Dict[str, str]] = field(default_factory=dict)
     """HTTP headers"""
-

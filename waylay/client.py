@@ -24,13 +24,12 @@ from .auth import (
 )
 
 
-
 class WaylayClient():
     """REST client for the Waylay Platform."""
     config: WaylayConfig
     api_client: ApiClient
 
-    ## services
+    # services
     registry: 'RegistryService'
     # TODO, do we want to load the services dynamically like in previous waylay-py
     # + only register installed services
@@ -96,7 +95,7 @@ class WaylayClient():
             f"config={self.config}"
             ")>"
         )
-    
+
     @property
     def services(self) -> List[WaylayService]:
         """Get the services that are available through this client."""

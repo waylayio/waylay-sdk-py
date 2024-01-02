@@ -17,7 +17,7 @@ MOCK_DOMAIN = 'unittest.waylay.io'
 MOCK_API_URL = f'https://{MOCK_DOMAIN}/api'
 
 MOCK_TOKEN_DATA = {
-    'domain':  MOCK_DOMAIN,
+    'domain': MOCK_DOMAIN,
     'tenant': '9999999999999999999999',
     'sub': 'users/999999999999999',
     'exp': datetime.now().timestamp() + 100000

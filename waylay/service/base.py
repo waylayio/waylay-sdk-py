@@ -7,12 +7,13 @@ class WaylayService:
     name: str
     api_client: ApiClient
 
-    def __init__(self, api_client: ApiClient, name = ''):
+    def __init__(self, api_client: ApiClient, name=''):
         self.api_client = api_client
         self.name = name
 
     def configure(self, api_client: ApiClient):
         self.api_client = api_client
+
 
 class WaylayServiceStub(WaylayService):
     """Dummy Waylay service stub."""

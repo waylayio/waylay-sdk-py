@@ -400,7 +400,7 @@ class WaylayTokenAuth(_http.Auth):
 
         self.credentials_callback = credentials_callback
 
-    def auth_flow(self, request: _http.Request) -> Generator[_http.Request,  _http.Response, None]:
+    def auth_flow(self, request: _http.Request) -> Generator[_http.Request, _http.Response, None]:
         """Authenticate a http request.
 
         Implements the authentication callback for the http client.

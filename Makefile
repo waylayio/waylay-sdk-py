@@ -93,6 +93,9 @@ test-integration-cleanup-models:
 
 pre-commit: codestyle
 
+format: 
+	autopep8 --global-config pyproject.toml .
+
 test-unit:
 	@pytest test/unit -m "not (sklearn or pytorch or tensorflow or xgboost or cleanup)"
 

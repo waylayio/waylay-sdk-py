@@ -7,6 +7,7 @@ from httpx import Response as RESTResponse
 
 from waylay.exceptions import RequestError, RestResponseError
 
+
 class ApiTypeError(RequestError, TypeError):
     def __init__(self, msg, path_to_item=None, valid_classes=None,
                  key_type=None) -> None:
@@ -93,9 +94,9 @@ class ApiKeyError(RequestError, KeyError):
 class ApiError(RestResponseError):
 
     def __init__(
-        self, 
-        status: Optional[int] = None, 
-        reason: Optional[str] = None, 
+        self,
+        status: Optional[int] = None,
+        reason: Optional[str] = None,
         http_resp: Optional[RESTResponse] = None,
         *,
         content: Optional[bytes] = None,
@@ -111,9 +112,9 @@ class ApiError(RestResponseError):
 
         if http_resp:
             self.url = http_resp.url
-            try: 
+            try:
                 self.method = http_resp.request.method
-            except RuntimeError: 
+            except RuntimeError:
                 pass
             if self.status_code is None:
                 self.status_code = http_resp.status_code
@@ -128,10 +129,10 @@ class ApiError(RestResponseError):
 
     @classmethod
     def from_response(
-        cls, 
-        *, 
-        http_resp: Optional[RESTResponse] = None, 
-        content: Optional[bytes], 
+        cls,
+        *,
+        http_resp: Optional[RESTResponse] = None,
+        content: Optional[bytes],
         data: Optional[Any],
     ) -> Self:
         if 400 <= http_resp.status_code <= 499:
@@ -149,7 +150,7 @@ class ApiError(RestResponseError):
                         "Reason: {2}\n".format(self.__class__.__name__, self.status_code, self.reason)
         if self.url and self.method:
             error_message += "{0} {1}\n".format(self.method, self.url)
-        
+
         if self.headers:
             error_message += "HTTP response headers: {0}\n".format(
                 self.headers)

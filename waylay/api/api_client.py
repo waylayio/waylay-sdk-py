@@ -87,7 +87,6 @@ class ApiClient:
         body: Optional[Any] = None,
         files: Dict[str, str] = None,
     ) -> Dict[str, Any]:
-
         """Builds the HTTP request params needed by the request.
         :param method: Method to call.
         :param resource_path: Path to method endpoint.
@@ -125,7 +124,7 @@ class ApiClient:
             files = self.files_parameters(files)
 
         # auth setting
-        # TODO ??? 
+        # TODO ???
 
         # body
         if body:
@@ -146,7 +145,6 @@ class ApiClient:
             'body': body,
             'files': files
         }
-
 
     async def call_api(
         self,
@@ -196,7 +194,6 @@ class ApiClient:
         :return: ApiResponse
         """
 
-
         response_type = response_types_map.get(str(response_data.status_code), None)
         if not response_type and isinstance(response_data.status_code, int) and 100 <= response_data.status_code <= 599:
             # if not found, look for '1XX', '2XX', etc.
@@ -213,17 +210,17 @@ class ApiClient:
                 return_data = self.deserialize(response_data, response_type)
         finally:
             if not 200 <= response_data.status_code <= 299:
-                raise ApiError.from_response( # pylint: disable=raising-bad-type
+                raise ApiError.from_response(  # pylint: disable=raising-bad-type
                     http_resp=response_data,
                     content=response_data.content,
                     data=return_data,
                 )
 
         return ApiResponse(
-            status_code = response_data.status_code,
-            data = return_data,
-            headers = response_data.headers,
-            raw_data = response_data.content
+            status_code=response_data.status_code,
+            data=return_data,
+            headers=response_data.headers,
+            raw_data=response_data.content
         )
 
     def _sanitize_for_serialization(self, obj):
@@ -318,7 +315,7 @@ class ApiClient:
                     types_pkg_name, class_name = klass.split('.')
                     types_module = import_module(types_pkg_name)
                     klass = getattr(types_module, class_name)
-                except:
+                except BaseException:
                     klass = object
 
         if klass in self.PRIMITIVE_TYPES:
@@ -344,7 +341,7 @@ class ApiClient:
             for k, v in files.items():
                 if not v:
                     continue
-                file_names = v if type(v) is list else [v]
+                file_names = v if isinstance(v, list) else [v]
                 for n in file_names:
                     with open(n, 'rb') as f:
                         filename = os.path.basename(f.name)

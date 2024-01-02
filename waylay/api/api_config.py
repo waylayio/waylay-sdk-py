@@ -22,6 +22,7 @@ from waylay.config import WaylayConfig
 
 from waylay import __version__
 
+
 class ApiConfig:
     """API client settings.
 
@@ -44,7 +45,7 @@ class ApiConfig:
         self.ssl_ca_cert = ssl_ca_cert
         """Set this to customize the certificate file to verify the peer."""
 
-        ## Other configuration
+        # Other configuration
 
         self.temp_folder_path = None
         """Temp file folder for downloading files """
@@ -57,12 +58,12 @@ class ApiConfig:
 
         self.logger["package_logger"] = logging.getLogger("waylay.api")
         self.logger["urllib3_logger"] = logging.getLogger("urllib3")
-        
+
         self.logger_format = '%(asctime)s %(levelname)s %(message)s'
         """Log format"""
         self.logger_stream_handler = None
         """Log stream handler"""
-        
+
         self.logger_file_handler = None
         """Log file handler"""
 
@@ -100,7 +101,7 @@ class ApiConfig:
 
         self.safe_chars_for_path_param = ''
         """Safe chars for path_param"""
-        
+
         self.retries = None
         """Adding retries to override urllib3 default value 3"""
 
@@ -215,7 +216,7 @@ class ApiConfig:
         self.__logger_format = value
         self.logger_formatter = logging.Formatter(self.__logger_format)
 
-    @property 
+    @property
     def host(self):
         """Return generated host."""
         return self.waylay_config.gateway_url

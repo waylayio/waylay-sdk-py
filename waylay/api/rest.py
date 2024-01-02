@@ -7,6 +7,7 @@ from waylay.api.api_exceptions import ApiValueError
 
 RESTResponse = httpx.Response
 
+
 class RESTClient:
 
     def __init__(self, configuration: ApiConfig) -> None:
@@ -62,15 +63,14 @@ class RESTClient:
                 "body parameter cannot be used with files parameter."
             )
 
-
         timeout = None
         if _request_timeout:
             if isinstance(_request_timeout, (int, float)):
                 timeout = _request_timeout
             elif (
-                    isinstance(_request_timeout, tuple)
-                    and len(_request_timeout) == 2
-                ):
+                isinstance(_request_timeout, tuple)
+                and len(_request_timeout) == 2
+            ):
                 timeout = _request_timeout
 
         # For `POST`, `PUT`, `PATCH`, `OPTIONS`, `DELETE`
@@ -87,14 +87,14 @@ class RESTClient:
                 )
             else:
                 return await self.client.request(
-                        method,
-                        url,
-                        params=query,
-                        data=body,
-                        timeout=timeout,
-                        headers=headers
-                    )
-        
+                    method,
+                    url,
+                    params=query,
+                    data=body,
+                    timeout=timeout,
+                    headers=headers
+                )
+
         # For `GET`, `HEAD`
         else:
             return await self.client.request(

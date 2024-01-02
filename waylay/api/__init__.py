@@ -7,5 +7,3 @@ from waylay.api.api_exceptions import ApiValueError
 from waylay.api.api_exceptions import ApiKeyError
 from waylay.api.api_exceptions import ApiAttributeError
 from waylay.api.api_exceptions import ApiError
-
-
