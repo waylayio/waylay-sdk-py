@@ -9,10 +9,11 @@ description = "Waylay Python SDK."
 requires-python = ">=3.9"
 authors = [{name = "Waylay", email = "info@waylay.io"}]
 dependencies = [
-    'httpx',
-    'appdirs',
-    'python-jose',
-    'python_dateutil',
+    "httpx",
+    "appdirs",
+    "python-jose",
+    "python_dateutil",
+    "typing_extensions",
 ]
 
 
@@ -23,14 +24,13 @@ dependencies = [
 exclude = []
 
 [project.optional-dependencies]
-dev = []
+dev = [
+    "pytest",
+    "pytest-mock",
+]
 services = [
-    "registry" # TODO 
+    "registry @ git+https://github.com/waylayio/xxx@v1.0.0" # TODO
 ]
-all = [
-    "registry[types]" # TODO
-]
-
 [tool.pytest.ini_options]
 env = [
 ]
