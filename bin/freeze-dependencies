@@ -1,0 +1,6 @@
+#!/bin/bash
+printMsg="\033[36m\033[1m%-15s\033[0m\033[36m %-30s\033[0m
+"
+py_version=$(bin/pyversion)
+pip freeze | grep -e '^-e ' -v | sed -e 's:certifi==:certifi>=:' > requirements/requirements.${py_version}.txt
+printf "${printMsg}" "freeze-dependencies" "PLEASE REVIEW CHANGES TO requirements/requirements.${py_version}.txt BEFORE COMMITTING"

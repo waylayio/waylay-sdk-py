@@ -16,7 +16,9 @@ class ConfigError(WaylayError):
 class RequestError(WaylayError):
     """Exception class for request validation errors within the waylay client.
 
-    Notifies errors in tools and utilities that are not directly related to a REST call.
+    Notifies errors in tools and utilities that are not directly related
+    to a REST call.
+
     """
 
 

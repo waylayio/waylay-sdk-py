@@ -61,8 +61,8 @@ class WaylayConfig():
     _token_auth_provider: Type[WaylayTokenAuth] = WaylayTokenAuth
 
     def __init__(
-        self, credentials: WaylayCredentials = None, profile: str = DEFAULT_PROFILE,
-        settings: TenantSettings = None, fetch_tenant_settings=True,
+        self, credentials: Optional[WaylayCredentials] = None, profile: str = DEFAULT_PROFILE,
+        settings: Optional[TenantSettings] = None, fetch_tenant_settings=True,
         credentials_callback: Optional[CredentialsCallback] = None
     ):
         """Create a WaylayConfig."""
@@ -83,6 +83,7 @@ class WaylayConfig():
         """Get current credentials.
 
         As configured or returned by last callback.
+
         """
         return self._auth.credentials
 
@@ -130,6 +131,7 @@ class WaylayConfig():
 
         Will persist on `save`.
         Setting a `None` value will remove the override.
+
         """
         config_key = _root_url_key_for(config_key)
         self.set_local_settings(**{config_key: root_url})
@@ -160,7 +162,9 @@ class WaylayConfig():
     def tenant_settings(self) -> TenantSettings:
         """Get the tenant settings as stored on accounts.
 
-        Will fetch settings when not present and initialised with 'fetch_tenant_settings=True'.
+        Will fetch settings when not present and initialised with
+        'fetch_tenant_settings=True'.
+
         """
         if self._tenant_settings is None:
             self._tenant_settings = self._request_settings()
@@ -171,7 +175,9 @@ class WaylayConfig():
     def local_settings(self) -> TenantSettings:
         """Get the settings overrides for this configuration.
 
-        These include the endpoint overrides that are stored with the profile.
+        These include the endpoint overrides that are stored with the
+        profile.
+
         """
         return self._local_settings
 
@@ -192,8 +198,10 @@ class WaylayConfig():
     def get_settings(self, resolve=True) -> TenantSettings:
         """Get the tenant settings.
 
-        As resolved form the accounts backend, and overridden with local settings.
-        If `resolve=True`, fetch and cache tenant settings from the accounts backend.
+        As resolved form the accounts backend, and overridden with local
+        settings. If `resolve=True`, fetch and cache tenant settings
+        from the accounts backend.
+
         """
         return {
             **(self.tenant_settings if resolve else self._tenant_settings or {}),
@@ -309,6 +317,7 @@ class WaylayConfig():
         """Get the (obfuscated) attributes of this WaylayConfig.
 
         Secret credentials are obfuscated.
+
         """
         return {
             'credentials': self.credentials.to_dict(obfuscate),
@@ -320,6 +329,7 @@ class WaylayConfig():
         """Save the configuration as specified in the profile.
 
         Returns the save location.
+
         """
         config_path = Path(self.config_file_path(self.profile))
         config_path.parent.mkdir(parents=True, exist_ok=True)
@@ -333,6 +343,7 @@ class WaylayConfig():
         """Delete a stored profile.
 
         Returns the deleted location.
+
         """
         config_path = Path(cls.config_file_path(profile))
         if config_path.exists():

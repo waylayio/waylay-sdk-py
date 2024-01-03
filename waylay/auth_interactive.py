@@ -100,6 +100,7 @@ def request_client_credentials_interactive(
     """Asks interactively for client credentials.
 
     Default callback provider for an interactive WaylayConfig.
+
     """
     tell("Authenticating to the Waylay Platform")
     gateway_url = ask_gateway(default_gateway_url)

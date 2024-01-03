@@ -1,4 +1,4 @@
-"""Waylay Function Registry Service"""
+"""Waylay Function Registry Service."""
 
 from typing import TYPE_CHECKING
 
