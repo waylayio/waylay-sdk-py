@@ -1,14 +1,16 @@
 """REST client for the Waylay Platform."""
 
+__version__ = '0.0.0'
+
 from typing import List, Optional
 
 
-from .api.api_client import ApiClient
-from .api.api_config import ApiConfig
+from waylay.api.api_client import ApiClient
+from waylay.api.api_config import ApiConfig
 from .exceptions import ConfigError
 
-from .service.base import WaylayService
-from .service.registry import RegistryService, registry_available
+from waylay.services._base import WaylayService
+from waylay.services._loader import RegistryService, registry_available
 
 from .config import (
     WaylayConfig,

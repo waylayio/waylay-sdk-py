@@ -1,6 +1,7 @@
 """API client."""
 
 from importlib import import_module
+from types import SimpleNamespace
 from typing import Any, Dict, Optional, List, cast
 
 import datetime
@@ -13,7 +14,7 @@ import tempfile
 
 from urllib.parse import quote
 
-from waylay import __version__
+from waylay.client import __version__
 from waylay.api.api_config import ApiConfig
 from waylay.api.api_response import ApiResponse
 
@@ -312,11 +313,13 @@ class ApiClient:
                 klass = self.NATIVE_TYPES_MAPPING[klass]
             else:
                 try:
-                    types_pkg_name, class_name = klass.split('.')
-                    types_module = import_module(types_pkg_name)
+                    [types_module_name, class_name] = klass.rsplit('.', 1)
+                    types_module = import_module(types_module_name)
                     klass = getattr(types_module, class_name)
+                    return self.__deserialize_model(data, klass)
                 except BaseException:
                     klass = object
+                    return self.__deserialize_simple_namespace(data)
 
         if klass in self.PRIMITIVE_TYPES:
             return self.__deserialize_primitive(data, klass)
@@ -327,7 +330,7 @@ class ApiClient:
         elif klass == datetime.datetime:
             return self.__deserialize_datetime(data)
         else:
-            return self.__deserialize_model(data, klass)
+            return data
 
     def files_parameters(self, files=None):
         """Build form parameters.
@@ -489,3 +492,20 @@ class ApiClient:
         """
 
         return klass.from_dict(data)
+
+    def __deserialize_simple_namespace(self, data):
+        """Deserializes dict to a `SimpleNamespace`.
+
+        :param data: str.
+        :return: SimpleNamespace.
+
+        """
+        if type(data) is list:
+            return list(map(self.__deserialize_simple_namespace, data))
+        elif type(data) is dict:
+            sns = SimpleNamespace()
+            for key, value in data.items():
+                setattr(sns, key, self.__deserialize_simple_namespace(value))
+            return sns
+        else:
+            return data
