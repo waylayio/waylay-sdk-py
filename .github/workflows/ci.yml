@@ -17,6 +17,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Git with token to access other private repositories
+        run: git config --global url."https://${{ secrets.OTOMATOR_PAT }}@github".insteadOf https://github
       - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
