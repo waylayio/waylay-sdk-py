@@ -28,7 +28,7 @@ class WaylayServiceStub(WaylayService):
 
     def __getattr__(self, name):
         """Get attribute."""
-        raise ImportError('{0} service is not installed'.format(
+        raise ImportError('Waylay {0} service is not installed'.format(
             self.name.capitalize() if self.name else 'This'))
 
     def __bool__(self):

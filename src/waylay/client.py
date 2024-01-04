@@ -116,7 +116,7 @@ class WaylayClient():
         """Load all services that are installed."""
         self.api_client = ApiClient(ApiConfig(config))
 
-        self.registry = RegistryService(self.api_client)
+        self.registry = RegistryService(self.api_client, name='registry')
         if registry_available:
             self._services.append(self.registry)
 
