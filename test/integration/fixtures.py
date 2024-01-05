@@ -4,7 +4,7 @@ from typing import Optional
 
 import pytest
 
-from waylay import ClientCredentials, WaylayClient
+from waylay.client import ClientCredentials, WaylayClient
 from waylay.auth import WaylayCredentials, WaylayTokenAuth
 
 
