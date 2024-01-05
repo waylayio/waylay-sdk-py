@@ -1,24 +1,20 @@
 """Waylay Function Registry Service."""
 
 from typing import TYPE_CHECKING
+from ._base import WaylayServiceStub
 
-from ..base import WaylayServiceStub, WaylayService
 
+# registry service
 try:
-    from registry.service import RegistryService
-    import registry.api as api
-    # from registry import *
+    from waylay.services.registry.service import RegistryService
     registry_available = True
-
 except ImportError:
     registry_available = False
     if not TYPE_CHECKING:
         RegistryService = WaylayServiceStub
 
 try:
-    import registry.models as models
-    import registry.queries as queries
+    from waylay.services.registry import models, queries
     registry_types_available = True
-
 except ImportError:
     registry_types_available = False

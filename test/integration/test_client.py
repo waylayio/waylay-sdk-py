@@ -1,8 +1,7 @@
 """Integration tests for waylay.auth module."""
-from waylay import (
+from waylay.client import (
     WaylayClient
 )
-import re
 
 import waylay.auth_interactive
 from waylay.config import (

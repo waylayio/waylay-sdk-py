@@ -67,23 +67,24 @@ install:  ### install waylay with frozen dependencies
 dev-reinstall: full-clean  dev-install  ### Remove all dependences and reinstall with frozen dependencies
 
 lint:
-	@pylint -E waylay test/*/*.py
+	@pylint -E src test/*/*.py
 	@${printMsg} lint OK
 
 lint-minimal:
-	@pylint -E waylay test/*/*.py --confidence=INFERENCE
+	@pylint -E src test/*/*.py --confidence=INFERENCE
 	@${printMsg} lint-minimal OK
 
 codestyle:
-	@pycodestyle waylay test/*/*.py
+	@pycodestyle src test/*/*.py
 	@${printMsg} codestyle OK
 
 typecheck:
-	@mypy waylay test/*/*.py
+	@mypy -p waylay 
+	@mypy test/*/*.py
 	@${printMsg} typecheck OK
 
 docstyle:
-	@pydocstyle waylay test/*/*.py
+	@pydocstyle src test/*/*.py
 	@${printMsg} docstyle OK
 
 code-qa: codestyle docstyle lint typecheck ### perform code quality checks
@@ -100,19 +101,19 @@ test-unit:
 	@pytest test/unit -m "not (sklearn or pytorch or tensorflow or xgboost or cleanup)"
 
 test-unit-coverage:
-	@pytest --cov-report term-missing:skip-covered --cov=waylay --cov-fail-under=90 test/unit
+	@pytest --cov-report term-missing:skip-covered --cov=src --cov-fail-under=90 test/unit
 
 test-unit-coverage-report: ### generate html coverage report for the unit tests
-	@pytest --cov-report html:cov_report --cov=waylay --cov-fail-under=90 test/unit
+	@pytest --cov-report html:cov_report --cov=src --cov-fail-under=90 test/unit
 
 test-coverage-report: ### generate html coverage report for the unit and integration tests
-	@pytest --cov-report html:cov_report_all --cov=waylay --cov-fail-under=90 test/unit test/integration -m "not byoml_integration"
+	@pytest --cov-report html:cov_report_all --cov=src --cov-fail-under=90 test/unit test/integration -m "not byoml_integration"
 
 test-integration:
 	@pytest test/integration -m "not byoml_integration"
 
 test-integration-coverage-report: ### generate html coverage report for the integration tests
-	@pytest --cov-report html:cov_report/integration --cov=waylay test/integration
+	@pytest --cov-report html:cov_report/integration --cov=src test/integration
 
 test: code-qa test-unit ### perform all quality checks and tests, except for integration tests
 
@@ -181,8 +182,8 @@ freeze-dependencies: ## perform a full reinstall procedure and regenerate the 'r
 pdoc: # TODO 
 	rm -fr ./doc/api/
 	pdoc -o ./doc/api \
-		waylay/client.py \
-		waylay/config.py \
-		waylay/exceptions.py \
-		waylay/auth.py \
-		waylay/service/base.py 
+		src/waylay/client.py \
+		src/waylay/config.py \
+		src/waylay/exceptions.py \
+		src/waylay/auth.py \
+		src/waylay/service/base.py 

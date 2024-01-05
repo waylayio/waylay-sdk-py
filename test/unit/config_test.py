@@ -3,7 +3,7 @@
 import pytest
 from datetime import datetime
 
-from waylay import WaylayConfig
+from waylay.config import WaylayConfig
 from waylay.exceptions import ConfigError
 from waylay.auth import (
     DEFAULT_GATEWAY_URL, WaylayTokenAuth, WaylayToken,
