@@ -1,5 +1,6 @@
 """REST client implementation."""
 
+from io import BufferedReader
 from typing import Any, Optional
 import httpx
 from waylay.api.api_config import ApiConfig
@@ -74,34 +75,33 @@ class RESTClient:
             ):
                 timeout = _request_timeout
 
+        kwargs = {
+            'method': method,
+            'url': url,
+            'params': query,
+            'timeout': timeout,
+            'headers': headers
+        }
+
         # For `POST`, `PUT`, `PATCH`, `OPTIONS`, `DELETE`
         if method in ['POST', 'PUT', 'PATCH', 'OPTIONS', 'DELETE']:
             content_type = headers.get('Content-Type')
-            if content_type and content_type == 'multipart/form-data':
-                return await self.client.request(
-                    method,
-                    url,
-                    params=query,
-                    files=files,
-                    timeout=timeout,
-                    headers=headers
-                )
+            if files or content_type and content_type == 'multipart/form-data':
+                kwargs.update({'files': files})
+            elif isinstance(body, (bytes, bytearray, BufferedReader)):
+                if isinstance(body, BufferedReader):
+                    body = body.read()
+                if not headers.get('content-type'):
+                    try:
+                        import magic
+                        mime_type = magic.from_buffer(body)
+                    except BaseException:
+                        mime_type = 'application/octet-stream'
+                    kwargs['headers'].update({'content-type': mime_type})
+                    kwargs.update({'content': body})
+            elif content_type and content_type != 'application/json':
+                kwargs.update({'data': body})
             else:
-                return await self.client.request(
-                    method,
-                    url,
-                    params=query,
-                    data=body,
-                    timeout=timeout,
-                    headers=headers
-                )
+                kwargs.update({'json': body})
 
-        # For `GET`, `HEAD`
-        else:
-            return await self.client.request(
-                method,
-                url,
-                params=query,
-                timeout=timeout,
-                headers=headers
-            )
+        return await self.client.request(**kwargs)
