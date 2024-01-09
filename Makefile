@@ -14,6 +14,8 @@ install-dependencies:
 	pip install -r requirements/requirements.$$(bin/pyversion).txt
 
 install-dev-dependencies:
+# need to install the `waylay` first, because the `waylay_<SERVICE>` packages require it
+	pip install -e . --no-deps
 	pip install -r requirements/requirements.$$(bin/pyversion).txt
 	pip install -r requirements/requirements.dev.$$(bin/pyversion).txt
 

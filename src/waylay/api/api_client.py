@@ -121,12 +121,8 @@ class ApiClient:
 
         # post parameters
         if files:
-            files = self.files_parameters(files)
+            files = self._sanitize_files_parameters(files)
 
-        # auth setting
-        # TODO ???
-
-        # body
         if body:
             body = self._sanitize_for_serialization(body)
 
@@ -261,7 +257,10 @@ class ApiClient:
             # and attributes which value is not None.
             # Convert attribute name to json key in
             # model definition for request.
-            obj_dict = obj.to_dict()
+            try:
+                obj_dict = obj.to_dict()
+            except AttributeError:
+                return obj
 
         return {
             key: self._sanitize_for_serialization(val)
@@ -332,63 +331,15 @@ class ApiClient:
         else:
             return data
 
-    def files_parameters(self, files=None):
+    def _sanitize_files_parameters(self, files=None):
         """Build form parameters.
 
         :param files: File parameters.
         :return: Form parameters with files.
 
         """
-        params = {}
 
-        if files:
-            for k, v in files.items():
-                if not v:
-                    continue
-                file_names = v if isinstance(v, list) else [v]
-                for n in file_names:
-                    with open(n, 'rb') as f:
-                        filename = os.path.basename(f.name)
-                        filedata = f.read()
-                        mimetype = (
-                            mimetypes.guess_type(filename)[0]
-                            or 'application/octet-stream'
-                        )
-                        params[k] = tuple([filename, filedata, mimetype])
-
-        return params
-
-    def select_header_accept(self, accepts: List[str]) -> Optional[str]:
-        """Return `Accept` based on an array of accepts provided.
-
-        :param accepts: List of headers.
-        :return: Accept (e.g. application/json).
-
-        """
-        if not accepts:
-            return None
-
-        for accept in accepts:
-            if re.search('json', accept, re.IGNORECASE):
-                return accept
-
-        return accepts[0]
-
-    def select_header_content_type(self, content_types):
-        """Return `Content-Type` based on an array of content_types provided.
-
-        :param content_types: List of content-types.
-        :return: Content-Type (e.g. application/json).
-
-        """
-        if not content_types:
-            return None
-
-        for content_type in content_types:
-            if re.search('json', content_type, re.IGNORECASE):
-                return content_type
-
-        return content_types[0]
+        return files
 
     def __deserialize_file(self, response: rest.RESTResponse):
         """Deserializes body to file.
