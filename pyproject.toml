@@ -14,6 +14,7 @@ dependencies = [
     "python-jose",
     "python_dateutil",
     "typing_extensions",
+    "python-magic",
 ]
 
 
@@ -26,7 +27,9 @@ exclude = []
 [project.optional-dependencies]
 dev = [
     "pytest",
+    "pytest-cov",
     "pytest-mock",
+    "syrupy",
     'pylint',
     'pycodestyle',
     'pydocstyle',
@@ -37,7 +40,6 @@ dev = [
     'types-python-dateutil',
     'docformatter',
     'waylay[services,services-types]',
-    'python-magic',
 ]
 services = [
     "waylay_registry_api @ git+https://github.com/waylayio/waylay-py-services@feat/multipart_uploads#subdirectory=services/registry/waylay_registry_api"

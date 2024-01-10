@@ -14,7 +14,7 @@ import tempfile
 
 from urllib.parse import quote
 
-from waylay.client import __version__
+from waylay.__version__ import __version__
 from waylay.api.api_config import ApiConfig
 from waylay.api.api_response import ApiResponse
 
@@ -23,6 +23,18 @@ from waylay.api.api_exceptions import (
     ApiValueError,
     ApiError,
 )
+
+_PRIMITIVE_BYTE_TYPES = (bytes, bytearray)
+_PRIMITIVE_TYPES = (float, bool, str, int)
+_NATIVE_TYPES_MAPPING = {
+    'int': int,
+    'float': float,
+    'str': str,
+    'bool': bool,
+    'date': datetime.date,
+    'datetime': datetime.datetime,
+    'object': object,
+}
 
 
 class ApiClient:
@@ -37,18 +49,6 @@ class ApiClient:
 
     """
 
-    PRIMITIVE_TYPES = (float, bool, bytes, str, int)
-    NATIVE_TYPES_MAPPING = {
-        'int': int,
-        'float': float,
-        'str': str,
-        'bool': bool,
-        'date': datetime.date,
-        'datetime': datetime.datetime,
-        'object': object,
-    }
-    _pool = None
-
     def __init__(
         self,
         configuration: ApiConfig,
@@ -59,7 +59,7 @@ class ApiClient:
         self.default_headers: Dict[str, Any] = {}
 
         # Set default User-Agent.
-        self.user_agent = "waylay-sdk/python/{__version__}"
+        self.user_agent = f"waylay-sdk/python/{__version__}"
         self.client_side_validation = configuration.client_side_validation
 
     @property
@@ -236,7 +236,7 @@ class ApiClient:
         """
         if obj is None:
             return None
-        elif isinstance(obj, self.PRIMITIVE_TYPES):
+        elif isinstance(obj, _PRIMITIVE_TYPES + _PRIMITIVE_BYTE_TYPES):
             return obj
         elif isinstance(obj, list):
             return [
@@ -266,7 +266,7 @@ class ApiClient:
             key: self._sanitize_for_serialization(val)
             for key, val in obj_dict.items()
         }
-
+    
     def deserialize(self, response: rest.RESTResponse, response_type):
         """Deserialize response into an object.
 
@@ -276,60 +276,58 @@ class ApiClient:
         :return: deserialized object.
 
         """
-
-        # fetch data from response object
         try:
             data = response.json()
         except ValueError:
-            data = response.content
+            data = None
 
-        return self.__deserialize(data, response_type)
+        return self.__deserialize(response_type, data=data, text=response.text, raw_content=response.content)
 
-    def __deserialize(self, data, klass):
-        """Deserializes dict, list, str into an object.
-
-        :param data: dict, list or str.
-        :param klass: class literal, or string of class name.
-        :return: object.
-
-        """
-        if data is None:
+    def __deserialize(self, klass, *, 
+                      data: Any = None, text: str = None, raw_content: bytes = None):
+        """Deserializes response content into a `klass` instance."""
+        if (data or text or raw_content) is None:
             return None
 
+        if isinstance(klass, str) and klass in _NATIVE_TYPES_MAPPING:
+            # if the response_type is string representing primitive type, replace it with the actual primitive class
+            klass = _NATIVE_TYPES_MAPPING[klass]
+            # continue
+        if klass in _PRIMITIVE_BYTE_TYPES:
+            return raw_content or data
+        if klass in _PRIMITIVE_TYPES:
+            return self.__deserialize_primitive(text, klass)
+        elif klass == object:
+            return self.__deserialize_object(text or data)
+        elif klass == datetime.date:
+            return self.__deserialize_date(text or data)
+        elif klass == datetime.datetime:
+            return self.__deserialize_datetime(text or data)
+        
+        if data is None:
+            return raw_content
+        
         if isinstance(klass, str):
             if klass.startswith('List['):
                 sub_kls = re.match(r'List\[(.*)]', klass).group(1)
-                return [self.__deserialize(sub_data, sub_kls)
+                return [self.__deserialize(klass, data=sub_data)
                         for sub_data in data]
 
             if klass.startswith('Dict['):
                 sub_kls = re.match(r'Dict\[([^,]*), (.*)]', klass).group(2)
-                return {k: self.__deserialize(v, sub_kls)
+                return {k: self.__deserialize(klass, data=sub_kls)
                         for k, v in data.items()}
 
-            # convert str to class
-            if klass in self.NATIVE_TYPES_MAPPING:
-                klass = self.NATIVE_TYPES_MAPPING[klass]
             else:
                 try:
+                    # get the actual class from the class name
                     [types_module_name, class_name] = klass.rsplit('.', 1)
                     types_module = import_module(types_module_name)
                     klass = getattr(types_module, class_name)
-                    return self.__deserialize_model(data, klass)
+                    # continue
                 except BaseException:
-                    klass = object
                     return self.__deserialize_simple_namespace(data)
-
-        if klass in self.PRIMITIVE_TYPES:
-            return self.__deserialize_primitive(data, klass)
-        elif klass == object:
-            return self.__deserialize_object(data)
-        elif klass == datetime.date:
-            return self.__deserialize_date(data)
-        elif klass == datetime.datetime:
-            return self.__deserialize_datetime(data)
-        else:
-            return data
+        return self.__deserialize_model(data, klass)
 
     def _sanitize_files_parameters(self, files=None):
         """Build form parameters.
@@ -442,7 +440,13 @@ class ApiClient:
 
         """
 
-        return klass.from_dict(data)
+        try: 
+            if callable(getattr(klass, 'from_dict', None)):
+                return klass.from_dict(data)    
+        except BaseException as e:
+            pass
+        return self.__deserialize_simple_namespace(data)
+
 
     def __deserialize_simple_namespace(self, data):
         """Deserializes dict to a `SimpleNamespace`.

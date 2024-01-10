@@ -1,0 +1,145 @@
+# serializer version: 1
+# name: test_deserialize[response_kwargs0-str]
+  tuple(
+    'str',
+    'some_text_resopnse',
+  )
+# ---
+# name: test_deserialize[response_kwargs1-Dict]
+  tuple(
+    'SimpleNamespace',
+    namespace(message='some not found message', code='RESOURCE_NOT_FOUND'),
+  )
+# ---
+# name: test_deserialize[response_kwargs2-bytearray]
+  tuple(
+    'bytes',
+    b'some binary file content,',
+  )
+# ---
+# name: test_deserialize[response_kwargs3-List]
+  tuple(
+    'list',
+    list([
+      'hello',
+      'world',
+      123,
+      namespace(key='value'),
+    ]),
+  )
+# ---
+# name: test_deserialize[response_kwargs4-datetime]
+  tuple(
+    'datetime',
+    datetime.datetime(2023, 12, 25, 0, 1),
+  )
+# ---
+# name: test_deserialize[response_kwargs5-date]
+  tuple(
+    'date',
+    datetime.date(2023, 12, 25),
+  )
+# ---
+# name: test_deserialize[response_kwargs6-str]
+  tuple(
+    'str',
+    '2023-12-25T00:01:00',
+  )
+# ---
+# name: test_deserialize[response_kwargs7-Pet]
+  tuple(
+    'Pet',
+    Pet(name='Lord Biscuit, Master of Naps', owner=Owner(id=123, name='Simon'), tag='doggo'),
+  )
+# ---
+# name: test_deserialize[response_kwargs8-Pet]
+  tuple(
+    'Pet',
+    Pet(name='Lord Biscuit, Master of Naps', owner=Owner(id=123, name='Simon'), tag='doggo'),
+  )
+# ---
+# name: test_deserialize[response_kwargs9-Pet]
+  tuple(
+    'Pet',
+    Pet(name='Lord Biscuit, Master of Naps', owner=Owner(id=123, name='Simon'), tag='doggo'),
+  )
+# ---
+# name: test_param_serialize[test_input0]
+  dict({
+    'body': None,
+    'files': None,
+    'header_params': dict({
+      'User-Agent': 'waylay-sdk/python/0.0.0',
+      'x-my-header': 'header_value',
+    }),
+    'method': 'GET',
+    'query_params': dict({
+      'key1': 'value1',
+      'key2': 'value2',
+    }),
+    'url': 'https://api-example.io/service/v1/A/foo/B',
+  })
+# ---
+# name: test_param_serialize[test_input1]
+  dict({
+    'body': dict({
+      'array_key': list([
+        'val1',
+        'val2',
+      ]),
+      'timestamp': '1999-09-28T12:30:59',
+      'tuple_key': tuple(
+        'val3',
+        123,
+        dict({
+          'key': 'value',
+        }),
+        None,
+      ),
+    }),
+    'files': None,
+    'header_params': dict({
+      'User-Agent': 'waylay-sdk/python/0.0.0',
+      'x-my-header': 'header_value',
+    }),
+    'method': 'PATCH',
+    'query_params': None,
+    'url': 'https://api-example.io/service/v1/A/bar/{missing_param}',
+  })
+# ---
+# name: test_param_serialize[test_input2]
+  dict({
+    'body': None,
+    'files': dict({
+      'file1': b'<... binary content ...>',
+      'file2': '<... other binary content ...>',
+    }),
+    'header_params': dict({
+      'User-Agent': 'waylay-sdk/python/0.0.0',
+    }),
+    'method': 'POST',
+    'query_params': dict({
+      'key1': 15,
+    }),
+    'url': 'https://api-example.io/service/v1/cruz/',
+  })
+# ---
+# name: test_param_serialize[test_input3]
+  dict({
+    'body': dict({
+      'name': 'Lord Biscuit, Master of Naps',
+      'owner': dict({
+        'id': 123,
+        'name': 'Simon',
+      }),
+      'tag': 'doggo',
+    }),
+    'files': None,
+    'header_params': dict({
+      'User-Agent': 'waylay-sdk/python/0.0.0',
+    }),
+    'method': 'PUT',
+    'query_params': None,
+    'url': 'https://api-example.io/service/v1/C/foo',
+  })
+# ---
