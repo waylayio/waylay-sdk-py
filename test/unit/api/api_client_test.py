@@ -11,7 +11,9 @@ from waylay.config import WaylayConfig
 from waylay.api import ApiConfig, ApiClient
 from waylay.api.rest import RESTResponse
 
-from .example_model import Pet, Owner
+from .example.pet_model import Pet
+from .example.pet_fixtures import pet_instance, pet_instance_dict, pet_instance_json
+
 
 @pytest.fixture
 def waylay_token_credentials() -> TokenCredentials:
@@ -29,21 +31,6 @@ def waylay_api_config(waylay_config: WaylayConfig) -> ApiConfig:
 def waylay_api_client(waylay_api_config: ApiConfig) -> ApiClient:
     return ApiClient(waylay_api_config)
 
-@pytest.fixture
-def pet_owner_instance() -> Owner:
-    return Owner(id=123, name='Simon')
-
-@pytest.fixture
-def pet_instance(pet_owner_instance) -> Pet:
-    return Pet(name='Lord Biscuit, Master of Naps', tag='doggo', owner=pet_owner_instance)
-
-@pytest.fixture
-def pet_instance_json(pet_instance) -> str:
-    return pet_instance.to_json()
-
-@pytest.fixture
-def pet_instance_dict(pet_instance) -> dict:
-    return pet_instance.to_dict()
 
 @pytest.mark.parametrize("test_input", [
     {
@@ -75,6 +62,18 @@ def pet_instance_dict(pet_instance) -> dict:
         'resource_path': '/service/v1/{param1}/foo',
         'path_params': {'param1': 'C'},
         'body': pet_instance,
+    },
+    {
+        'method': 'PUT',
+        'resource_path': '/service/v1/{param1}/foo',
+        'path_params': {'param1': 'C'},
+        'body': pet_instance_dict,
+    },
+    {
+        'method': 'PUT',
+        'resource_path': '/service/v1/{param1}/foo',
+        'path_params': {'param1': 'C'},
+        'body': pet_instance_json,
     },
 ])
 def test_param_serialize(snapshot, waylay_api_client: ApiClient, test_input: dict[str, Any], request):

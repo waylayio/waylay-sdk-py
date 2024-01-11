@@ -2,8 +2,9 @@ from __future__ import annotations
 import pprint
 import json
 
-from typing import Any, ClassVar, Dict, List, Optional
-from pydantic import BaseModel, StrictInt, StrictStr
+from typing import Annotated, Any, ClassVar, Dict, List, NotRequired, Optional
+from typing_extensions import TypedDict
+from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictStr
 try:
     from typing import Self
 except ImportError:
@@ -12,7 +13,7 @@ except ImportError:
 class Pet(BaseModel):
     """Pet"""
     name: StrictStr
-    owner: Owner
+    owner: PetOwner
     tag: Optional[StrictStr] = None
     __properties: ClassVar[List[str]] = ["name", "owner", "tag"]
 
@@ -59,12 +60,12 @@ class Pet(BaseModel):
 
         _obj = cls.model_validate({
             "name": obj.get("name"),
-            "owner": Owner.from_dict(obj.get("owner")) if obj.get("owner") is not None else None,
+            "owner": PetOwner.from_dict(obj.get("owner")) if obj.get("owner") is not None else None,
             "tag": obj.get("tag")
         })
         return _obj
     
-class Owner(BaseModel):
+class PetOwner(BaseModel):
     """Owner"""
     id: StrictInt
     name: StrictStr
@@ -122,5 +123,10 @@ class Owner(BaseModel):
             "name": obj.get("name")
         })
         return _obj
+
+class CreatePetQuery(TypedDict):
+    """ create_pet query parameters. """
+    limit: NotRequired[ Annotated[Optional[Annotated[int, Field(le=100, strict=True)]], Field(description="How many biscuits?")]]
+    good_boy: NotRequired[ Annotated[Optional[StrictBool], Field(description="Is the pet a good boy?")]]
 
 
