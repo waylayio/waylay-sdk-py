@@ -1,16 +1,20 @@
 """Test suite for package `waylay.api`."""
 
+import re
 from typing import Any, Dict, List, Union
 from unittest import mock
-from unittest.mock import patch
+from urllib import parse
 import pytest
 from datetime import datetime, date
+
+from pytest_httpx import HTTPXMock
 
 from waylay.auth import TokenCredentials
 from waylay.config import WaylayConfig
 from waylay.api import ApiConfig, ApiClient
 from waylay.api.rest import RESTResponse
 
+from ..fixtures import WaylayTokenStub
 from .example.pet_model import Pet
 from .example.pet_fixtures import pet_instance, pet_instance_dict, pet_instance_json
 
@@ -76,10 +80,32 @@ def waylay_api_client(waylay_api_config: ApiConfig) -> ApiClient:
         'body': pet_instance_json,
     },
 ])
-def test_param_serialize(snapshot, waylay_api_client: ApiClient, test_input: dict[str, Any], request):
+async def test_serialize_and_call(snapshot, mocker, httpx_mock: HTTPXMock, waylay_api_client: ApiClient, test_input: dict[str, Any], request):
     """Test REST param serializer"""
     test_input = _retreive_fixture_values(request, test_input)
-    assert waylay_api_client.param_serialize(**test_input) == snapshot
+    serialized_params = waylay_api_client.param_serialize(**test_input)
+    assert serialized_params == snapshot
+
+    mocker.patch('waylay.auth.WaylayTokenAuth.assure_valid_token', lambda *args: WaylayTokenStub())
+    httpx_mock.add_response()
+    await waylay_api_client.call_api(**serialized_params)
+    requests = httpx_mock.get_requests()
+    assert (requests, [_headers_and_content_snap(r.headers, r.read()) for r in requests]) == snapshot
+
+def _headers_and_content_snap(headers: dict[str, str], content:bytes):
+    # mask `boundary` from multipart/form-data uploads
+    content_type = headers.get('content-type')
+    if content_type and content_type.startswith('multipart/form-data'):
+        pattern = re.compile(r'(boundary=)([^\s;]+)')
+        match = pattern.search(content_type)
+        if match:
+            boundary = match.group(2)
+            headers.update({
+                'content-type': content_type.replace(boundary, '<boundary>')
+            })
+            content = content.decode().replace(boundary, '<boundary>').encode()
+        re.sub(pattern, r'\1***', content_type)
+    return (headers, content)
 
 @pytest.mark.parametrize("response_kwargs,response_type", [
     (

@@ -29,6 +29,8 @@ dev = [
     "pytest",
     "pytest-cov",
     "pytest-mock",
+    "pytest-httpx",
+    "pytest-asyncio",
     "syrupy",
     'pylint',
     'pycodestyle',
@@ -48,5 +50,6 @@ services-types = [
     "waylay_registry_types @ git+https://github.com/waylayio/waylay-py-services@feat/multipart_uploads#subdirectory=services/registry/waylay_registry_types"
 ]
 [tool.pytest.ini_options]
+asyncio_mode = "auto"
 env = [
 ]

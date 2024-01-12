@@ -2,6 +2,7 @@
 
 import pytest
 from datetime import datetime
+from .fixtures import MOCK_API_URL, MOCK_DOMAIN, MOCK_TENANT_SETTINGS, WaylayTokenStub
 
 from waylay.config import WaylayConfig
 from waylay.exceptions import ConfigError
@@ -12,29 +13,6 @@ from waylay.auth import (
 import waylay.config
 import waylay.auth_interactive
 from httpx import Response, Request
-
-MOCK_DOMAIN = 'unittest.waylay.io'
-MOCK_API_URL = f'https://{MOCK_DOMAIN}/api'
-
-MOCK_TOKEN_DATA = {
-    'domain': MOCK_DOMAIN,
-    'tenant': '9999999999999999999999',
-    'sub': 'users/999999999999999',
-    'exp': datetime.now().timestamp() + 100000
-}
-
-MOCK_TENANT_SETTINGS = {
-    'waylay_api': MOCK_API_URL,
-    'waylay_domain': MOCK_DOMAIN
-}
-
-
-class WaylayTokenStub(WaylayToken):
-    """A WaylayToken test stub with fixed data."""
-
-    def __init__(self):
-        """Create a WaylayTokenStub."""
-        super().__init__('', MOCK_TOKEN_DATA)
 
 
 def _mock_send_single_request_accounts(target, request: Request, *args) -> Response:

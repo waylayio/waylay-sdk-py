@@ -64,7 +64,7 @@
     Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_param_serialize[test_input0]
+# name: test_serialize_and_call[test_input0]
   dict({
     'body': None,
     'files': None,
@@ -80,7 +80,20 @@
     'url': 'https://api-example.io/service/v1/A/foo/B',
   })
 # ---
-# name: test_param_serialize[test_input1]
+# name: test_serialize_and_call[test_input0].1
+  tuple(
+    list([
+      <Request('GET', 'https://api-example.io/service/v1/A/foo/B?key1=value1&key2=value2')>,
+    ]),
+    list([
+      tuple(
+        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'x-my-header': 'header_value', 'user-agent': 'waylay-sdk/python/0.0.0', 'authorization': '[secure]'}),
+        b'',
+      ),
+    ]),
+  )
+# ---
+# name: test_serialize_and_call[test_input1]
   dict({
     'body': dict({
       'array_key': list([
@@ -107,7 +120,20 @@
     'url': 'https://api-example.io/service/v1/A/bar/{missing_param}',
   })
 # ---
-# name: test_param_serialize[test_input2]
+# name: test_serialize_and_call[test_input1].1
+  tuple(
+    list([
+      <Request('PATCH', 'https://api-example.io/service/v1/A/bar/%7Bmissing_param%7D')>,
+    ]),
+    list([
+      tuple(
+        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'x-my-header': 'header_value', 'user-agent': 'waylay-sdk/python/0.0.0', 'content-length': '119', 'content-type': 'application/json', 'authorization': '[secure]'}),
+        b'{"array_key": ["val1", "val2"], "tuple_key": ["val3", 123, {"key": "value"}, null], "timestamp": "1999-09-28T12:30:59"}',
+      ),
+    ]),
+  )
+# ---
+# name: test_serialize_and_call[test_input2]
   dict({
     'body': None,
     'files': dict({
@@ -124,7 +150,20 @@
     'url': 'https://api-example.io/service/v1/cruz/',
   })
 # ---
-# name: test_param_serialize[test_input3]
+# name: test_serialize_and_call[test_input2].1
+  tuple(
+    list([
+      <Request('POST', 'https://api-example.io/service/v1/cruz/?key1=15')>,
+    ]),
+    list([
+      tuple(
+        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.0', 'content-length': '382', 'authorization': '[secure]', 'content-type': 'multipart/form-data; boundary=<boundary>'}),
+        b'--<boundary>\r\nContent-Disposition: form-data; name="file1"; filename="upload"\r\nContent-Type: application/octet-stream\r\n\r\n<... binary content ...>\r\n--<boundary>\r\nContent-Disposition: form-data; name="file2"; filename="upload"\r\nContent-Type: application/octet-stream\r\n\r\n<... other binary content ...>\r\n--<boundary>--\r\n',
+      ),
+    ]),
+  )
+# ---
+# name: test_serialize_and_call[test_input3]
   dict({
     'body': dict({
       'name': 'Lord Biscuit, Master of Naps',
@@ -143,7 +182,20 @@
     'url': 'https://api-example.io/service/v1/C/foo',
   })
 # ---
-# name: test_param_serialize[test_input4]
+# name: test_serialize_and_call[test_input3].1
+  tuple(
+    list([
+      <Request('PUT', 'https://api-example.io/service/v1/C/foo')>,
+    ]),
+    list([
+      tuple(
+        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.0', 'content-length': '95', 'content-type': 'application/json', 'authorization': '[secure]'}),
+        b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
+      ),
+    ]),
+  )
+# ---
+# name: test_serialize_and_call[test_input4]
   dict({
     'body': dict({
       'name': 'Lord Biscuit, Master of Naps',
@@ -162,7 +214,20 @@
     'url': 'https://api-example.io/service/v1/C/foo',
   })
 # ---
-# name: test_param_serialize[test_input5]
+# name: test_serialize_and_call[test_input4].1
+  tuple(
+    list([
+      <Request('PUT', 'https://api-example.io/service/v1/C/foo')>,
+    ]),
+    list([
+      tuple(
+        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.0', 'content-length': '95', 'content-type': 'application/json', 'authorization': '[secure]'}),
+        b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
+      ),
+    ]),
+  )
+# ---
+# name: test_serialize_and_call[test_input5]
   dict({
     'body': '{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}',
     'files': None,
@@ -173,4 +238,17 @@
     'query_params': None,
     'url': 'https://api-example.io/service/v1/C/foo',
   })
+# ---
+# name: test_serialize_and_call[test_input5].1
+  tuple(
+    list([
+      <Request('PUT', 'https://api-example.io/service/v1/C/foo')>,
+    ]),
+    list([
+      tuple(
+        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.0', 'content-length': '105', 'content-type': 'application/json', 'authorization': '[secure]'}),
+        b'"{\\"name\\":\\"Lord Biscuit, Master of Naps\\",\\"owner\\":{\\"id\\":123,\\"name\\":\\"Simon\\"},\\"tag\\":\\"doggo\\"}"',
+      ),
+    ]),
+  )
 # ---
