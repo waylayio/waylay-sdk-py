@@ -13,6 +13,7 @@ from waylay.auth import TokenCredentials
 from waylay.config import WaylayConfig
 from waylay.api import ApiConfig, ApiClient
 from waylay.api.rest import RESTResponse
+from waylay.api.api_exceptions import ApiValueError
 
 from ..fixtures import WaylayTokenStub
 from .example.pet_model import Pet
@@ -106,6 +107,14 @@ def _headers_and_content_snap(headers: dict[str, str], content:bytes):
             content = content.decode().replace(boundary, '<boundary>').encode()
         re.sub(pattern, r'\1***', content_type)
     return (headers, content)
+
+
+async def test_serialize_and_call_does_not_support_body_and_files(waylay_api_client: ApiClient):
+    """REST param serializer should not support setting both `body` and `files` """
+    serialized_params = waylay_api_client.param_serialize(method='POST', resource_path='/foo', body={'key':'value'}, files = {'file1': b'<binary>'})
+    with pytest.raises(ApiValueError):
+        await waylay_api_client.call_api(**serialized_params)
+
 
 @pytest.mark.parametrize("response_kwargs,response_type", [
     (
