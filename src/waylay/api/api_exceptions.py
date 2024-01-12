@@ -126,8 +126,8 @@ class ApiError(RestResponseError):
         self.method = None
 
         if http_resp:
-            self.url = http_resp.url
             try:
+                self.url = http_resp.url
                 self.method = http_resp.request.method
             except RuntimeError:
                 pass

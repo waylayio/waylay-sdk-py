@@ -13,7 +13,7 @@ from waylay.auth import TokenCredentials
 from waylay.config import WaylayConfig
 from waylay.api import ApiConfig, ApiClient
 from waylay.api.rest import RESTResponse
-from waylay.api.api_exceptions import ApiValueError
+from waylay.api.api_exceptions import ApiError, ApiValueError
 
 from ..fixtures import WaylayTokenStub
 from .example.pet_model import Pet
@@ -116,53 +116,217 @@ async def test_serialize_and_call_does_not_support_body_and_files(waylay_api_cli
         await waylay_api_client.call_api(**serialized_params)
 
 
-@pytest.mark.parametrize("response_kwargs,response_type", [
+@pytest.mark.parametrize("response_kwargs,response_type_map", [
+    # primtive response types
     (
         { 'status_code': 200, 'text' : 'some_text_resopnse', 'headers' : {'x-resp-header': 'resp_header_value'} },
-        str 
+        {'200': str} 
     ),
     (
-        { 'status_code': 404, 'json': {"message": "some not found message", "code": "RESOURCE_NOT_FOUND"} },
-        Dict[str, str]
+        { 'status_code': 200, 'text' : 'some_text_resopnse' },
+        {'200': 'str'} 
+    ),
+    (
+        { 'status_code': 200, 'text' : 'some_text_resopnse'},
+        {} # no response mapping
+    ),
+    (
+        { 'status_code': 200, 'text' : '123' },
+        {'200': int} 
+    ),
+    (
+        { 'status_code': 200, 'text' : '123.456'},
+        {'200': float} 
+    ),
+    (
+        { 'status_code': 200, 'json' : 123.456},
+        {'200': 'float'} 
+    ),
+    (
+        { 'status_code': 200, 'json' : '123' },
+        {} # no response mapping
+    ),
+    (
+        { 'status_code': 200, 'json' : 123 },
+        {} # no response mapping
+    ),
+    (
+        { 'status_code': 200, 'text' : 'true' },
+        {'200': bool} 
+    ),
+    (
+        { 'status_code': 200, 'json' : False },
+        {'200': 'bool'} # TODO fix parsing of falsy boolean values (currently returns 'bytes')
+    ),
+    (
+        { 'status_code': 200, 'json' : True },
+        {} # no response mapping
+    ),
+    (
+        { 'status_code': 200, 'json' : {'hello': 'world', 'key': [1, 2, 3]} },
+        {'200': object}
+    ),
+    (
+        { 'status_code': 200, 'json' : {'hello': 'world', 'key': [1, 2, 3]} },
+        {} # no response mapping
+    ),
+    (
+        { 'status_code': 200, 'content' : None},
+        {} # no response mapping
+    ),
+        (
+        { 'status_code': 200, 'content' : None},
+        {'200': None }
+    ),
+    # dict response type
+    (
+        { 'status_code': 201, 'json': {"message": "some not found message", "code": "RESOURCE_NOT_FOUND"} },
+        {'201': Dict[str, str] }
+    ),
+    (
+        { 'status_code': 201, 'json': {"message": "some not found message", "code": "RESOURCE_NOT_FOUND"} },
+        {'2XX': Dict[str, str] }
+    ),
+    (
+        { 'status_code': 201, 'json': {"message": "some not found message", "code": "RESOURCE_NOT_FOUND"} },
+        {'*': 'Dict[str, str]' }
+    ),
+    (
+        { 'status_code': 201, 'json': {"message": "some not found message", "code": "RESOURCE_NOT_FOUND"} },
+        {'default': dict }
+    ),
+    (
+        { 'status_code': 201, 'json': {"message": "some not found message", "code": "RESOURCE_NOT_FOUND"} },
+        {'4XX': Dict[str, str]} # no response mapping
+    ),
+    # binary response types
+    (
+        { 'status_code': 202, 'content': b'some binary file content,', 'headers':{'Content-Disposition': 'file_name.ext', 'content-type': 'application/octet-stream'} },
+        {'202': bytearray }
     ),
     (
         { 'status_code': 202, 'content': b'some binary file content,', 'headers':{'Content-Disposition': 'file_name.ext', 'content-type': 'application/octet-stream'} },
-        bytearray
+        {'2XX': 'bytearray' }
+    ),
+    (
+        { 'status_code': 202, 'content': b'some binary file content,', 'headers':{'Content-Disposition': 'file_name.ext', 'content-type': 'application/octet-stream'} },
+        {'*': bytes }
+    ),
+    # list response types
+    (
+        { 'status_code': 200, 'json': ['11', '22', 33]},
+        {'2XX': List[int]} # TODO fix parsing subtype (currently array elements aren't converted to int)
+    ),
+    (
+        { 'status_code': 200, 'json': ['11', '22', 33]},
+        {'2XX': 'List[int]'}
     ),
     (
         { 'status_code': 200, 'json': ['hello', 'world', 123, {'key': 'value'}]},
-        List[Union[str, int, Dict[str, Any]]]
+        {'2XX': List[Union[str, int, Dict[str, Any]]]}
+    ),
+    (
+        { 'status_code': 200, 'json': ['hello', 'world', 123, {'key': 'value'}]},
+        {'2XX': list}
+    ),
+    (
+        { 'status_code': 200, 'json': ['hello', 'world', 123, {'key': 'value'}]},
+        {} # no response type
+    ),
+    # datetime response types
+    (
+        { 'status_code': 200, 'text': str(datetime(2023, 12, 25, minute=1).isoformat())},
+        {'200': datetime}
     ),
     (
         { 'status_code': 200, 'text': str(datetime(2023, 12, 25, minute=1).isoformat())},
-        datetime
+        {'2XX': date}
     ),
     (
         { 'status_code': 200, 'text': str(datetime(2023, 12, 25, minute=1).isoformat())},
-        date
+        {'2XX': str}
     ),
     (
         { 'status_code': 200, 'text': str(datetime(2023, 12, 25, minute=1).isoformat())},
-        str
+        {} # no response type
     ),
+    # custom model response types
     (
         { 'status_code':200, 'json': pet_instance_dict },
-        Pet
+        {'200': Pet}
     ),
     (
         { 'status_code':200, 'text': pet_instance_json },
-        Pet
+        {'2XX': Pet}
     ),
     (
         { 'status_code':200, 'content': pet_instance_json },
-        Pet
+        {'*': Pet}
+    ),
+    (
+        { 'status_code':200, 'json': pet_instance_dict },
+        {'200': Any}
+    ),
+    (
+        { 'status_code':200, 'json': pet_instance_dict },
+        {'200': None}
+    ),
+    (
+        { 'status_code':200, 'json': pet_instance_dict },
+        {}
     ),
 ])
-def test_deserialize(snapshot, waylay_api_client: ApiClient, response_kwargs: Dict[str, Any], response_type: Any, request):
-    """Test REST param serializer"""
+def test_deserialize(snapshot, waylay_api_client: ApiClient, response_kwargs: Dict[str, Any], response_type_map: Any, request):
+    """Test REST param deserializer"""
     response_kwargs = _retreive_fixture_values(request, response_kwargs)
-    deserialized = waylay_api_client.deserialize(RESTResponse(**response_kwargs), response_type)
-    assert (type(deserialized).__name__, deserialized) == snapshot
+    deserialized = waylay_api_client.response_deserialize(RESTResponse(**response_kwargs), response_type_map)
+    assert (
+        deserialized,
+        type(deserialized.data).__name__,
+        deserialized.data,
+    ) == snapshot(name=f"{deserialized.status_code}:{deserialized.raw_data}@{str(response_type_map)}")
+
+
+@pytest.mark.parametrize("response_kwargs,response_type_map", [
+    (
+        { 'status_code': 404, 'json': {"message": "some not found message", "code": "RESOURCE_NOT_FOUND"} },
+        {'404': Dict[str, str]}
+    ),
+    (
+        { 'status_code': 404, 'json': {"message": "some not found message", "code": "RESOURCE_NOT_FOUND"} },
+        {'4XX': dict}
+    ),
+    (
+        { 'status_code': 404, 'json': {"message": "some not found message", "code": "RESOURCE_NOT_FOUND"} },
+        {'4XX': Any}
+    ),
+    (
+        { 'status_code': 404, 'text': "some not found message"},
+        {'4XX': Any}
+    ),
+    (
+        { 'status_code': 404, 'json': {"message": "some not found message", "code": "RESOURCE_NOT_FOUND"} },
+        {} # no response mapping
+    ),
+    (
+        { 'status_code':400, 'json': pet_instance_dict },
+        {'400': Pet}
+    ),
+    (
+        { 'status_code':400, 'content': pet_instance_json },
+        {'default': Any}
+    ),
+    (
+        { 'status_code':400, 'json': pet_instance_dict },
+        {}
+    ),
+])
+def test_deserialize_error_responses(snapshot, waylay_api_client: ApiClient, response_kwargs: Dict[str, Any], response_type_map: Any, request):
+    """Test REST param deserializer when error response"""
+    response_kwargs = _retreive_fixture_values(request, response_kwargs)
+    with pytest.raises(ApiError) as excinfo:
+        waylay_api_client.response_deserialize(RESTResponse(**response_kwargs), response_type_map)
+    assert (str(excinfo.value), type(excinfo.value.data).__name__, excinfo.value.data) == snapshot(name=str(response_type_map))
 
 
 def _retreive_fixture_values(request, kwargs: Dict[str, Any]) -> Dict[str, Any]:
