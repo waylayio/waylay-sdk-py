@@ -172,10 +172,10 @@ class ApiClient:
         response_type = response_types_map.get(str(response_data.status_code), None)
         if not response_type and isinstance(response_data.status_code, int) and 100 <= response_data.status_code <= 599:
             # if not found, look for '1XX', '2XX', etc.
-            response_type = response_types_map.get(str(response_data.status_code)[0] + "XX", None)
+            response_type = response_types_map.get(str(response_data.status_code)[0] + "XX")
         if not response_type:
-            # if still not found, look for default response type
-            response_type = response_types_map.get('*', None) or response_types_map.get('default', None)
+            # if still not found, look for default response type, otherwise use `Any`
+            response_type = response_types_map.get('*') or response_types_map.get('default') or Any
 
         # deserialize response data
         return_data = None
