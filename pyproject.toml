@@ -15,6 +15,7 @@ dependencies = [
     "python_dateutil",
     "typing_extensions",
     "python-magic",
+    "typeguard",
 ]
 
 

@@ -2,25 +2,21 @@
 
 from importlib import import_module
 from types import SimpleNamespace
-from typing import Any, Dict, Optional, List, cast
+from typing import Any, Dict, Optional, cast
 
 import datetime
 from dateutil.parser import parse
-import json
-import mimetypes
 import os
 import re
 import tempfile
-
 from urllib.parse import quote
 
 from waylay.__version__ import __version__
-from waylay.api.api_config import ApiConfig
-from waylay.api.api_response import ApiResponse
 
-from waylay.api import rest
-from waylay.api.api_exceptions import (
-    ApiValueError,
+from ..api.api_config import ApiConfig
+from ..api.api_response import ApiResponse
+from ..api import rest
+from ..api.api_exceptions import (
     ApiError,
 )
 
@@ -144,13 +140,13 @@ class ApiClient:
 
     async def call_api(
         self,
-        method,
-        url,
+        method: str,
+        url: str,
         query_params: Optional[Dict[str, Any]] = None,
-        header_params=None,
-        body=None,
-        files=None,
-        _request_timeout=None
+        header_params: Optional[Dict[str, Optional[str]]] = None,
+        body: Optional[Any] = None,
+        files: Optional[Dict[str, str]] = None,
+        _request_timeout: Optional[rest.RESTTimeout] = None
     ) -> rest.RESTResponse:
         """Make the HTTP request (synchronous) :param method: Method to call.
 

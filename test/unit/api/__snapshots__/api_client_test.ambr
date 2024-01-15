@@ -251,6 +251,13 @@
     None,
   )
 # ---
+# name: test_deserialize[response_kwargs38-response_type_map38][200:b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}'@{'200': 'unit.api.example.pet_model.Pet'}]
+  tuple(
+    ApiResponse(status_code=200, data=Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'), raw_data=b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}', headers=Headers({'content-length': '95', 'content-type': 'application/json'})),
+    'Pet',
+    Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'),
+  )
+# ---
 # name: test_deserialize[response_kwargs4-response_type_map4][200:b'123.456'@{'200': <class 'float'>}]
   tuple(
     ApiResponse(status_code=200, data=123.456, raw_data=b'123.456', headers=Headers({'content-length': '7', 'content-type': 'text/plain; charset=utf-8'})),
@@ -589,6 +596,31 @@
       tuple(
         Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.0', 'content-length': '105', 'content-type': 'application/json', 'authorization': '[secure]'}),
         b'"{\\"name\\":\\"Lord Biscuit, Master of Naps\\",\\"owner\\":{\\"id\\":123,\\"name\\":\\"Simon\\"},\\"tag\\":\\"doggo\\"}"',
+      ),
+    ]),
+  )
+# ---
+# name: test_serialize_and_call[test_input6]
+  dict({
+    'body': b'..some binary content..',
+    'files': None,
+    'header_params': dict({
+      'User-Agent': 'waylay-sdk/python/0.0.0',
+    }),
+    'method': 'POST',
+    'query_params': None,
+    'url': 'https://api-example.io/service/v1/bar/foo',
+  })
+# ---
+# name: test_serialize_and_call[test_input6].1
+  tuple(
+    list([
+      <Request('POST', 'https://api-example.io/service/v1/bar/foo')>,
+    ]),
+    list([
+      tuple(
+        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.0', 'content-type': 'ASCII text, with no line terminators', 'content-length': '23', 'authorization': '[secure]'}),
+        b'..some binary content..',
       ),
     ]),
   )

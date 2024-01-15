@@ -4,10 +4,12 @@ import re
 from typing import Any, Dict, List, Union
 from unittest import mock
 from urllib import parse
+import httpx
 import pytest
 from datetime import datetime, date
 
 from pytest_httpx import HTTPXMock
+from pytest_mock import MockerFixture
 
 from waylay.auth import TokenCredentials
 from waylay.config import WaylayConfig
@@ -92,6 +94,11 @@ def waylay_api_client(waylay_api_config: ApiConfig) -> ApiClient:
                               'path_params': {'param1': 'C'},
                               'body': pet_instance_json,
                               },
+                            {
+                                'method': 'POST',
+                                'resource_path': '/service/v1/bar/foo',
+                                'body': b'..some binary content..',
+                            },
                           ])
 async def test_serialize_and_call(snapshot, mocker, httpx_mock: HTTPXMock, waylay_api_client: ApiClient, test_input: dict[str, Any], request):
     """Test REST param serializer."""
@@ -297,6 +304,10 @@ async def test_serialize_and_call_does_not_support_body_and_files(waylay_api_cli
         {'status_code': 200, 'json': pet_instance_dict},
         {}
     ),
+    (
+        {'status_code': 200, 'json': pet_instance_dict},
+        {'200': 'unit.api.example.pet_model.Pet'}
+    ),
 ])
 def test_deserialize(snapshot, waylay_api_client: ApiClient,
                      response_kwargs: Dict[str, Any], response_type_map: Any, request):
@@ -360,3 +371,31 @@ def _retreive_fixture_values(request, kwargs: Dict[str, Any]) -> Dict[str, Any]:
             _arg_value = request.getfixturevalue(arg_value.__name__)
             kwargs.update({arg_key: _arg_value})
     return kwargs
+
+
+async def test_default_headers(waylay_api_client: ApiClient):
+    """Test setting and getting of default user agent."""
+    _user_agent = 'test'
+    waylay_api_client.user_agent = _user_agent
+    assert waylay_api_client.user_agent == _user_agent
+    assert waylay_api_client.default_headers['User-Agent'] == _user_agent
+
+    [name, value] = ['x-header-name', 'header_value']
+    waylay_api_client.set_default_header(name, value)
+    assert waylay_api_client.default_headers[name] == value
+
+@pytest.mark.parametrize("request_kwargs", [
+    { 'method': 'GET', 'url': 'https://example.com/foo/', '_request_timeout' : 10.0},
+    { 'method': 'GET', 'url': 'https://example.com/foo/', '_request_timeout' : 10},
+    { 'method': 'GET', 'url': 'https://example.com/foo/', '_request_timeout' : (10, 5, 5, 5)}  # (connect, read, write, pool)
+])
+async def test_request_timeout(waylay_api_client: ApiClient, httpx_mock: HTTPXMock, mocker: MockerFixture, request_kwargs):
+    """Test request timeout."""
+    spy = mocker.spy(waylay_api_client.rest_client.client, 'request')
+    mocker.patch('waylay.auth.WaylayTokenAuth.assure_valid_token', lambda *args: WaylayTokenStub())
+    httpx_mock.add_response()
+    await waylay_api_client.call_api(**request_kwargs)
+    _httpx_args = {'params': None, 'headers': {}}
+    _httpx_args.update(request_kwargs)
+    _httpx_args['timeout'] = _httpx_args.pop('_request_timeout')
+    spy.assert_called_once_with(**_httpx_args)
