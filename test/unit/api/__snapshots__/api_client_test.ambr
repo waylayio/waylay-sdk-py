@@ -102,21 +102,21 @@
 # ---
 # name: test_deserialize[response_kwargs20-response_type_map20][202:b'some binary file content,'@{'202': <class 'bytearray'>}]
   tuple(
-    ApiResponse(status_code=202, data=b'some binary file content,', raw_data=b'some binary file content,', headers=Headers({'content-disposition': 'file_name.ext', 'content-type': 'application/octet-stream', 'content-length': '25'})),
+    ApiResponse(status_code=202, data=b'some binary file content,', raw_data=b'some binary file content,', headers=Headers({'content-type': 'application/octet-stream', 'content-length': '25'})),
     'bytes',
     b'some binary file content,',
   )
 # ---
 # name: test_deserialize[response_kwargs21-response_type_map21][202:b'some binary file content,'@{'2XX': 'bytearray'}]
   tuple(
-    ApiResponse(status_code=202, data=b'some binary file content,', raw_data=b'some binary file content,', headers=Headers({'content-disposition': 'file_name.ext', 'content-type': 'application/octet-stream', 'content-length': '25'})),
+    ApiResponse(status_code=202, data=b'some binary file content,', raw_data=b'some binary file content,', headers=Headers({'content-type': 'application/octet-stream', 'content-length': '25'})),
     'bytes',
     b'some binary file content,',
   )
 # ---
 # name: test_deserialize[response_kwargs22-response_type_map22][202:b'some binary file content,'@{'*': <class 'bytes'>}]
   tuple(
-    ApiResponse(status_code=202, data=b'some binary file content,', raw_data=b'some binary file content,', headers=Headers({'content-disposition': 'file_name.ext', 'content-type': 'application/octet-stream', 'content-length': '25'})),
+    ApiResponse(status_code=202, data=b'some binary file content,', raw_data=b'some binary file content,', headers=Headers({'content-type': 'application/octet-stream', 'content-length': '25'})),
     'bytes',
     b'some binary file content,',
   )

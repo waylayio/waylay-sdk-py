@@ -228,17 +228,17 @@ async def test_serialize_and_call_does_not_support_body_and_files(waylay_api_cli
     # binary response types
     (
         {'status_code': 202, 'content': b'some binary file content,', 'headers': {
-            'Content-Disposition': 'file_name.ext', 'content-type': 'application/octet-stream'}},
+            'content-type': 'application/octet-stream'}},
         {'202': bytearray}
     ),
     (
         {'status_code': 202, 'content': b'some binary file content,', 'headers': {
-            'Content-Disposition': 'file_name.ext', 'content-type': 'application/octet-stream'}},
+            'content-type': 'application/octet-stream'}},
         {'2XX': 'bytearray'}
     ),
     (
         {'status_code': 202, 'content': b'some binary file content,', 'headers': {
-            'Content-Disposition': 'file_name.ext', 'content-type': 'application/octet-stream'}},
+            'content-type': 'application/octet-stream'}},
         {'*': bytes}
     ),
     # list response types

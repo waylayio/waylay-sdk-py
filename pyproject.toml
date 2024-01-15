@@ -45,10 +45,10 @@ dev = [
     'waylay[services,services-types]',
 ]
 services = [
-    "waylay_registry_api @ git+https://github.com/waylayio/waylay-py-services@feat/multipart_uploads#subdirectory=services/registry/waylay_registry_api"
+    "waylay_registry_api @ git+https://github.com/waylayio/waylay-py-services@main#subdirectory=services/registry/waylay_registry_api"
 ]
 services-types = [
-    "waylay_registry_types @ git+https://github.com/waylayio/waylay-py-services@feat/multipart_uploads#subdirectory=services/registry/waylay_registry_types"
+    "waylay_registry_types @ git+https://github.com/waylayio/waylay-py-services@main#subdirectory=services/registry/waylay_registry_types"
 ]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

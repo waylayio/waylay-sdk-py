@@ -23,33 +23,18 @@ from waylay.__version__ import __version__
 
 class ApiConfig:
     """API client settings.
-
     :param waylay_config: WaylayConfig
-    :param ssl_ca_cert: str - the path to a file of concatenated CA certificates
-      in PEM format.
-
     """
 
     _default = None
 
-    def __init__(self, waylay_config: WaylayConfig,
-                 ssl_ca_cert=None,
-                 ) -> None:
+    def __init__(self, waylay_config: WaylayConfig, _client_options = None) -> None:
         """Create an instance."""
         self.waylay_config = waylay_config
         """Waylay configuration."""
-
-        self.ssl_ca_cert = ssl_ca_cert
-        """Set this to customize the certificate file to verify the peer."""
+        self._client_options = _client_options
 
         # Other configuration
-
-        self.temp_folder_path = None
-        """Temp file folder for downloading files."""
-
-        self.refresh_api_key_hook = None
-        """Function hook to refresh API key if expired."""
-
         self.logger = {}
         """Logging Settings."""
 
@@ -70,39 +55,8 @@ class ApiConfig:
         self.debug = False
         """Debug switch."""
 
-        self.verify_ssl = True
-        """SSL/TLS verification Set this to false to skip verifying SSL certificate when calling API from https
-        server."""
-
-        self.cert_file = None
-        """Client certificate file."""
-
-        self.key_file = None
-        """Client key file."""
-
-        self.assert_hostname = None
-        """Set this to True/False to enable/disable SSL hostname verification."""
-
-        self.tls_server_name = None
-        """SSL/TLS Server Name Indication (SNI) Set this to the SNI value expected by the server."""
-
-        self.proxy = None
-        """Proxy URL."""
-
-        self.proxy_headers = None
-        """Proxy headers."""
-
-        self.safe_chars_for_path_param = ''
-        """Safe chars for path_param."""
-
-        self.retries = None
-        """Adding retries to override urllib3 default value 3."""
-
         self.client_side_validation = True
         """Enable/disable client side validation."""
-
-        self.socket_options = None
-        """Options to pass down to the underlying urllib3 socket."""
 
         self.datetime_format = "%Y-%m-%dT%H:%M:%S.%f%z"
         """Datetime format."""

@@ -112,7 +112,7 @@ class ApiClient:
                 # specified safe chars, encode everything
                 resource_path = resource_path.replace(
                     '{%s}' % k,
-                    quote(str(v), safe=config.safe_chars_for_path_param)
+                    quote(str(v))
                 )
 
         # post parameters
@@ -160,19 +160,13 @@ class ApiClient:
         :return: RESTResponse
 
         """
-
-        try:
-            # perform request and return response
-            response_data = await self.rest_client.request(
-                method, url, query=query_params,
-                headers=header_params,
-                body=body, files=files,
-                _request_timeout=_request_timeout
-            )
-
-        except ApiError as e:
-            raise e
-
+        # perform request and return response
+        response_data = await self.rest_client.request(
+            method, url, query=query_params,
+            headers=header_params,
+            body=body, files=files,
+            _request_timeout=_request_timeout
+        )
         return response_data
 
     def response_deserialize(
@@ -201,8 +195,6 @@ class ApiClient:
         try:
             if response_type in _PRIMITIVE_BYTE_TYPES + tuple(t.__name__ for t in _PRIMITIVE_BYTE_TYPES):
                 return_data = response_data.content
-            elif response_type == "file":
-                return_data = self.__deserialize_file(response_data)
             elif response_type is not None:
                 try:
                     _data = response_data.json()
@@ -317,35 +309,6 @@ class ApiClient:
 
         return files
 
-    def __deserialize_file(self, response: rest.RESTResponse):
-        """Deserializes body to file.
-
-        Saves response body into a file in a temporary folder, using the
-        filename from the `Content-Disposition` header if provided.
-
-        handle file downloading save response body into a tmp file and
-        return the instance
-
-        :param response: RESTResponse.
-        :return: file path.
-
-        """
-        fd, path = tempfile.mkstemp(dir=self.configuration.temp_folder_path)
-        os.close(fd)
-        os.remove(path)
-
-        content_disposition = response.headers.get("Content-Disposition")
-        if content_disposition:
-            filename = re.search(
-                r'filename=[\'"]?([^\'"\s]+)[\'"]?',
-                content_disposition
-            ).group(1)  # type: ignore[union-attr]
-            path = os.path.join(os.path.dirname(path), filename)
-
-        with open(path, "wb") as f:
-            f.write(response.content)
-
-        return path
 
     def __deserialize_primitive(self, data, klass):
         """Deserializes string to primitive type.

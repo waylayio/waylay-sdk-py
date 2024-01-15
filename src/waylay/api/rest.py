@@ -17,14 +17,11 @@ class RESTClient:
 
     def __init__(self, configuration: ApiConfig) -> None:
         """Create an instance."""
-        additional_httpx_kwargs = {
-            "verify": configuration.ssl_ca_cert,
-        }
-
-        self.client = httpx.AsyncClient(
-            auth=configuration.waylay_config.auth,
-            **additional_httpx_kwargs
-        )
+        httpx_kwargs = { "auth": configuration.waylay_config.auth }
+        if configuration._client_options:
+            httpx_kwargs.update(configuration._client_options)
+        self.client = httpx.AsyncClient(**httpx_kwargs)
+    
 
     async def request(
         self,
