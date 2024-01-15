@@ -1,3 +1,5 @@
+"""Shared unit test fixtures."""
+
 from datetime import datetime
 import pytest
 from waylay.auth import WaylayToken
@@ -16,6 +18,7 @@ MOCK_TOKEN_DATA = {
     'sub': 'users/999999999999999',
     'exp': datetime.now().timestamp() + 100000
 }
+
 
 class WaylayTokenStub(WaylayToken):
     """A WaylayToken test stub with fixed data."""

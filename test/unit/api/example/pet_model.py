@@ -10,8 +10,9 @@ try:
 except ImportError:
     from typing_extensions import Self
 
+
 class Pet(BaseModel):
-    """Pet"""
+    """Pet."""
     name: StrictStr
     owner: PetOwner
     tag: Optional[StrictStr] = None
@@ -23,22 +24,21 @@ class Pet(BaseModel):
         "protected_namespaces": (),
     }
 
-
     def to_str(self) -> str:
-        """Returns the string representation of the model using alias"""
+        """Returns the string representation of the model using alias."""
         return pprint.pformat(self.model_dump(by_alias=True))
 
     def to_json(self) -> str:
-        """Returns the JSON representation of the model using alias"""
+        """Returns the JSON representation of the model using alias."""
         return self.model_dump_json()
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
-        """Create an instance of Pet from a JSON string"""
+        """Create an instance of Pet from a JSON string."""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
-        """Return the dictionary representation"""
+        """Return the dictionary representation."""
         _dict = self.model_dump(
             by_alias=True,
             exclude={
@@ -51,7 +51,7 @@ class Pet(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Dict) -> Self:
-        """Create an instance of Pet from a dict"""
+        """Create an instance of Pet from a dict."""
         if obj is None:
             return None
 
@@ -64,9 +64,10 @@ class Pet(BaseModel):
             "tag": obj.get("tag")
         })
         return _obj
-    
+
+
 class PetOwner(BaseModel):
-    """Owner"""
+    """Owner."""
     id: StrictInt
     name: StrictStr
     __properties: ClassVar[List[str]] = ["id", "name"]
@@ -77,18 +78,17 @@ class PetOwner(BaseModel):
         "protected_namespaces": (),
     }
 
-
     def to_str(self) -> str:
-        """Returns the string representation of the model using alias"""
+        """Returns the string representation of the model using alias."""
         return pprint.pformat(self.model_dump(by_alias=True))
 
     def to_json(self) -> str:
-        """Returns the JSON representation of the model using alias"""
+        """Returns the JSON representation of the model using alias."""
         return self.model_dump_json()
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
-        """Create an instance of Owner from a JSON string"""
+        """Create an instance of Owner from a JSON string."""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -100,6 +100,7 @@ class PetOwner(BaseModel):
         * `None` is only added to the output dict for nullable fields that
           were set at model initialization. Other fields with value `None`
           are ignored.
+
         """
         _dict = self.model_dump(
             by_alias=True,
@@ -111,7 +112,7 @@ class PetOwner(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Dict) -> Self:
-        """Create an instance of Owner from a dict"""
+        """Create an instance of Owner from a dict."""
         if obj is None:
             return None
 
@@ -124,9 +125,9 @@ class PetOwner(BaseModel):
         })
         return _obj
 
+
 class CreatePetQuery(TypedDict):
-    """ create_pet query parameters. """
-    limit: NotRequired[ Annotated[Optional[Annotated[int, Field(le=100, strict=True)]], Field(description="How many biscuits?")]]
-    good_boy: NotRequired[ Annotated[Optional[StrictBool], Field(description="Is the pet a good boy?")]]
-
-
+    """create_pet query parameters."""
+    limit: NotRequired[Annotated[Optional[Annotated[int, Field(
+        le=100, strict=True)]], Field(description="How many biscuits?")]]
+    good_boy: NotRequired[Annotated[Optional[StrictBool], Field(description="Is the pet a good boy?")]]

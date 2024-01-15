@@ -273,7 +273,7 @@ class ApiClient:
             key: self.__sanitize_for_serialization(val)
             for key, val in obj_dict.items()
         }
-    
+
     def __deserialize(self, data: Any, klass: Any):
         """Deserializes response content into a `klass` instance."""
         if isinstance(klass, str) and klass in _NATIVE_TYPES_MAPPING:
@@ -288,15 +288,15 @@ class ApiClient:
             return self.__deserialize_date(data)
         elif klass == datetime.datetime:
             return self.__deserialize_datetime(data)
-        
+
         if isinstance(klass, str):
             if klass.startswith('List['):
-                sub_kls = re.match(r'List\[(.*)]', klass).group(1)
+                sub_kls = re.match(r'List\[(.*)]', klass).group(1)  # type: ignore[union-attr]
                 return [self.__deserialize(sub_data, sub_kls)
                         for sub_data in data]
 
             if klass.startswith('Dict['):
-                sub_kls = re.match(r'Dict\[([^,]*), (.*)]', klass).group(2)
+                sub_kls = re.match(r'Dict\[([^,]*), (.*)]', klass).group(2)  # type: ignore[union-attr]
                 return {k: self.__deserialize(v, sub_kls)
                         for k, v in data.items()}
 
@@ -422,13 +422,12 @@ class ApiClient:
 
         """
 
-        try: 
+        try:
             if callable(getattr(klass, 'from_dict', None)):
-                return klass.from_dict(data)    
+                return klass.from_dict(data)
         except BaseException as e:
             pass
         return self.__deserialize_simple_namespace(data)
-
 
     def __deserialize_simple_namespace(self, data):
         """Deserializes dict to a `SimpleNamespace`.
@@ -437,9 +436,9 @@ class ApiClient:
         :return: SimpleNamespace.
 
         """
-        if type(data) is list:
+        if isinstance(data, list):
             return list(map(self.__deserialize_simple_namespace, data))
-        elif type(data) is dict:
+        elif isinstance(data, dict):
             sns = SimpleNamespace()
             for key, value in data.items():
                 setattr(sns, key, self.__deserialize_simple_namespace(value))
