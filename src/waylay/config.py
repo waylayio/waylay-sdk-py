@@ -57,8 +57,10 @@ class WaylayConfig():
     _auth: WaylayTokenAuth
     _local_settings: Settings
     _tenant_settings: Optional[TenantSettings] = None
-
     _token_auth_provider: Type[WaylayTokenAuth] = WaylayTokenAuth
+
+    client_side_validation: bool = True
+    """Enable/disable client side validation."""
 
     def __init__(
         self, credentials: Optional[WaylayCredentials] = None, profile: str = DEFAULT_PROFILE,

@@ -1,7 +1,7 @@
 """REST client implementation."""
 
 from io import BufferedReader
-from typing import Any, Optional
+from typing import Any, Mapping, Optional
 from typeguard import check_type
 import httpx
 from waylay.api.api_config import ApiConfig
@@ -15,12 +15,9 @@ RESTTimeout = httpx._types.TimeoutTypes
 class RESTClient:
     """Base REST client."""
 
-    def __init__(self, configuration: ApiConfig) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         """Create an instance."""
-        httpx_kwargs = { "auth": configuration.waylay_config.auth }
-        if configuration._client_options:
-            httpx_kwargs.update(configuration._client_options)
-        self.client = httpx.AsyncClient(**httpx_kwargs)
+        self.client = httpx.AsyncClient(*args, **kwargs)
     
 
     async def request(
@@ -28,7 +25,7 @@ class RESTClient:
         method: str,
         url: httpx._types.URLTypes,
         query: Optional[httpx._types.QueryParamTypes] = None,
-        headers: Optional[httpx._types.HeaderTypes] = None,
+        headers: Optional[Mapping[str, str]] = None,
         body: Optional[Any] = None,
         files: Optional[httpx._types.RequestFiles] = None,
         _request_timeout: Optional[RESTTimeout] = None
@@ -59,7 +56,7 @@ class RESTClient:
             'OPTIONS'
         ]:
             raise ApiValueError(
-                "Method %0 is not supported.".format(method)
+                "Method {0} is not supported.".format(method)
             )
 
         if files and body:
@@ -67,7 +64,7 @@ class RESTClient:
                 "The `body` and `files` params are mutually exclusive."
             )
 
-        kwargs = {
+        kwargs: dict[str, Any] = {
             'method': method,
             'url': url,
             'params': query,

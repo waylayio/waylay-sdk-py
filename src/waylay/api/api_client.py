@@ -2,21 +2,20 @@
 
 from importlib import import_module
 from types import SimpleNamespace
-from typing import Any, Dict, Optional, cast
+from typing import Any, Mapping, Optional, cast
 
 import datetime
 from dateutil.parser import parse
-import os
 import re
-import tempfile
 from urllib.parse import quote
 
 from waylay.__version__ import __version__
+from waylay.config import WaylayConfig
 
-from ..api.api_config import ApiConfig
-from ..api.api_response import ApiResponse
 from ..api import rest
-from ..api.api_exceptions import (
+from .api_config import ApiConfig
+from .api_response import ApiResponse
+from .api_exceptions import (
     ApiError,
 )
 
@@ -47,40 +46,29 @@ class ApiClient:
 
     def __init__(
         self,
-        configuration: ApiConfig,
+        waylay_config: WaylayConfig,
     ) -> None:
         """Create an instance."""
-        self.configuration = configuration
-        self.rest_client = rest.RESTClient(configuration)
-        self.default_headers: Dict[str, Any] = {}
+        self.config = ApiConfig(waylay_config)
 
-        # Set default User-Agent.
-        self.user_agent = f"waylay-sdk/python/{__version__}"
-        self.client_side_validation = configuration.client_side_validation
+        rest_client_kwargs = { "auth": waylay_config.auth }
+        rest_client_kwargs.update(self.config._client_options or {})
+        self.rest_client = rest.RESTClient(**rest_client_kwargs)
 
-    @property
-    def user_agent(self):
-        """User agent for this API client."""
-        return self.default_headers['User-Agent']
-
-    @user_agent.setter
-    def user_agent(self, value):
-        self.default_headers['User-Agent'] = value
-
-    def set_default_header(self, header_name: str, header_value: Any):
-        """Set a default header."""
-        self.default_headers[header_name] = header_value
+        self.default_headers: dict[str, Any] = {
+            'User-Agent': "waylay-sdk/python/{0}".format(__version__)
+        }
 
     def param_serialize(
         self,
         method: str,
         resource_path: str,
-        path_params: Optional[Dict[str, str]] = None,
-        query_params: Optional[Dict[str, Any]] = None,
-        header_params: Optional[Dict[str, Optional[str]]] = None,
+        path_params: Optional[Mapping[str, str]] = None,
+        query_params: Optional[Mapping[str, Any]] = None,
+        header_params: Optional[Mapping[str, Optional[str]]] = None,
         body: Optional[Any] = None,
-        files: Optional[Dict[str, str]] = None,
-    ) -> Dict[str, Any]:
+        files: Optional[Mapping[str, str]] = None,
+    ) -> dict[str, Any]:
         """Build the HTTP request params needed by the request.
 
         :param method: Method to call.
@@ -92,14 +80,13 @@ class ApiClient:
         :param body: Request body.
         :param files dict: key -> filename, value -> filepath, for
             `multipart/form-data`.
-        :return: Dict of form {path, method, query_params,
+        :return: dict of form {path, method, query_params,
             header_params, body, files}
 
         """
-        config = self.configuration
 
         # header parameters
-        header_params = header_params or {}
+        header_params = dict(header_params or {})
         header_params.update(self.default_headers)
         if header_params:
             header_params = self.__sanitize_for_serialization(header_params)
@@ -123,7 +110,7 @@ class ApiClient:
             body = self.__sanitize_for_serialization(body)
 
         # request url
-        url = self.configuration.host + resource_path
+        url = self.config.host + resource_path
 
         # query parameters
         if query_params:
@@ -142,10 +129,10 @@ class ApiClient:
         self,
         method: str,
         url: str,
-        query_params: Optional[Dict[str, Any]] = None,
-        header_params: Optional[Dict[str, Optional[str]]] = None,
+        query_params: Optional[Mapping[str, Any]] = None,
+        header_params: Optional[Mapping[str, str]] = None,
         body: Optional[Any] = None,
-        files: Optional[Dict[str, str]] = None,
+        files: Optional[Mapping[str, str]] = None,
         _request_timeout: Optional[rest.RESTTimeout] = None
     ) -> rest.RESTResponse:
         """Make the HTTP request (synchronous) :param method: Method to call.
@@ -342,13 +329,8 @@ class ApiClient:
         """
         try:
             return parse(string).date()
-        except ImportError:
-            return string
         except ValueError:
-            raise ApiError(
-                status=0,
-                reason="Failed to parse `{0}` as date object".format(string)
-            )
+            return string
 
     def __deserialize_datetime(self, string):
         """Deserializes string to datetime.
@@ -361,16 +343,8 @@ class ApiClient:
         """
         try:
             return parse(string)
-        except ImportError:
-            return string
         except ValueError:
-            raise ApiError(
-                status=0,
-                reason=(
-                    "Failed to parse `{0}` as datetime object"
-                    .format(string)
-                )
-            )
+            return string
 
     def __deserialize_model(self, data, klass):
         """Deserializes list or dict to model.

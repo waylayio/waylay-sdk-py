@@ -10,13 +10,6 @@ Do not edit the class manually.
 
 """  # noqa: E501
 
-
-import copy
-import logging
-import sys
-
-import http.client as httplib
-
 from waylay.config import WaylayConfig
 from waylay.__version__ import __version__
 
@@ -25,38 +18,12 @@ class ApiConfig:
     """API client settings.
     :param waylay_config: WaylayConfig
     """
-
-    _default = None
-
     def __init__(self, waylay_config: WaylayConfig, _client_options = None) -> None:
         """Create an instance."""
         self.waylay_config = waylay_config
         """Waylay configuration."""
         self._client_options = _client_options
-
-        # Other configuration
-        self.logger = {}
-        """Logging Settings."""
-
-        self.logger["package_logger"] = logging.getLogger("waylay.api")
-        self.logger["urllib3_logger"] = logging.getLogger("urllib3")
-
-        self.logger_format = '%(asctime)s %(levelname)s %(message)s'
-        """Log format."""
-        self.logger_stream_handler = None
-        """Log stream handler."""
-
-        self.logger_file_handler = None
-        """Log file handler."""
-
-        self.logger_file = None
-        """Debug file location."""
-
-        self.debug = False
-        """Debug switch."""
-
-        self.client_side_validation = True
-        """Enable/disable client side validation."""
+        """Additional REST client options."""
 
         self.datetime_format = "%Y-%m-%dT%H:%M:%S.%f%z"
         """Datetime format."""
@@ -64,128 +31,12 @@ class ApiConfig:
         self.date_format = "%Y-%m-%d"
         """Date format."""
 
-    def __deepcopy__(self, memo):
-        """Create a deep copy of the instance."""
-        cls = self.__class__
-        result = cls.__new__(cls)
-        memo[id(self)] = result
-        for k, v in self.__dict__.items():
-            if k not in ('logger', 'logger_file_handler'):
-                setattr(result, k, copy.deepcopy(v, memo))
-        # shallow copy of loggers
-        result.logger = copy.copy(self.logger)
-        # use setters to configure loggers
-        result.logger_file = self.logger_file
-        result.debug = self.debug
-        return result
-
-    @property
-    def logger_file(self):
-        """The logger file.
-
-        If the logger_file is None, then add stream handler and remove
-        file handler. Otherwise, add file handler and remove stream
-        handler.
-
-        :param value: The logger_file path.
-        :type: str
-
-        """
-        return self.__logger_file
-
-    @logger_file.setter
-    def logger_file(self, value):
-        """Set the logger file.
-
-        If the logger_file is None, then add stream handler and remove
-        file handler. Otherwise, add file handler and remove stream
-        handler.
-
-        :param value: The logger_file path.
-        :type: str
-
-        """
-        self.__logger_file = value
-        if self.__logger_file:
-            # If set logging file,
-            # then add file handler and remove stream handler.
-            self.logger_file_handler = logging.FileHandler(self.__logger_file)
-            self.logger_file_handler.setFormatter(self.logger_formatter)
-            for _, logger in self.logger.items():
-                logger.addHandler(self.logger_file_handler)
-
-    @property
-    def debug(self):
-        """Debug status.
-
-        :param value: The debug status, True or False.
-        :type: bool
-
-        """
-        return self.__debug
-
-    @debug.setter
-    def debug(self, value):
-        """Debug status.
-
-        :param value: The debug status, True or False.
-        :type: bool
-
-        """
-        self.__debug = value
-        if self.__debug:
-            # if debug status is True, turn on debug logging
-            for _, logger in self.logger.items():
-                logger.setLevel(logging.DEBUG)
-            # turn on httplib debug
-            httplib.HTTPConnection.debuglevel = 1
-        else:
-            # if debug status is False, turn off debug logging,
-            # setting log level to default `logging.WARNING`
-            for _, logger in self.logger.items():
-                logger.setLevel(logging.WARNING)
-            # turn off httplib debug
-            httplib.HTTPConnection.debuglevel = 0
-
-    @property
-    def logger_format(self):
-        """The logger format.
-
-        The logger_formatter will be updated when sets logger_format.
-
-        :param value: The format string.
-        :type: str
-
-        """
-        return self.__logger_format
-
-    @logger_format.setter
-    def logger_format(self, value):
-        """Set the logger format.
-
-        The logger_formatter will be updated when sets logger_format.
-
-        :param value: The format string.
-        :type: str
-
-        """
-        self.__logger_format = value
-        self.logger_formatter = logging.Formatter(self.__logger_format)
-
     @property
     def host(self):
         """Return generated host."""
         return self.waylay_config.gateway_url
-
-    def to_debug_report(self):
-        """Get the essential information for debugging.
-
-        :return: The report for debugging.
-
-        """
-        return "Python SDK Debug Report:\n"\
-               "OS: {env}\n"\
-               "Python Version: {pyversion}\n"\
-               "Version of the API: {apiversion}\n"\
-               "SDK Package Version: {clientversion}".\
-               format(env=sys.platform, pyversion=sys.version, clientversion=__version__, apiversion='TODO')
+    
+    @property
+    def client_side_validation(self):
+        """Return whether client side validation is enabled or not."""
+        return self.waylay_config.client_side_validation

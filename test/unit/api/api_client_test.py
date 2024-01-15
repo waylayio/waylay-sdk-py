@@ -33,13 +33,8 @@ def waylay_config(waylay_token_credentials: TokenCredentials) -> WaylayConfig:
 
 
 @pytest.fixture
-def waylay_api_config(waylay_config: WaylayConfig) -> ApiConfig:
-    return ApiConfig(waylay_config)
-
-
-@pytest.fixture
-def waylay_api_client(waylay_api_config: ApiConfig) -> ApiClient:
-    return ApiClient(waylay_api_config)
+def waylay_api_client(waylay_config: WaylayConfig) -> ApiClient:
+    return ApiClient(waylay_config)
 
 
 @pytest.mark.parametrize("test_input",
@@ -99,6 +94,12 @@ def waylay_api_client(waylay_api_config: ApiConfig) -> ApiClient:
                                 'resource_path': '/service/v1/bar/foo',
                                 'body': b'..some binary content..',
                             },
+                            {
+                                'method': 'POST',
+                                'resource_path': '/service/v1/bar/foo',
+                                'header_params': {'Content-Type': 'application/x-www-form-urlencoded'},
+                                'body': {'key': 'value'},
+                            },
                           ])
 async def test_serialize_and_call(snapshot, mocker, httpx_mock: HTTPXMock, waylay_api_client: ApiClient, test_input: dict[str, Any], request):
     """Test REST param serializer."""
@@ -140,6 +141,11 @@ async def test_serialize_and_call_does_not_support_body_and_files(waylay_api_cli
             'file1': b'<binary>'})
     with pytest.raises(ApiValueError):
         await waylay_api_client.call_api(**serialized_params)
+
+async def test_call_invalid_method(waylay_api_client: ApiClient):
+    """REST param serializer should not support setting both `body` and `files`"""
+    with pytest.raises(ApiValueError):
+        await waylay_api_client.call_api(method='invalid', url='https://dummy.io')
 
 
 @pytest.mark.parametrize("response_kwargs,response_type_map", [
@@ -272,6 +278,10 @@ async def test_serialize_and_call_does_not_support_body_and_files(waylay_api_cli
         {'2XX': date}
     ),
     (
+        {'status_code': 200, 'text': str('2023/12/25:12.02.20')}, # invalid date should result in str
+        {'2XX': date}
+    ),
+    (
         {'status_code': 200, 'text': str(datetime(2023, 12, 25, minute=1).isoformat())},
         {'2XX': str}
     ),
@@ -307,6 +317,14 @@ async def test_serialize_and_call_does_not_support_body_and_files(waylay_api_cli
     (
         {'status_code': 200, 'json': pet_instance_dict},
         {'200': 'unit.api.example.pet_model.Pet'}
+    ),
+    (
+        {'status_code': 200, 'json': pet_instance_dict},
+        {'200': 'unit.api.example.pet_model.Unexisting'}
+    ),
+    (
+        {'status_code': 200, 'json': pet_instance_dict},
+        {'200': 'some.unexisting.module.Pet'}
     ),
 ])
 def test_deserialize(snapshot, waylay_api_client: ApiClient,
@@ -372,17 +390,6 @@ def _retreive_fixture_values(request, kwargs: Dict[str, Any]) -> Dict[str, Any]:
             kwargs.update({arg_key: _arg_value})
     return kwargs
 
-
-async def test_default_headers(waylay_api_client: ApiClient):
-    """Test setting and getting of default user agent."""
-    _user_agent = 'test'
-    waylay_api_client.user_agent = _user_agent
-    assert waylay_api_client.user_agent == _user_agent
-    assert waylay_api_client.default_headers['User-Agent'] == _user_agent
-
-    [name, value] = ['x-header-name', 'header_value']
-    waylay_api_client.set_default_header(name, value)
-    assert waylay_api_client.default_headers[name] == value
 
 @pytest.mark.parametrize("request_kwargs", [
     { 'method': 'GET', 'url': 'https://example.com/foo/', '_request_timeout' : 10.0},
