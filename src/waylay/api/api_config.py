@@ -18,8 +18,7 @@ import sys
 import http.client as httplib
 
 from waylay.config import WaylayConfig
-
-from waylay.client import __version__
+from waylay.__version__ import __version__
 
 
 class ApiConfig:

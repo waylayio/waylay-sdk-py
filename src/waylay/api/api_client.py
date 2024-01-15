@@ -14,7 +14,7 @@ import tempfile
 
 from urllib.parse import quote
 
-from waylay.client import __version__
+from waylay.__version__ import __version__
 from waylay.api.api_config import ApiConfig
 from waylay.api.api_response import ApiResponse
 
@@ -23,6 +23,18 @@ from waylay.api.api_exceptions import (
     ApiValueError,
     ApiError,
 )
+
+_PRIMITIVE_BYTE_TYPES = (bytes, bytearray)
+_PRIMITIVE_TYPES = (float, bool, str, int)
+_NATIVE_TYPES_MAPPING = {
+    'int': int,
+    'float': float,
+    'str': str,
+    'bool': bool,
+    'date': datetime.date,
+    'datetime': datetime.datetime,
+    'object': object,
+}
 
 
 class ApiClient:
@@ -37,18 +49,6 @@ class ApiClient:
 
     """
 
-    PRIMITIVE_TYPES = (float, bool, bytes, str, int)
-    NATIVE_TYPES_MAPPING = {
-        'int': int,
-        'float': float,
-        'str': str,
-        'bool': bool,
-        'date': datetime.date,
-        'datetime': datetime.datetime,
-        'object': object,
-    }
-    _pool = None
-
     def __init__(
         self,
         configuration: ApiConfig,
@@ -59,7 +59,7 @@ class ApiClient:
         self.default_headers: Dict[str, Any] = {}
 
         # Set default User-Agent.
-        self.user_agent = "waylay-sdk/python/{__version__}"
+        self.user_agent = f"waylay-sdk/python/{__version__}"
         self.client_side_validation = configuration.client_side_validation
 
     @property
@@ -106,11 +106,11 @@ class ApiClient:
         header_params = header_params or {}
         header_params.update(self.default_headers)
         if header_params:
-            header_params = self._sanitize_for_serialization(header_params)
+            header_params = self.__sanitize_for_serialization(header_params)
 
         # path parameters
         if path_params:
-            path_params = self._sanitize_for_serialization(path_params)
+            path_params = self.__sanitize_for_serialization(path_params)
 
             for k, v in path_params.items() if path_params else []:
                 # specified safe chars, encode everything
@@ -121,17 +121,17 @@ class ApiClient:
 
         # post parameters
         if files:
-            files = self._sanitize_files_parameters(files)
+            files = self.__sanitize_files_parameters(files)
 
         if body:
-            body = self._sanitize_for_serialization(body)
+            body = self.__sanitize_for_serialization(body)
 
         # request url
         url = self.configuration.host + resource_path
 
         # query parameters
         if query_params:
-            query_params = self._sanitize_for_serialization(query_params)
+            query_params = self.__sanitize_for_serialization(query_params)
 
         return {
             'method': method,
@@ -196,16 +196,23 @@ class ApiClient:
         if not response_type and isinstance(response_data.status_code, int) and 100 <= response_data.status_code <= 599:
             # if not found, look for '1XX', '2XX', etc.
             response_type = response_types_map.get(str(response_data.status_code)[0] + "XX", None)
+        if not response_type:
+            # if still not found, look for default response type
+            response_type = response_types_map.get('*', None) or response_types_map.get('default', None)
 
         # deserialize response data
         return_data = None
         try:
-            if response_type == "bytearray":
+            if response_type in _PRIMITIVE_BYTE_TYPES + tuple(t.__name__ for t in _PRIMITIVE_BYTE_TYPES):
                 return_data = response_data.content
             elif response_type == "file":
                 return_data = self.__deserialize_file(response_data)
             elif response_type is not None:
-                return_data = self.deserialize(response_data, response_type)
+                try:
+                    _data = response_data.json()
+                except ValueError:
+                    _data = response_data.text
+                return_data = self.__deserialize(_data, response_type) if _data else response_data.content
         finally:
             if not 200 <= response_data.status_code <= 299:
                 raise ApiError.from_response(  # pylint: disable=raising-bad-type
@@ -221,7 +228,7 @@ class ApiClient:
             raw_data=response_data.content
         )
 
-    def _sanitize_for_serialization(self, obj):
+    def __sanitize_for_serialization(self, obj):
         """Build a JSON POST object.
 
         If obj is None, return None. If obj is str, int, long, float,
@@ -236,15 +243,15 @@ class ApiClient:
         """
         if obj is None:
             return None
-        elif isinstance(obj, self.PRIMITIVE_TYPES):
+        elif isinstance(obj, _PRIMITIVE_TYPES + _PRIMITIVE_BYTE_TYPES):
             return obj
         elif isinstance(obj, list):
             return [
-                self._sanitize_for_serialization(sub_obj) for sub_obj in obj
+                self.__sanitize_for_serialization(sub_obj) for sub_obj in obj
             ]
         elif isinstance(obj, tuple):
             return tuple(
-                self._sanitize_for_serialization(sub_obj) for sub_obj in obj
+                self.__sanitize_for_serialization(sub_obj) for sub_obj in obj
             )
         elif isinstance(obj, (datetime.datetime, datetime.date)):
             return obj.isoformat()
@@ -263,64 +270,17 @@ class ApiClient:
                 return obj
 
         return {
-            key: self._sanitize_for_serialization(val)
+            key: self.__sanitize_for_serialization(val)
             for key, val in obj_dict.items()
         }
 
-    def deserialize(self, response: rest.RESTResponse, response_type):
-        """Deserialize response into an object.
-
-        :param response: RESTResponse object to be deserialized.
-        :param response_type: class literal for deserialized object, or
-            string of class name.
-        :return: deserialized object.
-
-        """
-
-        # fetch data from response object
-        try:
-            data = response.json()
-        except ValueError:
-            data = response.content
-
-        return self.__deserialize(data, response_type)
-
-    def __deserialize(self, data, klass):
-        """Deserializes dict, list, str into an object.
-
-        :param data: dict, list or str.
-        :param klass: class literal, or string of class name.
-        :return: object.
-
-        """
-        if data is None:
-            return None
-
-        if isinstance(klass, str):
-            if klass.startswith('List['):
-                sub_kls = re.match(r'List\[(.*)]', klass).group(1)
-                return [self.__deserialize(sub_data, sub_kls)
-                        for sub_data in data]
-
-            if klass.startswith('Dict['):
-                sub_kls = re.match(r'Dict\[([^,]*), (.*)]', klass).group(2)
-                return {k: self.__deserialize(v, sub_kls)
-                        for k, v in data.items()}
-
-            # convert str to class
-            if klass in self.NATIVE_TYPES_MAPPING:
-                klass = self.NATIVE_TYPES_MAPPING[klass]
-            else:
-                try:
-                    [types_module_name, class_name] = klass.rsplit('.', 1)
-                    types_module = import_module(types_module_name)
-                    klass = getattr(types_module, class_name)
-                    return self.__deserialize_model(data, klass)
-                except BaseException:
-                    klass = object
-                    return self.__deserialize_simple_namespace(data)
-
-        if klass in self.PRIMITIVE_TYPES:
+    def __deserialize(self, data: Any, klass: Any):
+        """Deserializes response content into a `klass` instance."""
+        if isinstance(klass, str) and klass in _NATIVE_TYPES_MAPPING:
+            # if the response_type is string representing primitive type, replace it with the actual primitive class
+            klass = _NATIVE_TYPES_MAPPING[klass]
+            # continue
+        if klass in _PRIMITIVE_TYPES + _PRIMITIVE_BYTE_TYPES:
             return self.__deserialize_primitive(data, klass)
         elif klass == object:
             return self.__deserialize_object(data)
@@ -328,10 +288,30 @@ class ApiClient:
             return self.__deserialize_date(data)
         elif klass == datetime.datetime:
             return self.__deserialize_datetime(data)
-        else:
-            return data
 
-    def _sanitize_files_parameters(self, files=None):
+        if isinstance(klass, str):
+            if klass.startswith('List['):
+                sub_kls = re.match(r'List\[(.*)]', klass).group(1)  # type: ignore[union-attr]
+                return [self.__deserialize(sub_data, sub_kls)
+                        for sub_data in data]
+
+            if klass.startswith('Dict['):
+                sub_kls = re.match(r'Dict\[([^,]*), (.*)]', klass).group(2)  # type: ignore[union-attr]
+                return {k: self.__deserialize(v, sub_kls)
+                        for k, v in data.items()}
+
+            else:
+                try:
+                    # get the actual class from the class name
+                    [types_module_name, class_name] = klass.rsplit('.', 1)
+                    types_module = import_module(types_module_name)
+                    klass = getattr(types_module, class_name)
+                    # continue
+                except BaseException:
+                    return self.__deserialize_simple_namespace(data)
+        return self.__deserialize_model(data, klass)
+
+    def __sanitize_files_parameters(self, files=None):
         """Build form parameters.
 
         :param files: File parameters.
@@ -442,7 +422,12 @@ class ApiClient:
 
         """
 
-        return klass.from_dict(data)
+        try:
+            if callable(getattr(klass, 'from_dict', None)):
+                return klass.from_dict(data)
+        except BaseException as e:
+            pass
+        return self.__deserialize_simple_namespace(data)
 
     def __deserialize_simple_namespace(self, data):
         """Deserializes dict to a `SimpleNamespace`.
@@ -451,9 +436,9 @@ class ApiClient:
         :return: SimpleNamespace.
 
         """
-        if type(data) is list:
+        if isinstance(data, list):
             return list(map(self.__deserialize_simple_namespace, data))
-        elif type(data) is dict:
+        elif isinstance(data, dict):
             sns = SimpleNamespace()
             for key, value in data.items():
                 setattr(sns, key, self.__deserialize_simple_namespace(value))

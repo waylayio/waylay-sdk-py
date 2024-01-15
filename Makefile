@@ -100,7 +100,7 @@ format:
 	autopep8 . && docformatter --config setup.cfg .
 
 test-unit:
-	@pytest test/unit -m "not (sklearn or pytorch or tensorflow or xgboost or cleanup)"
+	@pytest test/unit
 
 test-unit-coverage:
 	@pytest --cov-report term-missing:skip-covered --cov=src --cov-fail-under=90 test/unit
