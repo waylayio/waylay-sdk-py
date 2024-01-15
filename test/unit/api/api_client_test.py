@@ -89,18 +89,18 @@ def waylay_api_client(waylay_config: WaylayConfig) -> ApiClient:
                               'path_params': {'param1': 'C'},
                               'body': pet_instance_json,
                               },
-                            {
-                                'method': 'POST',
-                                'resource_path': '/service/v1/bar/foo',
-                                'body': b'..some binary content..',
-                            },
-                            {
-                                'method': 'POST',
-                                'resource_path': '/service/v1/bar/foo',
-                                'header_params': {'Content-Type': 'application/x-www-form-urlencoded'},
-                                'body': {'key': 'value'},
-                            },
-                          ])
+                          {
+                             'method': 'POST',
+                             'resource_path': '/service/v1/bar/foo',
+                             'body': b'..some binary content..',
+                         },
+                             {
+                             'method': 'POST',
+                             'resource_path': '/service/v1/bar/foo',
+                             'header_params': {'Content-Type': 'application/x-www-form-urlencoded'},
+                             'body': {'key': 'value'},
+                         },
+                         ])
 async def test_serialize_and_call(snapshot, mocker, httpx_mock: HTTPXMock, waylay_api_client: ApiClient, test_input: dict[str, Any], request):
     """Test REST param serializer."""
     test_input = _retreive_fixture_values(request, test_input)
@@ -141,6 +141,7 @@ async def test_serialize_and_call_does_not_support_body_and_files(waylay_api_cli
             'file1': b'<binary>'})
     with pytest.raises(ApiValueError):
         await waylay_api_client.call_api(**serialized_params)
+
 
 async def test_call_invalid_method(waylay_api_client: ApiClient):
     """REST param serializer should not support setting both `body` and `files`"""
@@ -278,7 +279,7 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
         {'2XX': date}
     ),
     (
-        {'status_code': 200, 'text': str('2023/12/25:12.02.20')}, # invalid date should result in str
+        {'status_code': 200, 'text': str('2023/12/25:12.02.20')},  # invalid date should result in str
         {'2XX': date}
     ),
     (
@@ -392,9 +393,10 @@ def _retreive_fixture_values(request, kwargs: Dict[str, Any]) -> Dict[str, Any]:
 
 
 @pytest.mark.parametrize("request_kwargs", [
-    { 'method': 'GET', 'url': 'https://example.com/foo/', '_request_timeout' : 10.0},
-    { 'method': 'GET', 'url': 'https://example.com/foo/', '_request_timeout' : 10},
-    { 'method': 'GET', 'url': 'https://example.com/foo/', '_request_timeout' : (10, 5, 5, 5)}  # (connect, read, write, pool)
+    {'method': 'GET', 'url': 'https://example.com/foo/', '_request_timeout': 10.0},
+    {'method': 'GET', 'url': 'https://example.com/foo/', '_request_timeout': 10},
+    {'method': 'GET', 'url': 'https://example.com/foo/',
+        '_request_timeout': (10, 5, 5, 5)}  # (connect, read, write, pool)
 ])
 async def test_request_timeout(waylay_api_client: ApiClient, httpx_mock: HTTPXMock, mocker: MockerFixture, request_kwargs):
     """Test request timeout."""

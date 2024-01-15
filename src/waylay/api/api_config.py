@@ -15,10 +15,9 @@ from waylay.__version__ import __version__
 
 
 class ApiConfig:
-    """API client settings.
-    :param waylay_config: WaylayConfig
-    """
-    def __init__(self, waylay_config: WaylayConfig, _client_options = None) -> None:
+    """API client settings."""
+
+    def __init__(self, waylay_config: WaylayConfig, _client_options=None) -> None:
         """Create an instance."""
         self.waylay_config = waylay_config
         """Waylay configuration."""
@@ -35,7 +34,7 @@ class ApiConfig:
     def host(self):
         """Return generated host."""
         return self.waylay_config.gateway_url
-    
+
     @property
     def client_side_validation(self):
         """Return whether client side validation is enabled or not."""

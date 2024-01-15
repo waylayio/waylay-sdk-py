@@ -18,7 +18,6 @@ class RESTClient:
     def __init__(self, *args, **kwargs) -> None:
         """Create an instance."""
         self.client = httpx.AsyncClient(*args, **kwargs)
-    
 
     async def request(
         self,

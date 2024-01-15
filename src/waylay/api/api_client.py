@@ -51,7 +51,7 @@ class ApiClient:
         """Create an instance."""
         self.config = ApiConfig(waylay_config)
 
-        rest_client_kwargs = { "auth": waylay_config.auth }
+        rest_client_kwargs = {"auth": waylay_config.auth}
         rest_client_kwargs.update(self.config._client_options or {})
         self.rest_client = rest.RESTClient(**rest_client_kwargs)
 
@@ -295,7 +295,6 @@ class ApiClient:
         """
 
         return files
-
 
     def __deserialize_primitive(self, data, klass):
         """Deserializes string to primitive type.
