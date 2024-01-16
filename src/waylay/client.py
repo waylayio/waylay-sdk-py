@@ -2,7 +2,7 @@
 
 from typing import List, Optional
 
-from waylay.api import ApiClient, ApiConfig
+from waylay.api import ApiClient
 from waylay.services._base import WaylayService
 from waylay.services._loader import RegistryService, registry_available
 
@@ -106,11 +106,11 @@ class WaylayClient():
         """Update this client with the given configuration."""
         self.config = config
         for srv in self._services:
-            srv.configure(ApiClient(ApiConfig(config)))
+            srv.configure(ApiClient(config))
 
     def load_services(self, config: WaylayConfig):
         """Load all services that are installed."""
-        self.api_client = ApiClient(ApiConfig(config))
+        self.api_client = ApiClient(config)
 
         self.registry = RegistryService(self.api_client, name='registry')
         if registry_available:

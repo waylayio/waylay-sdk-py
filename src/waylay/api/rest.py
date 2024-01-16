@@ -1,38 +1,33 @@
 """REST client implementation."""
 
 from io import BufferedReader
-from typing import Any, Optional
+from typing import Any, Mapping, Optional
+from typeguard import check_type
 import httpx
 from waylay.api.api_config import ApiConfig
 
 from waylay.api.api_exceptions import ApiValueError
 
 RESTResponse = httpx.Response
+RESTTimeout = httpx._types.TimeoutTypes
 
 
 class RESTClient:
     """Base REST client."""
 
-    def __init__(self, configuration: ApiConfig) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         """Create an instance."""
-        additional_httpx_kwargs = {
-            "verify": configuration.ssl_ca_cert,
-        }
-
-        self.client = httpx.AsyncClient(
-            auth=configuration.waylay_config.auth,
-            **additional_httpx_kwargs
-        )
+        self.client = httpx.AsyncClient(*args, **kwargs)
 
     async def request(
         self,
-        method,
-        url,
-        query=None,
-        headers=None,
-        body=None,
-        files=None,
-        _request_timeout=None
+        method: str,
+        url: httpx._types.URLTypes,
+        query: Optional[httpx._types.QueryParamTypes] = None,
+        headers: Optional[Mapping[str, str]] = None,
+        body: Optional[Any] = None,
+        files: Optional[httpx._types.RequestFiles] = None,
+        _request_timeout: Optional[RESTTimeout] = None
     ) -> RESTResponse:
         """Perform requests.
 
@@ -50,7 +45,7 @@ class RESTClient:
         method = method.upper()
         headers = headers or {}
 
-        assert method in [
+        if method not in [
             'GET',
             'HEAD',
             'DELETE',
@@ -58,30 +53,25 @@ class RESTClient:
             'PUT',
             'PATCH',
             'OPTIONS'
-        ]
+        ]:
+            raise ApiValueError(
+                "Method {0} is not supported.".format(method)
+            )
 
         if files and body:
             raise ApiValueError(
-                "body parameter cannot be used with files parameter."
+                "The `body` and `files` params are mutually exclusive."
             )
 
-        timeout: Optional[Any] = None
-        if _request_timeout:
-            if isinstance(_request_timeout, (int, float)):
-                timeout = _request_timeout
-            elif (
-                isinstance(_request_timeout, tuple)
-                and len(_request_timeout) == 2
-            ):
-                timeout = _request_timeout
-
-        kwargs = {
+        kwargs: dict[str, Any] = {
             'method': method,
             'url': url,
             'params': query,
-            'timeout': timeout,
             'headers': headers
         }
+
+        if _request_timeout and check_type(_request_timeout, RESTTimeout):
+            kwargs['timeout'] = _request_timeout
 
         # For `POST`, `PUT`, `PATCH`, `OPTIONS`, `DELETE`
         if method in ['POST', 'PUT', 'PATCH', 'OPTIONS', 'DELETE']:

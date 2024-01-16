@@ -4,10 +4,12 @@ import re
 from typing import Any, Dict, List, Union
 from unittest import mock
 from urllib import parse
+import httpx
 import pytest
 from datetime import datetime, date
 
 from pytest_httpx import HTTPXMock
+from pytest_mock import MockerFixture
 
 from waylay.auth import TokenCredentials
 from waylay.config import WaylayConfig
@@ -31,13 +33,8 @@ def waylay_config(waylay_token_credentials: TokenCredentials) -> WaylayConfig:
 
 
 @pytest.fixture
-def waylay_api_config(waylay_config: WaylayConfig) -> ApiConfig:
-    return ApiConfig(waylay_config)
-
-
-@pytest.fixture
-def waylay_api_client(waylay_api_config: ApiConfig) -> ApiClient:
-    return ApiClient(waylay_api_config)
+def waylay_api_client(waylay_config: WaylayConfig) -> ApiClient:
+    return ApiClient(waylay_config)
 
 
 @pytest.mark.parametrize("test_input",
@@ -92,7 +89,18 @@ def waylay_api_client(waylay_api_config: ApiConfig) -> ApiClient:
                               'path_params': {'param1': 'C'},
                               'body': pet_instance_json,
                               },
-                          ])
+                          {
+                             'method': 'POST',
+                             'resource_path': '/service/v1/bar/foo',
+                             'body': b'..some binary content..',
+                         },
+                             {
+                             'method': 'POST',
+                             'resource_path': '/service/v1/bar/foo',
+                             'header_params': {'Content-Type': 'application/x-www-form-urlencoded'},
+                             'body': {'key': 'value'},
+                         },
+                         ])
 async def test_serialize_and_call(snapshot, mocker, httpx_mock: HTTPXMock, waylay_api_client: ApiClient, test_input: dict[str, Any], request):
     """Test REST param serializer."""
     test_input = _retreive_fixture_values(request, test_input)
@@ -133,6 +141,12 @@ async def test_serialize_and_call_does_not_support_body_and_files(waylay_api_cli
             'file1': b'<binary>'})
     with pytest.raises(ApiValueError):
         await waylay_api_client.call_api(**serialized_params)
+
+
+async def test_call_invalid_method(waylay_api_client: ApiClient):
+    """REST client should throw on invalid http method"""
+    with pytest.raises(ApiValueError):
+        await waylay_api_client.call_api(method='invalid', url='https://dummy.io')
 
 
 @pytest.mark.parametrize("response_kwargs,response_type_map", [
@@ -221,17 +235,17 @@ async def test_serialize_and_call_does_not_support_body_and_files(waylay_api_cli
     # binary response types
     (
         {'status_code': 202, 'content': b'some binary file content,', 'headers': {
-            'Content-Disposition': 'file_name.ext', 'content-type': 'application/octet-stream'}},
+            'content-type': 'application/octet-stream'}},
         {'202': bytearray}
     ),
     (
         {'status_code': 202, 'content': b'some binary file content,', 'headers': {
-            'Content-Disposition': 'file_name.ext', 'content-type': 'application/octet-stream'}},
+            'content-type': 'application/octet-stream'}},
         {'2XX': 'bytearray'}
     ),
     (
         {'status_code': 202, 'content': b'some binary file content,', 'headers': {
-            'Content-Disposition': 'file_name.ext', 'content-type': 'application/octet-stream'}},
+            'content-type': 'application/octet-stream'}},
         {'*': bytes}
     ),
     # list response types
@@ -262,6 +276,10 @@ async def test_serialize_and_call_does_not_support_body_and_files(waylay_api_cli
     ),
     (
         {'status_code': 200, 'text': str(datetime(2023, 12, 25, minute=1).isoformat())},
+        {'2XX': date}
+    ),
+    (
+        {'status_code': 200, 'text': str('2023/12/25:12.02.20')},  # invalid date should result in str
         {'2XX': date}
     ),
     (
@@ -296,6 +314,18 @@ async def test_serialize_and_call_does_not_support_body_and_files(waylay_api_cli
     (
         {'status_code': 200, 'json': pet_instance_dict},
         {}
+    ),
+    (
+        {'status_code': 200, 'json': pet_instance_dict},
+        {'200': 'unit.api.example.pet_model.Pet'}
+    ),
+    (
+        {'status_code': 200, 'json': pet_instance_dict},
+        {'200': 'unit.api.example.pet_model.Unexisting'}
+    ),
+    (
+        {'status_code': 200, 'json': pet_instance_dict},
+        {'200': 'some.unexisting.module.Pet'}
     ),
 ])
 def test_deserialize(snapshot, waylay_api_client: ApiClient,
@@ -360,3 +390,21 @@ def _retreive_fixture_values(request, kwargs: Dict[str, Any]) -> Dict[str, Any]:
             _arg_value = request.getfixturevalue(arg_value.__name__)
             kwargs.update({arg_key: _arg_value})
     return kwargs
+
+
+@pytest.mark.parametrize("request_kwargs", [
+    {'method': 'GET', 'url': 'https://example.com/foo/', '_request_timeout': 10.0},
+    {'method': 'GET', 'url': 'https://example.com/foo/', '_request_timeout': 10},
+    {'method': 'GET', 'url': 'https://example.com/foo/',
+        '_request_timeout': (10, 5, 5, 5)}  # (connect, read, write, pool)
+])
+async def test_request_timeout(waylay_api_client: ApiClient, httpx_mock: HTTPXMock, mocker: MockerFixture, request_kwargs):
+    """Test request timeout."""
+    spy = mocker.spy(waylay_api_client.rest_client.client, 'request')
+    mocker.patch('waylay.auth.WaylayTokenAuth.assure_valid_token', lambda *args: WaylayTokenStub())
+    httpx_mock.add_response()
+    await waylay_api_client.call_api(**request_kwargs)
+    _httpx_args = {'params': None, 'headers': {}}
+    _httpx_args.update(request_kwargs)
+    _httpx_args['timeout'] = _httpx_args.pop('_request_timeout')
+    spy.assert_called_once_with(**_httpx_args)
