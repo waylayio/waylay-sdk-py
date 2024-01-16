@@ -144,7 +144,7 @@ async def test_serialize_and_call_does_not_support_body_and_files(waylay_api_cli
 
 
 async def test_call_invalid_method(waylay_api_client: ApiClient):
-    """REST param serializer should not support setting both `body` and `files`"""
+    """REST client should throw on invalid http method"""
     with pytest.raises(ApiValueError):
         await waylay_api_client.call_api(method='invalid', url='https://dummy.io')
 
