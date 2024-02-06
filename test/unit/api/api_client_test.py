@@ -91,7 +91,6 @@ SERIALIZE_CASES = {
         'method': 'POST',
         'resource_path': '/service/v1/bar/foo',
         'body': b'..some binary content..',
-        'header_params': {'Content-Type': 'application/octet-stream'},
     },
     'form': {
         'method': 'POST',
