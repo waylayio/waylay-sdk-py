@@ -2,20 +2,18 @@
 
 import re
 from typing import Any, Dict, List, Union
-from unittest import mock
-from urllib import parse
-import httpx
+
 import pytest
 from datetime import datetime, date
 
 from pytest_httpx import HTTPXMock
 from pytest_mock import MockerFixture
 
-from waylay.auth import TokenCredentials
-from waylay.config import WaylayConfig
-from waylay.api import ApiConfig, ApiClient
-from waylay.api.rest import RESTResponse
-from waylay.api.api_exceptions import ApiError, ApiValueError
+from waylay.sdk.auth import TokenCredentials
+from waylay.sdk.config import WaylayConfig
+from waylay.sdk.api import ApiClient
+from waylay.sdk.api.rest import RESTResponse
+from waylay.sdk.api.api_exceptions import ApiError, ApiValueError
 
 from ..fixtures import WaylayTokenStub
 from .example.pet_model import Pet
@@ -107,7 +105,7 @@ async def test_serialize_and_call(snapshot, mocker, httpx_mock: HTTPXMock, wayla
     serialized_params = waylay_api_client.param_serialize(**test_input)
     assert serialized_params == snapshot
 
-    mocker.patch('waylay.auth.WaylayTokenAuth.assure_valid_token', lambda *args: WaylayTokenStub())
+    mocker.patch('waylay.sdk.auth.WaylayTokenAuth.assure_valid_token', lambda *args: WaylayTokenStub())
     httpx_mock.add_response()
     await waylay_api_client.call_api(**serialized_params)
     requests = httpx_mock.get_requests()
@@ -144,7 +142,7 @@ async def test_serialize_and_call_does_not_support_body_and_files(waylay_api_cli
 
 
 async def test_call_invalid_method(waylay_api_client: ApiClient):
-    """REST client should throw on invalid http method"""
+    """REST client should throw on invalid http method."""
     with pytest.raises(ApiValueError):
         await waylay_api_client.call_api(method='invalid', url='https://dummy.io')
 
@@ -401,7 +399,7 @@ def _retreive_fixture_values(request, kwargs: Dict[str, Any]) -> Dict[str, Any]:
 async def test_request_timeout(waylay_api_client: ApiClient, httpx_mock: HTTPXMock, mocker: MockerFixture, request_kwargs):
     """Test request timeout."""
     spy = mocker.spy(waylay_api_client.rest_client.client, 'request')
-    mocker.patch('waylay.auth.WaylayTokenAuth.assure_valid_token', lambda *args: WaylayTokenStub())
+    mocker.patch('waylay.sdk.auth.WaylayTokenAuth.assure_valid_token', lambda *args: WaylayTokenStub())
     httpx_mock.add_response()
     await waylay_api_client.call_api(**request_kwargs)
     _httpx_args = {'params': None, 'headers': {}}

@@ -2,11 +2,9 @@
 
 from typing import List, Optional
 
-from waylay.api import ApiClient
-from waylay.services._base import WaylayService
-from waylay.services._loader import RegistryService, registry_available
-
-from .exceptions import ConfigError
+from .service import WaylayService
+from ._loader import RegistryService, registry_available
+from .api import ApiClient
 
 from .config import (
     WaylayConfig,

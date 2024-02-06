@@ -3,7 +3,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "waylay"
+name = "waylay-sdk"
 version = "0.0.0"
 description = "Waylay Python SDK."
 requires-python = ">=3.9"

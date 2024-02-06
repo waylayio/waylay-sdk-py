@@ -2,8 +2,8 @@
 import os
 import asyncio
 
-from waylay.client import WaylayClient
-from waylay.exceptions import RestResponseError
+from waylay.sdk import WaylayClient
+from waylay.sdk.exceptions import RestResponseError
 
 try:
     from waylay.services.registry.queries.plug_functions_api import ListVersionsQuery

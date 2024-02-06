@@ -645,7 +645,7 @@
     ]),
     list([
       tuple(
-        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.0', 'content-type': 'ASCII text, with no line terminators', 'content-length': '23', 'authorization': '[secure]'}),
+        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.0', 'content-type': 'application/octet-stream', 'content-length': '23', 'authorization': '[secure]'}),
         b'..some binary content..',
       ),
     ]),

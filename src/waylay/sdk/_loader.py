@@ -1,7 +1,7 @@
-"""Waylay Function Registry Service."""
+"""Loads services or stubs."""
 
 from typing import TYPE_CHECKING
-from ._base import WaylayServiceStub
+from .service import WaylayServiceStub
 
 
 # registry service

@@ -11,7 +11,6 @@ from .auth import (
     DEFAULT_GATEWAY_URL,
     WaylayCredentials,
     ClientCredentials,
-    DEFAULT_ACCOUNTS_URL,
     ACCOUNTS_USERS_ME_PATH,
     AuthError
 )
@@ -65,7 +64,7 @@ def ask_gateway(default_gateway_url: str):
         ) or gateway_url
         gateway_url = _gateway_url_for(gateway_url)
         try:
-            gateway_status_resp = httpx.get(f'{gateway_url}{ACCOUNTS_USERS_ME_PATH}')
+            gateway_status_resp = _http.get(f'{gateway_url}{ACCOUNTS_USERS_ME_PATH}')
         except Exception as err:
             tell(f"Cannot connect to '{gateway_url}: {err}")
             gateway_url = _gateway_url_for(default_gateway_url)
