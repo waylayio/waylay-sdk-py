@@ -42,7 +42,7 @@ dev = [
     'types-appdirs',
     'types-python-dateutil',
     'docformatter',
-    'waylay[services,services-types]',
+    'pydantic',
 ]
 services = [
     "waylay_registry_api @ git+https://github.com/waylayio/waylay-py-services@main#subdirectory=services/registry/waylay_registry_api"

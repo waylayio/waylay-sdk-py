@@ -1,20 +1,15 @@
 """Loads services or stubs."""
 
-from typing import TYPE_CHECKING
-from .service import WaylayServiceStub
+from typing import Dict, Type, TYPE_CHECKING
+from .service import WaylayService, WaylayServiceStub
 
+SERVICE_CLASSES: Dict[str, Type[WaylayService]] = {}
 
 # registry service
 try:
-    from waylay.services.registry.service import RegistryService
-    registry_available = True
+    from waylay.services.registry.service import RegistryService  # type: ignore
 except ImportError:
-    registry_available = False
     if not TYPE_CHECKING:
         RegistryService = WaylayServiceStub
 
-try:
-    from waylay.services.registry import models, queries
-    registry_types_available = True
-except ImportError:
-    registry_types_available = False
+SERVICE_CLASSES['registry'] = RegistryService
