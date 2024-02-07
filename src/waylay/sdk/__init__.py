@@ -10,3 +10,5 @@ from .auth import (
     WaylayToken,
     WaylayTokenAuth
 )
+from .service import WaylayService
+from .api import ApiClient

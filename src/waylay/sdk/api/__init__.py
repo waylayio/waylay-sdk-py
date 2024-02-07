@@ -7,3 +7,4 @@ from .api_config import ApiConfig
 from .api_exceptions import (
     ApiTypeError, ApiValueError, ApiKeyError, ApiAttributeError, ApiError
 )
+from .rest import RESTTimeout, RESTResponse
