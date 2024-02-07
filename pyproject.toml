@@ -20,10 +20,13 @@ dependencies = [
 
 
 [tool.setuptools.package-data]
+waylay = ["py.typed"]
 
 [tool.setuptools.packages.find]
 where = ["src/"]
+include = ["waylay*"]
 exclude = []
+namespaces = true
 
 [project.optional-dependencies]
 dev = [
@@ -50,6 +53,7 @@ services = [
 services-types = [
     "waylay_registry_types @ git+https://github.com/waylayio/waylay-py-services@main#subdirectory=services/registry/waylay_registry_types"
 ]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 env = [

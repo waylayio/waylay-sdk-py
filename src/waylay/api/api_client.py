@@ -89,6 +89,7 @@ class ApiClient:
         header_params = dict(header_params or {})
         header_params.update(self.default_headers)
         if header_params:
+            header_params = {k.lower(): v for k, v in header_params.items()}
             header_params = self.__sanitize_for_serialization(header_params)
 
         # path parameters

@@ -1,7 +1,7 @@
 """REST client implementation."""
 
 from io import BufferedReader
-from typing import Any, Mapping, Optional
+from typing import Any, Mapping, Optional, Tuple, Union
 from typeguard import check_type
 import httpx
 from waylay.api.api_config import ApiConfig
@@ -9,7 +9,10 @@ from waylay.api.api_config import ApiConfig
 from waylay.api.api_exceptions import ApiValueError
 
 RESTResponse = httpx.Response
-RESTTimeout = httpx._types.TimeoutTypes
+RESTTimeout = Union[
+    Optional[float],
+    Tuple[Optional[float], Optional[float], Optional[float], Optional[float]],
+]
 
 
 class RESTClient:
@@ -75,7 +78,7 @@ class RESTClient:
 
         # For `POST`, `PUT`, `PATCH`, `OPTIONS`, `DELETE`
         if method in ['POST', 'PUT', 'PATCH', 'OPTIONS', 'DELETE']:
-            content_type = headers.get('Content-Type')
+            content_type = headers.get('content-type')
             if files or content_type and content_type == 'multipart/form-data':
                 kwargs.update({'files': files})
             elif isinstance(body, (bytes, bytearray, BufferedReader)):
