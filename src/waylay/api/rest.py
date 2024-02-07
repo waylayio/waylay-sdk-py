@@ -78,7 +78,7 @@ class RESTClient:
 
         # For `POST`, `PUT`, `PATCH`, `OPTIONS`, `DELETE`
         if method in ['POST', 'PUT', 'PATCH', 'OPTIONS', 'DELETE']:
-            content_type = headers.get('Content-Type')
+            content_type = headers.get('content-type')
             if files or content_type and content_type == 'multipart/form-data':
                 kwargs.update({'files': files})
             elif isinstance(body, (bytes, bytearray, BufferedReader)):

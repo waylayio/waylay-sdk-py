@@ -443,7 +443,7 @@
     'body': None,
     'files': None,
     'header_params': dict({
-      'User-Agent': 'waylay-sdk/python/0.0.0',
+      'user-agent': 'waylay-sdk/python/0.0.0',
       'x-my-header': 'header_value',
     }),
     'method': 'GET',
@@ -486,7 +486,7 @@
     }),
     'files': None,
     'header_params': dict({
-      'User-Agent': 'waylay-sdk/python/0.0.0',
+      'user-agent': 'waylay-sdk/python/0.0.0',
       'x-my-header': 'header_value',
     }),
     'method': 'PATCH',
@@ -515,7 +515,7 @@
       'file2': '<... other binary content ...>',
     }),
     'header_params': dict({
-      'User-Agent': 'waylay-sdk/python/0.0.0',
+      'user-agent': 'waylay-sdk/python/0.0.0',
     }),
     'method': 'POST',
     'query_params': dict({
@@ -549,7 +549,7 @@
     }),
     'files': None,
     'header_params': dict({
-      'User-Agent': 'waylay-sdk/python/0.0.0',
+      'user-agent': 'waylay-sdk/python/0.0.0',
     }),
     'method': 'PUT',
     'query_params': None,
@@ -581,7 +581,7 @@
     }),
     'files': None,
     'header_params': dict({
-      'User-Agent': 'waylay-sdk/python/0.0.0',
+      'user-agent': 'waylay-sdk/python/0.0.0',
     }),
     'method': 'PUT',
     'query_params': None,
@@ -606,7 +606,7 @@
     'body': '{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}',
     'files': None,
     'header_params': dict({
-      'User-Agent': 'waylay-sdk/python/0.0.0',
+      'user-agent': 'waylay-sdk/python/0.0.0',
     }),
     'method': 'PUT',
     'query_params': None,
@@ -631,7 +631,7 @@
     'body': b'..some binary content..',
     'files': None,
     'header_params': dict({
-      'User-Agent': 'waylay-sdk/python/0.0.0',
+      'user-agent': 'waylay-sdk/python/0.0.0',
     }),
     'method': 'POST',
     'query_params': None,
@@ -658,8 +658,8 @@
     }),
     'files': None,
     'header_params': dict({
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'User-Agent': 'waylay-sdk/python/0.0.0',
+      'content-type': 'application/x-www-form-urlencoded',
+      'user-agent': 'waylay-sdk/python/0.0.0',
     }),
     'method': 'POST',
     'query_params': None,

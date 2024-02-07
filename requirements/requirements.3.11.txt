@@ -1,6 +1,6 @@
 anyio==4.2.0
 appdirs==1.4.4
-certifi>=2023.11.17
+certifi>=2024.2.2
 ecdsa==0.18.0
 h11==0.14.0
 httpcore==1.0.2
@@ -13,4 +13,5 @@ python-magic==0.4.27
 rsa==4.9
 six==1.16.0
 sniffio==1.3.0
+typeguard==4.1.5
 typing_extensions==4.9.0
