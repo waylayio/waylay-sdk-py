@@ -34,7 +34,6 @@ pytest-mock==3.12.0
 pytest_httpx==0.29.0
 python-dateutil==2.8.2
 python-jose==3.3.0
-python-magic==0.4.27
 rsa==4.9
 six==1.16.0
 sniffio==1.3.0

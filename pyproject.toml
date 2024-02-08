@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "waylay-sdk"
-version = "0.0.0"
+version = "0.0.1"
 description = "Waylay Python SDK."
 requires-python = ">=3.9"
 authors = [{name = "Waylay", email = "info@waylay.io"}]
@@ -14,7 +14,6 @@ dependencies = [
     "python-jose",
     "python_dateutil",
     "typing_extensions",
-    "python-magic",
     "typeguard",
 ]
 

@@ -85,10 +85,6 @@ class RESTClient:
                 if isinstance(body, BufferedReader):
                     body = body.read()
                 if not headers.get('content-type'):
-                    # try:
-                    #     import magic
-                    #     mime_type = magic.from_buffer(body)
-                    # except BaseException:
                     mime_type = 'application/octet-stream'
                     kwargs['headers'].update({'content-type': mime_type})
                     kwargs.update({'content': body})
