@@ -9,8 +9,8 @@ from dateutil.parser import parse
 import re
 from urllib.parse import quote
 
-from waylay.__version__ import __version__
-from waylay.config import WaylayConfig
+from ..__version__ import __version__
+from ..config import WaylayConfig
 
 from ..api import rest
 from .api_config import ApiConfig

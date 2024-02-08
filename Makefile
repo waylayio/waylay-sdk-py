@@ -14,7 +14,7 @@ install-dependencies:
 	pip install -r requirements/requirements.$$(bin/pyversion).txt
 
 install-dev-dependencies:
-# need to install the `waylay` first, because the `waylay_<SERVICE>` packages require it
+# need to install the `waylay-sdk` first, because the `waylay_<SERVICE>` packages require it
 	pip install -e . --no-deps
 	pip install -r requirements/requirements.$$(bin/pyversion).txt
 	pip install -r requirements/requirements.dev.$$(bin/pyversion).txt
@@ -50,7 +50,7 @@ full-clean:
 	make clean-caches
 	make clean-eggs
 
-dev-install-pkg:  ## Install waylay-py with development dependency constraints as specified in the package.
+dev-install-pkg:  ## Install waylay-sdk with development dependency constraints as specified in the package.
 	pip install -e ".[dev]"
 
 dev-install:  ### Install a development environment with frozen dependencies from 'requirements/requirements.[dev.].txt'
@@ -59,7 +59,7 @@ dev-install:  ### Install a development environment with frozen dependencies fro
 	make dev-install-pkg
 	make install-hooks
 
-install-pkg:  ### Install waylay-py with dependency constraints as specified in the package. (e.g. for notebook tests)
+install-pkg:  ### Install waylay-sdk with dependency constraints as specified in the package. (e.g. for notebook tests)
 	pip install .
 
 install:  ### install waylay with frozen dependencies
@@ -81,7 +81,7 @@ codestyle:
 	@${printMsg} codestyle OK
 
 typecheck:
-	@mypy -p waylay 
+	@mypy -p waylay.sdk
 	@mypy test/*/*.py
 	@${printMsg} typecheck OK
 
@@ -174,7 +174,7 @@ freeze-dependencies: ## perform a full reinstall procedure and regenerate the 'r
 	make upgrade-buildtools
 	# install with dependencies specified in setup.py
 	make install-pkg 
-	pip uninstall waylay -y
+	pip uninstall waylay-sdk -y
 	bin/freeze-dependencies
 	# install with dependencies specified in setup.py (development mode)
 	make dev-install-pkg
@@ -184,8 +184,8 @@ freeze-dependencies: ## perform a full reinstall procedure and regenerate the 'r
 pdoc: # TODO 
 	rm -fr ./doc/api/
 	pdoc -o ./doc/api \
-		src/waylay/client.py \
-		src/waylay/config.py \
-		src/waylay/exceptions.py \
-		src/waylay/auth.py \
-		src/waylay/service/base.py 
+		src/waylay/sdk/client.py \
+		src/waylay/sdk/config.py \
+		src/waylay/sdk/exceptions.py \
+		src/waylay/sdk/auth.py \
+		src/waylay/sdk/service.py 

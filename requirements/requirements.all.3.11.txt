@@ -34,7 +34,6 @@ pytest-mock==3.12.0
 pytest_httpx==0.29.0
 python-dateutil==2.8.2
 python-jose==3.3.0
-python-magic==0.4.27
 rsa==4.9
 six==1.16.0
 sniffio==1.3.0
@@ -48,5 +47,3 @@ types-python-dateutil==2.8.19.20240106
 types-python-jose==3.3.4.20240106
 typing_extensions==4.9.0
 untokenize==0.1.1
-waylay_registry_api @ git+https://github.com/waylayio/waylay-py-services@13f211925f826cee8537220e705c0eb98b62b7cd#subdirectory=services/registry/waylay_registry_api
-waylay_registry_types @ git+https://github.com/waylayio/waylay-py-services@13f211925f826cee8537220e705c0eb98b62b7cd#subdirectory=services/registry/waylay_registry_types

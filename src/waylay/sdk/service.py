@@ -1,6 +1,6 @@
 """Base classes for Waylay REST Services."""
 
-from waylay.api.api_client import ApiClient
+from .api import ApiClient
 
 
 class WaylayService:

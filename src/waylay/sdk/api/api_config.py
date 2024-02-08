@@ -10,8 +10,8 @@ Do not edit the class manually.
 
 """  # noqa: E501
 
-from waylay.config import WaylayConfig
-from waylay.__version__ import __version__
+from ..config import WaylayConfig
+from ..__version__ import __version__
 
 
 class ApiConfig:

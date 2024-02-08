@@ -2,20 +2,18 @@
 
 import re
 from typing import Any, Dict, List, Union
-from unittest import mock
-from urllib import parse
-import httpx
+
 import pytest
 from datetime import datetime, date
 
 from pytest_httpx import HTTPXMock
 from pytest_mock import MockerFixture
 
-from waylay.auth import TokenCredentials
-from waylay.config import WaylayConfig
-from waylay.api import ApiConfig, ApiClient
-from waylay.api.rest import RESTResponse
-from waylay.api.api_exceptions import ApiError, ApiValueError
+from waylay.sdk.auth import TokenCredentials
+from waylay.sdk.config import WaylayConfig
+from waylay.sdk.api import ApiClient
+from waylay.sdk.api.rest import RESTResponse
+from waylay.sdk.api.api_exceptions import ApiError, ApiValueError
 
 from ..fixtures import WaylayTokenStub
 from .example.pet_model import Pet
@@ -37,77 +35,79 @@ def waylay_api_client(waylay_config: WaylayConfig) -> ApiClient:
     return ApiClient(waylay_config)
 
 
-@pytest.mark.parametrize("test_input",
-                         [{'method': 'GET',
-                           'resource_path': '/service/v1/{param1}/foo/{param2}',
-                           'path_params': {'param1': 'A',
-                                           'param2': 'B'},
-                             'query_params': {'key1': 'value1',
-                                              'key2': 'value2'},
-                             'header_params': {'x-my-header': 'header_value'},
-                             'body': None,
-                             'files': None,
-                           },
-                             {'method': 'PATCH',
-                              'resource_path': '/service/v1/{param1}/bar/{missing_param}',
-                              'path_params': {'param1': 'A',
-                                              'param_not_in_resource_path': 'B'},
-                              'query_params': None,
-                              'header_params': {'x-my-header': 'header_value'},
-                              'body': {'array_key': ['val1',
-                                                     'val2'],
-                                       'tuple_key': ('val3',
-                                                     123,
-                                                     {'key': 'value'},
-                                                     None),
-                                       'timestamp': datetime(1999,
-                                                             9,
-                                                             28,
-                                                             hour=12,
-                                                             minute=30,
-                                                             second=59)},
-                              },
-                             {'method': 'POST',
-                              'resource_path': '/service/v1/cruz/',
-                              'path_params': None,
-                              'query_params': {'key1': 15},
-                              'files': {'file1': b'<... binary content ...>',
-                                        'file2': '<... other binary content ...>'},
-                              },
-                             {'method': 'PUT',
-                              'resource_path': '/service/v1/{param1}/foo',
-                              'path_params': {'param1': 'C'},
-                              'body': pet_instance,
-                              },
-                             {'method': 'PUT',
-                              'resource_path': '/service/v1/{param1}/foo',
-                              'path_params': {'param1': 'C'},
-                              'body': pet_instance_dict,
-                              },
-                             {'method': 'PUT',
-                              'resource_path': '/service/v1/{param1}/foo',
-                              'path_params': {'param1': 'C'},
-                              'body': pet_instance_json,
-                              },
-                          {
-                             'method': 'POST',
-                             'resource_path': '/service/v1/bar/foo',
-                             'body': b'..some binary content..',
-                         },
-                             {
-                             'method': 'POST',
-                             'resource_path': '/service/v1/bar/foo',
-                             'header_params': {'Content-Type': 'application/x-www-form-urlencoded'},
-                             'body': {'key': 'value'},
-                         },
-                         ])
+SERIALIZE_CASES = {
+  'params_and_query': {'method': 'GET',
+     'resource_path': '/service/v1/{param1}/foo/{param2}',
+     'path_params': {'param1': 'A',
+                     'param2': 'B'},
+     'query_params': {'key1': 'value1',
+                      'key2': 'value2'},
+     'header_params': {'x-my-header': 'header_value'},
+     'body': None,
+     'files': None,
+     },
+   'params_and_body': {'method': 'PATCH',
+     'resource_path': '/service/v1/{param1}/bar/{missing_param}',
+     'path_params': {'param1': 'A',
+                     'param_not_in_resource_path': 'B'},
+     'query_params': None,
+     'header_params': {'x-my-header': 'header_value'},
+     'body': {'array_key': ['val1',
+                            'val2'],
+              'tuple_key': ('val3',
+                            123,
+                            {'key': 'value'},
+                            None),
+              'timestamp': datetime(1999,
+                                    9,
+                                    28,
+                                    hour=12,
+                                    minute=30,
+                                    second=59)},
+     },
+    'files':{'method': 'POST',
+     'resource_path': '/service/v1/cruz/',
+     'path_params': None,
+     'query_params': {'key1': 15},
+     'files': {'file1': b'<... binary content ...>',
+               'file2': '<... other binary content ...>'},
+     },
+    'pet_body':{'method': 'PUT',
+     'resource_path': '/service/v1/{param1}/foo',
+     'path_params': {'param1': 'C'},
+     'body': pet_instance,
+     },
+   'pet_dict_body': {'method': 'PUT',
+     'resource_path': '/service/v1/{param1}/foo',
+     'path_params': {'param1': 'C'},
+     'body': pet_instance_dict,
+     },
+    'pet_json_body':{'method': 'PUT',
+     'resource_path': '/service/v1/{param1}/foo',
+     'path_params': {'param1': 'C'},
+     'body': pet_instance_json,
+     },
+    'binary_body': {
+        'method': 'POST',
+        'resource_path': '/service/v1/bar/foo',
+        'body': b'..some binary content..',
+    },
+    'form': {
+        'method': 'POST',
+        'resource_path': '/service/v1/bar/foo',
+        'header_params': {'Content-Type': 'application/x-www-form-urlencoded'},
+        'body': {'key': 'value'},
+    },
+}
+
+@pytest.mark.parametrize("test_input", SERIALIZE_CASES.values(), ids=SERIALIZE_CASES.keys())
 async def test_serialize_and_call(snapshot, mocker, httpx_mock: HTTPXMock, waylay_api_client: ApiClient, test_input: dict[str, Any], request):
     """Test REST param serializer."""
     test_input = _retreive_fixture_values(request, test_input)
     serialized_params = waylay_api_client.param_serialize(**test_input)
     assert serialized_params == snapshot
 
-    mocker.patch('waylay.auth.WaylayTokenAuth.assure_valid_token', lambda *args: WaylayTokenStub())
+    mocker.patch('waylay.sdk.auth.WaylayTokenAuth.assure_valid_token', lambda *args: WaylayTokenStub())
     httpx_mock.add_response()
     await waylay_api_client.call_api(**serialized_params)
     requests = httpx_mock.get_requests()
@@ -144,13 +144,13 @@ async def test_serialize_and_call_does_not_support_body_and_files(waylay_api_cli
 
 
 async def test_call_invalid_method(waylay_api_client: ApiClient):
-    """REST client should throw on invalid http method"""
+    """REST client should throw on invalid http method."""
     with pytest.raises(ApiValueError):
         await waylay_api_client.call_api(method='invalid', url='https://dummy.io')
 
 
 @pytest.mark.parametrize("response_kwargs,response_type_map", [
-    # primtive response types
+    # primitive response types
     (
         {'status_code': 200, 'text': 'some_text_resopnse', 'headers': {'x-resp-header': 'resp_header_value'}},
         {'200': str}
@@ -401,7 +401,7 @@ def _retreive_fixture_values(request, kwargs: Dict[str, Any]) -> Dict[str, Any]:
 async def test_request_timeout(waylay_api_client: ApiClient, httpx_mock: HTTPXMock, mocker: MockerFixture, request_kwargs):
     """Test request timeout."""
     spy = mocker.spy(waylay_api_client.rest_client.client, 'request')
-    mocker.patch('waylay.auth.WaylayTokenAuth.assure_valid_token', lambda *args: WaylayTokenStub())
+    mocker.patch('waylay.sdk.auth.WaylayTokenAuth.assure_valid_token', lambda *args: WaylayTokenStub())
     httpx_mock.add_response()
     await waylay_api_client.call_api(**request_kwargs)
     _httpx_args = {'params': None, 'headers': {}}

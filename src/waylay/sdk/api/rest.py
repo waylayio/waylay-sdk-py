@@ -4,9 +4,9 @@ from io import BufferedReader
 from typing import Any, Mapping, Optional, Tuple, Union
 from typeguard import check_type
 import httpx
-from waylay.api.api_config import ApiConfig
+import httpx._types as httpx_types
 
-from waylay.api.api_exceptions import ApiValueError
+from .api_exceptions import ApiValueError
 
 RESTResponse = httpx.Response
 RESTTimeout = Union[
@@ -26,10 +26,10 @@ class RESTClient:
         self,
         method: str,
         url: httpx._types.URLTypes,
-        query: Optional[httpx._types.QueryParamTypes] = None,
+        query: Optional[httpx_types.QueryParamTypes] = None,
         headers: Optional[Mapping[str, str]] = None,
         body: Optional[Any] = None,
-        files: Optional[httpx._types.RequestFiles] = None,
+        files: Optional[httpx_types.RequestFiles] = None,
         _request_timeout: Optional[RESTTimeout] = None
     ) -> RESTResponse:
         """Perform requests.
@@ -85,11 +85,7 @@ class RESTClient:
                 if isinstance(body, BufferedReader):
                     body = body.read()
                 if not headers.get('content-type'):
-                    try:
-                        import magic
-                        mime_type = magic.from_buffer(body)
-                    except BaseException:
-                        mime_type = 'application/octet-stream'
+                    mime_type = 'application/octet-stream'
                     kwargs['headers'].update({'content-type': mime_type})
                     kwargs.update({'content': body})
             elif content_type and content_type != 'application/json':

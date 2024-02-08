@@ -1,8 +1,7 @@
 """Shared unit test fixtures."""
 
 from datetime import datetime
-import pytest
-from waylay.auth import WaylayToken
+from waylay.sdk.auth import WaylayToken
 
 MOCK_DOMAIN = 'unittest.waylay.io'
 MOCK_API_URL = f'https://{MOCK_DOMAIN}/api'

@@ -1,11 +1,10 @@
 """Exceptions."""
 
 from typing import Any, Optional
-from typing_extensions import Self
 
 from httpx import Response as RESTResponse
 
-from waylay.exceptions import RequestError, RestResponseError
+from ..exceptions import RequestError, RestResponseError
 
 
 class ApiTypeError(RequestError, TypeError):

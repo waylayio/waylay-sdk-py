@@ -1,12 +1,10 @@
 """REST client for the Waylay Platform."""
 
-from typing import List, Optional
+from typing import List, Optional, Type
 
-from waylay.api import ApiClient
-from waylay.services._base import WaylayService
-from waylay.services._loader import RegistryService, registry_available
-
-from .exceptions import ConfigError
+from .service import WaylayService
+from ._loader import SERVICE_CLASSES, RegistryService
+from .api import ApiClient
 
 from .config import (
     WaylayConfig,
@@ -111,10 +109,13 @@ class WaylayClient():
     def load_services(self, config: WaylayConfig):
         """Load all services that are installed."""
         self.api_client = ApiClient(config)
+        for service_name, service_class in SERVICE_CLASSES.items():
+            self._register_service(service_name, service_class)
 
-        self.registry = RegistryService(self.api_client, name='registry')
-        if registry_available:
-            self._services.append(self.registry)
+    def _register_service(self, service_name: str, service_class: Type[WaylayService]):
+        service = service_class(self.api_client, service_name)
+        self._services.append(service)
+        setattr(self, service_name, service)
 
 
 def _auth_urls(gateway_url=None, accounts_url=None, settings: Optional[TenantSettings] = None):

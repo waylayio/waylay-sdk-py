@@ -4,8 +4,9 @@ from typing import Optional
 
 import pytest
 
-from waylay.client import ClientCredentials, WaylayClient
-from waylay.auth import WaylayCredentials, WaylayTokenAuth
+from waylay.sdk import ClientCredentials, WaylayClient, WaylayCredentials
+
+from waylay.sdk.auth import WaylayTokenAuth
 
 
 def get_test_env(key: str, default: Optional[str] = None) -> str:

@@ -31,5 +31,3 @@ types-pyasn1==0.5.0.20240205
 types-python-dateutil==2.8.19.20240106
 types-python-jose==3.3.4.20240106
 untokenize==0.1.1
-waylay_registry_api @ git+https://github.com/waylayio/waylay-py-services@13f211925f826cee8537220e705c0eb98b62b7cd#subdirectory=services/registry/waylay_registry_api
-waylay_registry_types @ git+https://github.com/waylayio/waylay-py-services@13f211925f826cee8537220e705c0eb98b62b7cd#subdirectory=services/registry/waylay_registry_types
