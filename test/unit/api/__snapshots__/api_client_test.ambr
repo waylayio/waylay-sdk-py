@@ -43,16 +43,16 @@
 # ---
 # name: test_deserialize[response_kwargs13-response_type_map13][200:b''@{}]
   tuple(
-    ApiResponse(status_code=200, data=b'', raw_data=b'', headers=Headers({})),
-    'bytes',
-    b'',
+    ApiResponse(status_code=200, data='', raw_data=b'', headers=Headers({})),
+    'str',
+    '',
   )
 # ---
 # name: test_deserialize[response_kwargs14-response_type_map14][200:b''@{'200': None}]
   tuple(
-    ApiResponse(status_code=200, data=b'', raw_data=b'', headers=Headers({})),
-    'bytes',
-    b'',
+    ApiResponse(status_code=200, data='', raw_data=b'', headers=Headers({})),
+    'str',
+    '',
   )
 # ---
 # name: test_deserialize[response_kwargs15-response_type_map15][201:b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}'@{'201': typing.Dict[str, str]}]
@@ -321,9 +321,9 @@
 # ---
 # name: test_deserialize[response_kwargs9-response_type_map9][200:b'false'@{'200': 'bool'}]
   tuple(
-    ApiResponse(status_code=200, data=b'false', raw_data=b'false', headers=Headers({'content-length': '5', 'content-type': 'application/json'})),
-    'bytes',
-    b'false',
+    ApiResponse(status_code=200, data=False, raw_data=b'false', headers=Headers({'content-length': '5', 'content-type': 'application/json'})),
+    'bool',
+    False,
   )
 # ---
 # name: test_deserialize_error_responses[response_kwargs0-response_type_map0][{'404': typing.Dict[str, str]}]
