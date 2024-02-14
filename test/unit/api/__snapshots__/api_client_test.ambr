@@ -443,7 +443,7 @@
     'body': b'..some binary content..',
     'files': None,
     'header_params': dict({
-      'user-agent': 'waylay-sdk/python/0.0.1',
+      'user-agent': 'waylay-sdk/python/0.0.2',
     }),
     'method': 'POST',
     'query_params': None,
@@ -457,7 +457,7 @@
     ]),
     list([
       tuple(
-        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.1', 'content-type': 'application/octet-stream', 'content-length': '23', 'authorization': '[secure]'}),
+        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.2', 'content-type': 'application/octet-stream', 'content-length': '23', 'authorization': '[secure]'}),
         b'..some binary content..',
       ),
     ]),
@@ -471,7 +471,7 @@
       'file2': '<... other binary content ...>',
     }),
     'header_params': dict({
-      'user-agent': 'waylay-sdk/python/0.0.1',
+      'user-agent': 'waylay-sdk/python/0.0.2',
     }),
     'method': 'POST',
     'query_params': dict({
@@ -487,7 +487,7 @@
     ]),
     list([
       tuple(
-        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.1', 'content-length': '382', 'authorization': '[secure]', 'content-type': 'multipart/form-data; boundary=<boundary>'}),
+        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.2', 'content-length': '382', 'authorization': '[secure]', 'content-type': 'multipart/form-data; boundary=<boundary>'}),
         b'--<boundary>\r\nContent-Disposition: form-data; name="file1"; filename="upload"\r\nContent-Type: application/octet-stream\r\n\r\n<... binary content ...>\r\n--<boundary>\r\nContent-Disposition: form-data; name="file2"; filename="upload"\r\nContent-Type: application/octet-stream\r\n\r\n<... other binary content ...>\r\n--<boundary>--\r\n',
       ),
     ]),
@@ -501,7 +501,7 @@
     'files': None,
     'header_params': dict({
       'content-type': 'application/x-www-form-urlencoded',
-      'user-agent': 'waylay-sdk/python/0.0.1',
+      'user-agent': 'waylay-sdk/python/0.0.2',
     }),
     'method': 'POST',
     'query_params': None,
@@ -515,7 +515,7 @@
     ]),
     list([
       tuple(
-        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'content-type': 'application/x-www-form-urlencoded', 'user-agent': 'waylay-sdk/python/0.0.1', 'content-length': '9', 'authorization': '[secure]'}),
+        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'content-type': 'application/x-www-form-urlencoded', 'user-agent': 'waylay-sdk/python/0.0.2', 'content-length': '9', 'authorization': '[secure]'}),
         b'key=value',
       ),
     ]),
@@ -540,7 +540,7 @@
     }),
     'files': None,
     'header_params': dict({
-      'user-agent': 'waylay-sdk/python/0.0.1',
+      'user-agent': 'waylay-sdk/python/0.0.2',
       'x-my-header': 'header_value',
     }),
     'method': 'PATCH',
@@ -555,7 +555,7 @@
     ]),
     list([
       tuple(
-        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'x-my-header': 'header_value', 'user-agent': 'waylay-sdk/python/0.0.1', 'content-length': '119', 'content-type': 'application/json', 'authorization': '[secure]'}),
+        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'x-my-header': 'header_value', 'user-agent': 'waylay-sdk/python/0.0.2', 'content-length': '119', 'content-type': 'application/json', 'authorization': '[secure]'}),
         b'{"array_key": ["val1", "val2"], "tuple_key": ["val3", 123, {"key": "value"}, null], "timestamp": "1999-09-28T12:30:59"}',
       ),
     ]),
@@ -566,7 +566,7 @@
     'body': None,
     'files': None,
     'header_params': dict({
-      'user-agent': 'waylay-sdk/python/0.0.1',
+      'user-agent': 'waylay-sdk/python/0.0.2',
       'x-my-header': 'header_value',
     }),
     'method': 'GET',
@@ -584,7 +584,7 @@
     ]),
     list([
       tuple(
-        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'x-my-header': 'header_value', 'user-agent': 'waylay-sdk/python/0.0.1', 'authorization': '[secure]'}),
+        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'x-my-header': 'header_value', 'user-agent': 'waylay-sdk/python/0.0.2', 'authorization': '[secure]'}),
         b'',
       ),
     ]),
@@ -602,7 +602,7 @@
     }),
     'files': None,
     'header_params': dict({
-      'user-agent': 'waylay-sdk/python/0.0.1',
+      'user-agent': 'waylay-sdk/python/0.0.2',
     }),
     'method': 'PUT',
     'query_params': None,
@@ -616,7 +616,7 @@
     ]),
     list([
       tuple(
-        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.1', 'content-length': '95', 'content-type': 'application/json', 'authorization': '[secure]'}),
+        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.2', 'content-length': '95', 'content-type': 'application/json', 'authorization': '[secure]'}),
         b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
       ),
     ]),
@@ -634,7 +634,7 @@
     }),
     'files': None,
     'header_params': dict({
-      'user-agent': 'waylay-sdk/python/0.0.1',
+      'user-agent': 'waylay-sdk/python/0.0.2',
     }),
     'method': 'PUT',
     'query_params': None,
@@ -648,7 +648,7 @@
     ]),
     list([
       tuple(
-        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.1', 'content-length': '95', 'content-type': 'application/json', 'authorization': '[secure]'}),
+        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.2', 'content-length': '95', 'content-type': 'application/json', 'authorization': '[secure]'}),
         b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
       ),
     ]),
@@ -659,7 +659,7 @@
     'body': '{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}',
     'files': None,
     'header_params': dict({
-      'user-agent': 'waylay-sdk/python/0.0.1',
+      'user-agent': 'waylay-sdk/python/0.0.2',
     }),
     'method': 'PUT',
     'query_params': None,
@@ -673,7 +673,7 @@
     ]),
     list([
       tuple(
-        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.1', 'content-length': '105', 'content-type': 'application/json', 'authorization': '[secure]'}),
+        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.2', 'content-length': '105', 'content-type': 'application/json', 'authorization': '[secure]'}),
         b'"{\\"name\\":\\"Lord Biscuit, Master of Naps\\",\\"owner\\":{\\"id\\":123,\\"name\\":\\"Simon\\"},\\"tag\\":\\"doggo\\"}"',
       ),
     ]),
