@@ -188,7 +188,7 @@ class ApiClient:
                     _data = response_data.json()
                 except ValueError:
                     _data = response_data.text
-                return_data = self.__deserialize(_data, response_type) if _data else response_data.content
+                return_data = self.__deserialize(_data, response_type) if _data is not None else response_data.content
         finally:
             if not 200 <= response_data.status_code <= 299:
                 raise ApiError.from_response(  # pylint: disable=raising-bad-type
