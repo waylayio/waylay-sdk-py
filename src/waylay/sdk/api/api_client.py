@@ -1,6 +1,8 @@
 """API client."""
 
+from enum import Enum
 from importlib import import_module
+from inspect import isclass
 from types import SimpleNamespace
 from typing import Any, Mapping, Optional, cast
 
@@ -264,7 +266,6 @@ class ApiClient:
             return self.__deserialize_date(data)
         elif klass == datetime.datetime:
             return self.__deserialize_datetime(data)
-
         if isinstance(klass, str):
             if klass.startswith('List['):
                 sub_kls = re.match(r'List\[(.*)]', klass).group(1)  # type: ignore[union-attr]
@@ -285,7 +286,10 @@ class ApiClient:
                     # continue
                 except BaseException:
                     return self.__deserialize_simple_namespace(data)
-        return self.__deserialize_model(data, klass)
+        if isclass(klass) and issubclass(klass, Enum):
+            return self.__deserialize_enum(data, klass)
+        else:
+            return self.__deserialize_model(data, klass)
 
     def __sanitize_files_parameters(self, files=None):
         """Build form parameters.
@@ -345,6 +349,25 @@ class ApiClient:
             return parse(string)
         except ValueError:
             return string
+
+    def __deserialize_enum(self, data, klass):
+        """Deserializes primitive type to enum.
+
+        :param data: primitive type.
+        :param klass: class literal.
+        :return: enum value.
+
+        """
+        try:
+            return klass(data)
+        except ValueError:
+            raise ApiError(
+                status=0,
+                reason=(
+                    "Failed to parse `{0}` as `{1}`"
+                    .format(data, klass)
+                )
+            )
 
     def __deserialize_model(self, data, klass):
         """Deserializes list or dict to model.

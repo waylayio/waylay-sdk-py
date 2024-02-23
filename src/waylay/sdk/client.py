@@ -1,9 +1,11 @@
 """REST client for the Waylay Platform."""
 
-from typing import List, Optional, Type
+from typing import TYPE_CHECKING, List, Optional, Type
 
 from .service import WaylayService
-from ._loader import SERVICE_CLASSES, RegistryService
+from ._loader import load_services
+if TYPE_CHECKING:
+    from ._loader import BrokerService, RegistryService
 from .api import ApiClient
 
 from .config import (
@@ -28,6 +30,7 @@ class WaylayClient():
 
     # services
     registry: 'RegistryService'
+    broker: 'BrokerService'
     # TODO, do we want to load the services dynamically like in previous waylay-py
     # + only register installed services
     # - lose type info
@@ -109,7 +112,8 @@ class WaylayClient():
     def load_services(self, config: WaylayConfig):
         """Load all services that are installed."""
         self.api_client = ApiClient(config)
-        for service_name, service_class in SERVICE_CLASSES.items():
+        service_classes = load_services()
+        for service_name, service_class in service_classes.items():
             self._register_service(service_name, service_class)
 
     def _register_service(self, service_name: str, service_class: Type[WaylayService]):

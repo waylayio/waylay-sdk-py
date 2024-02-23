@@ -16,7 +16,7 @@ from waylay.sdk.api.rest import RESTResponse
 from waylay.sdk.api.api_exceptions import ApiError, ApiValueError
 
 from ..fixtures import WaylayTokenStub
-from .example.pet_model import Pet
+from .example.pet_model import Pet, PetType
 from .example.pet_fixtures import pet_instance, pet_instance_dict, pet_instance_json
 
 
@@ -36,57 +36,57 @@ def waylay_api_client(waylay_config: WaylayConfig) -> ApiClient:
 
 
 SERIALIZE_CASES = {
-  'params_and_query': {'method': 'GET',
-     'resource_path': '/service/v1/{param1}/foo/{param2}',
-     'path_params': {'param1': 'A',
-                     'param2': 'B'},
-     'query_params': {'key1': 'value1',
-                      'key2': 'value2'},
-     'header_params': {'x-my-header': 'header_value'},
-     'body': None,
-     'files': None,
-     },
-   'params_and_body': {'method': 'PATCH',
-     'resource_path': '/service/v1/{param1}/bar/{missing_param}',
-     'path_params': {'param1': 'A',
-                     'param_not_in_resource_path': 'B'},
-     'query_params': None,
-     'header_params': {'x-my-header': 'header_value'},
-     'body': {'array_key': ['val1',
-                            'val2'],
-              'tuple_key': ('val3',
-                            123,
-                            {'key': 'value'},
-                            None),
-              'timestamp': datetime(1999,
-                                    9,
-                                    28,
-                                    hour=12,
-                                    minute=30,
-                                    second=59)},
-     },
-    'files':{'method': 'POST',
-     'resource_path': '/service/v1/cruz/',
-     'path_params': None,
-     'query_params': {'key1': 15},
-     'files': {'file1': b'<... binary content ...>',
-               'file2': '<... other binary content ...>'},
-     },
-    'pet_body':{'method': 'PUT',
-     'resource_path': '/service/v1/{param1}/foo',
-     'path_params': {'param1': 'C'},
-     'body': pet_instance,
-     },
-   'pet_dict_body': {'method': 'PUT',
-     'resource_path': '/service/v1/{param1}/foo',
-     'path_params': {'param1': 'C'},
-     'body': pet_instance_dict,
-     },
-    'pet_json_body':{'method': 'PUT',
-     'resource_path': '/service/v1/{param1}/foo',
-     'path_params': {'param1': 'C'},
-     'body': pet_instance_json,
-     },
+    'params_and_query': {'method': 'GET',
+                         'resource_path': '/service/v1/{param1}/foo/{param2}',
+                         'path_params': {'param1': 'A',
+                                         'param2': 'B'},
+                         'query_params': {'key1': 'value1',
+                                          'key2': 'value2'},
+                         'header_params': {'x-my-header': 'header_value'},
+                         'body': None,
+                         'files': None,
+                         },
+    'params_and_body': {'method': 'PATCH',
+                        'resource_path': '/service/v1/{param1}/bar/{missing_param}',
+                        'path_params': {'param1': 'A',
+                                        'param_not_in_resource_path': 'B'},
+                        'query_params': None,
+                        'header_params': {'x-my-header': 'header_value'},
+                        'body': {'array_key': ['val1',
+                                               'val2'],
+                                 'tuple_key': ('val3',
+                                               123,
+                                               {'key': 'value'},
+                                               None),
+                                 'timestamp': datetime(1999,
+                                                       9,
+                                                       28,
+                                                       hour=12,
+                                                       minute=30,
+                                                       second=59)},
+                        },
+    'files': {'method': 'POST',
+              'resource_path': '/service/v1/cruz/',
+              'path_params': None,
+              'query_params': {'key1': 15},
+              'files': {'file1': b'<... binary content ...>',
+                        'file2': '<... other binary content ...>'},
+              },
+    'pet_body': {'method': 'PUT',
+                 'resource_path': '/service/v1/{param1}/foo',
+                 'path_params': {'param1': 'C'},
+                 'body': pet_instance,
+                 },
+    'pet_dict_body': {'method': 'PUT',
+                      'resource_path': '/service/v1/{param1}/foo',
+                      'path_params': {'param1': 'C'},
+                      'body': pet_instance_dict,
+                      },
+    'pet_json_body': {'method': 'PUT',
+                      'resource_path': '/service/v1/{param1}/foo',
+                      'path_params': {'param1': 'C'},
+                      'body': pet_instance_json,
+                      },
     'binary_body': {
         'method': 'POST',
         'resource_path': '/service/v1/bar/foo',
@@ -99,6 +99,7 @@ SERIALIZE_CASES = {
         'body': {'key': 'value'},
     },
 }
+
 
 @pytest.mark.parametrize("test_input", SERIALIZE_CASES.values(), ids=SERIALIZE_CASES.keys())
 async def test_serialize_and_call(snapshot, mocker, httpx_mock: HTTPXMock, waylay_api_client: ApiClient, test_input: dict[str, Any], request):
@@ -289,6 +290,11 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
     (
         {'status_code': 200, 'text': str(datetime(2023, 12, 25, minute=1).isoformat())},
         {}  # no response type
+    ),
+    # enum response types
+    (
+        {'status_code': 200, 'text': "dog"},
+        {'*': PetType}
     ),
     # custom model response types
     (
