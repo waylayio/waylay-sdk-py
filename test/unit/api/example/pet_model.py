@@ -1,4 +1,5 @@
 from __future__ import annotations
+from enum import Enum
 import pprint
 import json
 
@@ -124,6 +125,12 @@ class PetOwner(BaseModel):
             "name": obj.get("name")
         })
         return _obj
+    
+class PetType(Enum):
+    """Pet Type."""
+    DOG = "dog"
+    CAT = "cat"
+
 
 
 class CreatePetQuery(TypedDict):
