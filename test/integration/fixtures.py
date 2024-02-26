@@ -6,7 +6,7 @@ import pytest
 
 from waylay.sdk import ClientCredentials, WaylayClient, WaylayCredentials
 
-from waylay.sdk.auth import WaylayTokenAuth
+from waylay.sdk.auth.provider import WaylayTokenAuth
 
 
 def get_test_env(key: str, default: Optional[str] = None) -> str:

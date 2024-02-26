@@ -7,12 +7,12 @@ from httpx import Response, Request
 
 from waylay.sdk import WaylayConfig
 from waylay.sdk.exceptions import ConfigError
-from waylay.sdk.auth import (
+from waylay.sdk.auth.provider import (
     WaylayTokenAuth,
     TokenCredentials, NoCredentials, ClientCredentials
 )
 import waylay.sdk.config
-import waylay.sdk.auth_interactive
+import waylay.sdk.auth.interactive
 
 from .fixtures import MOCK_API_URL, MOCK_DOMAIN, MOCK_TENANT_SETTINGS, WaylayTokenStub
 
@@ -28,9 +28,9 @@ def _mock_send_single_request_no_accounts(target, request: Request, *args) -> Re
 @pytest.fixture
 def mock_token(mocker):
     """Mock the auth module to use a WaylayTokenStub."""
-    mocker.patch('waylay.sdk.auth._request_token', lambda *args: '')
+    mocker.patch('waylay.sdk.auth.provider._request_token', lambda *args: '')
     mocker.patch(
-        'waylay.sdk.auth.WaylayTokenAuth._create_and_validate_token',
+        'waylay.sdk.auth.provider.WaylayTokenAuth._create_and_validate_token',
         lambda *args: WaylayTokenStub()
     )
 
@@ -83,6 +83,16 @@ def test_config_settings():
     assert cfg.get_root_url('a_service') is None
     assert cfg.get_root_url('api') == 'https://xxx'
     assert cfg.get_root_url('abc') == 'http://yyy'
+
+
+def test_doc_config_settings():
+    """Test doc urls."""
+    cfg = WaylayConfig(fetch_tenant_settings=False)
+    assert cfg.doc_url == waylay.sdk.config.model.DEFAULT_DOC_URL
+    assert cfg.apidoc_url == waylay.sdk.config.model.DEFAULT_APIDOC_URL
+    cfg = WaylayConfig(settings={'doc_url': 'A', 'apidoc_url': 'B'}, fetch_tenant_settings=False)
+    assert cfg.doc_url == 'A'
+    assert cfg.apidoc_url == 'B'
 
 
 def test_tenant_settings(mock_httpx_accounts, mock_token):
@@ -191,7 +201,7 @@ def test_save_load_delete_profile(mock_token, monkeypatch, mocker):
         assert next(user_dialog) in prompt
         return next(user_dialog)
 
-    monkeypatch.setattr(waylay.sdk.auth_interactive, 'ask', mock_ask)
+    monkeypatch.setattr(waylay.sdk.auth.interactive, 'ask', mock_ask)
 
     profile_name = f'_unit_test_{int(datetime.now().timestamp())}'
     with pytest.raises(ConfigError) as exc:
@@ -222,10 +232,13 @@ def test_save_load_delete_profile(mock_token, monkeypatch, mocker):
 def test_load_interactive(mocker, mock_token):
     """Test the interactive handling of loading a config."""
     mocker.patch(
-        'waylay.sdk.config.request_client_credentials_interactive',
+        'waylay.sdk.config.model.request_client_credentials_interactive',
         lambda default_gateway_url: TokenCredentials('_')
     )
-    mocker.patch('waylay.sdk.config.request_store_config_interactive', lambda profile, save_callback: save_callback())
+    mocker.patch(
+        'waylay.sdk.config.model.request_store_config_interactive',
+        lambda profile, save_callback: save_callback()
+    )
 
     profile_name = f'_unit_test_{int(datetime.now().timestamp())}'
     cfg = WaylayConfig.load(profile_name)

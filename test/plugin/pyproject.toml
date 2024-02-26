@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "waylay-sdk-plugin-example"
+version = "0.0.1"
+description = "Test Plugins for the Waylay Python SDK."
+requires-python = ">=3.9"
+authors = [{name = "Waylay", email = "info@waylay.io"}]
+dependencies = [
+    "waylay-sdk",
+]
+
+[project.entry-points.dynamic]
+"waylay_sdk_plugins"= "waylay.sdk_test.loader:PLUGINS"
+
+[tool.setuptools.package-data]
+waylay = ["py.typed"]
+
+[tool.setuptools.packages.find]
+where = ["src/"]
+include = ["waylay*"]
+exclude = []
+namespaces = true

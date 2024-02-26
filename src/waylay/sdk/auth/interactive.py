@@ -7,16 +7,17 @@ import urllib.parse
 from getpass import getpass
 import httpx
 
-from .auth import (
-    DEFAULT_GATEWAY_URL,
+from .model import (
     WaylayCredentials,
     ClientCredentials,
-    ACCOUNTS_USERS_ME_PATH,
     AuthError
 )
 
-_http = httpx
+DEFAULT_GATEWAY_URL = 'https://api.waylay.io'
+DEFAULT_ACCOUNTS_URL = 'https://accounts-api.waylay.io'
+ACCOUNTS_USERS_ME_PATH = '/accounts/v1/users/me'
 
+_http = httpx
 log = logging.getLogger(__name__)
 
 

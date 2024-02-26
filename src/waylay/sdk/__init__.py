@@ -8,7 +8,6 @@ from .auth import (
     ApplicationCredentials,
     TokenCredentials,
     WaylayToken,
-    WaylayTokenAuth
 )
-from .service import WaylayService
-from .api import ApiClient
+from .plugin import WaylayService, WaylayTool, WaylayPlugin, PluginAccess
+from .api import ApiClient, ApiResponse

@@ -18,7 +18,8 @@ install-dev-dependencies:
 	pip install -e . --no-deps
 	pip install -r requirements/requirements.$$(bin/pyversion).txt
 	pip install -r requirements/requirements.dev.$$(bin/pyversion).txt
-
+	pip install -e test/plugin
+	
 uninstall-dependencies:
 	pip uninstall -r requirements/requirements.$$(bin/pyversion).txt -y
 	pip uninstall -r requirements/requirements.dev.$$(bin/pyversion).txt -y
@@ -41,7 +42,8 @@ dist-clean:
 	rm -fr dist build
 
 uninstall-pkg: dist-clean
-	@pip freeze | grep '^-e' | sed -e "s/^.*#egg=\(.*\)/\1/" | xargs -L 1 pip uninstall -y
+	pip uninstall waylay-sdk -y
+	pip uninstall waylay-sdk-plugin-example -y
 	@${printMsg} "uninstall-pkg" "Development packages uninstalled"
 
 full-clean:
@@ -52,6 +54,7 @@ full-clean:
 
 dev-install-pkg:  ## Install waylay-sdk with development dependency constraints as specified in the package.
 	pip install -e ".[dev]"
+	pip install -e test/plugin
 
 dev-install:  ### Install a development environment with frozen dependencies from 'requirements/requirements.[dev.].txt'
 	make ci-upgrade-buildtools
@@ -125,9 +128,9 @@ upgrade-buildtools:
 	pip install --upgrade wheel
 
 upgrade-buildtools-latest:
-	pip install --upgrade pip==23.2.1
-	pip install --upgrade setuptools==68.2.2
-	pip install --upgrade wheel==0.41.2
+	pip install --upgrade pip==24.0
+	pip install --upgrade setuptools==69.1.1
+	pip install --upgrade wheel==0.42.0
 
 ci-upgrade-buildtools:
 	make ci-upgrade-buildtools-$$(bin/pyversion)
