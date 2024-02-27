@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "waylay-sdk"
-version = "0.0.2"
+version = "0.0.3"
 description = "Waylay Python SDK."
 requires-python = ">=3.9"
 authors = [{name = "Waylay", email = "info@waylay.io"}]
