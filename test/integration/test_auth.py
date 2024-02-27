@@ -1,5 +1,5 @@
 """Integration tests for waylay.sdk.auth module."""
-from waylay.sdk.auth import (
+from waylay.sdk.auth.provider import (
     TokenCredentials,
     WaylayTokenAuth
 )

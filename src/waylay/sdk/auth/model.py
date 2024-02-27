@@ -4,22 +4,17 @@ from datetime import datetime
 from enum import Enum
 from dataclasses import dataclass
 from typing import (
-    Optional, Generator, ClassVar,
-    Dict, Any, List, Callable,
+    Optional, ClassVar,
+    Dict, Any, List
 )
 import json
 import abc
 
 import base64
 import binascii
-import httpx
 from jose import jwt, JWTError
-import jose.exceptions as jwt_exc
 
-from .exceptions import AuthError
-
-# http client dependencies
-_http = httpx
+from .exceptions import TokenParseError, AuthError
 
 
 class CredentialsType(str, Enum):
@@ -40,11 +35,6 @@ class CredentialsType(str, Enum):
         """Get the string representation."""
         return self.value
 
-
-DEFAULT_GATEWAY_URL = 'https://api.waylay.io'
-DEFAULT_ACCOUNTS_URL = 'https://accounts-api.waylay.io'
-
-ACCOUNTS_USERS_ME_PATH = '/accounts/v1/users/me'
 
 TokenString = str
 
@@ -83,9 +73,6 @@ class WaylayCredentials(abc.ABC):
         authentication.
 
         """
-
-
-CredentialsCallback = Callable[[Optional[str]], WaylayCredentials]
 
 
 @dataclass(repr=False)
@@ -238,7 +225,7 @@ class TokenCredentials(AccountsUrlMixin, WaylayCredentials):
         try:
             # WaylayToken constructor decodes the data without signature verification
             return WaylayToken(self.token).tenant is not None
-        except AuthError:
+        except TokenParseError:
             return False
 
 
@@ -252,7 +239,7 @@ class WaylayToken:
             try:
                 token_data = jwt.decode(token_string, '', options=dict(verify_signature=False))
             except (TypeError, ValueError, JWTError) as exc:
-                raise AuthError(_auth_message_for_exception(exc)) from exc
+                raise TokenParseError(exc) from exc
         self.token_data = token_data
 
     def validate(self) -> 'WaylayToken':
@@ -377,133 +364,3 @@ class WaylayToken:
     def __bool__(self) -> bool:
         """Get the validity of the token."""
         return self.is_valid
-
-
-class WaylayTokenAuth(_http.Auth):
-    """Authentication flow with a waylay token.
-
-    Will automatically refresh an expired token.
-
-    """
-
-    current_token: Optional[WaylayToken]
-    credentials: WaylayCredentials
-
-    def __init__(
-        self,
-        credentials: WaylayCredentials,
-        initial_token: Optional[TokenString] = None,
-        credentials_callback: Optional[CredentialsCallback] = None
-    ):
-        """Create a Waylay Token authentication provider."""
-        self.credentials = credentials
-        self.current_token = None
-
-        if isinstance(credentials, TokenCredentials):
-            initial_token = initial_token or credentials.token
-
-        if initial_token:
-            try:
-                self.current_token = self._create_and_validate_token(initial_token)
-            except AuthError:
-                pass
-
-        self.credentials_callback = credentials_callback
-
-    def auth_flow(self, request: _http.Request) -> Generator[_http.Request, _http.Response, None]:
-        """Authenticate a http request.
-
-        Implements the authentication callback for the http client.
-
-        """
-        token = self.assure_valid_token()
-        request.headers["Authorization"] = f"Bearer {token}"
-        yield request
-
-    def assure_valid_token(self) -> WaylayToken:
-        """Validate the current token and request a new one if invalid."""
-        if self.current_token:
-            # token exists and is valid
-            return self.current_token
-
-        self.current_token = self._create_and_validate_token(self._request_token_string())
-        return self.current_token
-
-    def _create_and_validate_token(self, token: TokenString) -> WaylayToken:
-        return WaylayToken(token).validate()
-
-    def _request_token_string(self) -> TokenString:
-        """Request a token."""
-        if isinstance(self.credentials, NoCredentials):
-            if self.credentials_callback is not None:
-                # TODO: where is this used? Clients need to update their
-                # definition of the callback to use gateway URL as argument.
-                self.credentials = self.credentials_callback(
-                    self.credentials.accounts_url or self.credentials.gateway_url
-                )
-            else:
-                raise AuthError("No credentials or credentials_callback provided.")
-
-        if isinstance(self.credentials, TokenCredentials):
-            raise AuthError(
-                f"cannot refresh expired token with credentials "
-                f"of type '{self.credentials.credentials_type}'"
-            )
-
-        if isinstance(self.credentials, ApplicationCredentials):
-            raise AuthError(
-                f"credentials of type {self.credentials.credentials_type} are not supported yet"
-            )
-
-        if isinstance(self.credentials, ClientCredentials):
-            return _request_token(self.credentials)
-
-        raise AuthError(
-            f"credentials of type {self.credentials.credentials_type} are not supported"
-        )
-
-
-def _request_token(credentials: ClientCredentials) -> str:
-    token_url_prefix = credentials.accounts_url or f'{credentials.gateway_url}/accounts/v1'
-    token_url = f"{token_url_prefix}/tokens?grant_type=client_credentials"
-    token_req = {
-        'clientId': credentials.api_key,
-        'clientSecret': credentials.api_secret,
-    }
-    try:
-        token_resp = _http.post(url=token_url, json=token_req)
-        if token_resp.status_code != 200:
-            raise AuthError(f'could not obtain waylay token: {token_resp.content!r} [{token_resp.status_code}]')
-        token_resp_json = token_resp.json()
-    except _http.HTTPError as exc:
-        raise AuthError(f'could not obtain waylay token: {exc}') from exc
-    return token_resp_json['token']
-
-
-_AUTH_MESSAGE_FOR_EXCEPTON_CLASS = [
-    (jwt_exc.JWTClaimsError, 'invalid token'),
-    (jwt_exc.ExpiredSignatureError, 'token expired'),
-    (jwt_exc.JWTError, 'invalid token'),
-    (TypeError, 'could not decode token'),
-    (ValueError, 'could not decode token')
-]
-
-
-def _auth_message_for_exception(exception):
-    for (exc_class, msg) in _AUTH_MESSAGE_FOR_EXCEPTON_CLASS:
-        if isinstance(exception, exc_class):
-            return msg
-    return 'could not decode token'
-
-
-def parse_credentials(json_obj: Dict[str, Any]) -> WaylayCredentials:
-    """Convert a parsed json representation to a WaylayCredentials object."""
-    cred_type = json_obj.get('type', None)
-    if cred_type is None:
-        raise ValueError('invalid json for credentials: missing type')
-
-    for clz in [NoCredentials, ClientCredentials, ApplicationCredentials, TokenCredentials]:
-        if clz.credentials_type == cred_type:  # type: ignore
-            return clz(**{k: v for k, v in json_obj.items() if k != 'type'})
-
-    raise ValueError(f'cannot parse json for credential type {cred_type}')

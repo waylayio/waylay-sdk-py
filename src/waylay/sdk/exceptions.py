@@ -5,10 +5,6 @@ class WaylayError(Exception):
     """Root class for all exceptions raised by this module."""
 
 
-class AuthError(WaylayError):
-    """Exception class for waylay authentication errors."""
-
-
 class ConfigError(WaylayError):
     """Exception class for waylay client configuration."""
 
@@ -18,7 +14,6 @@ class RequestError(WaylayError):
 
     Notifies errors in tools and utilities that are not directly related
     to a REST call.
-
     """
 
 

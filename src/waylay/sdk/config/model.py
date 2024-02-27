@@ -10,22 +10,26 @@ import json
 import logging
 import httpx
 from appdirs import user_config_dir
-from .auth import (
-    DEFAULT_GATEWAY_URL,
+from ..auth import (
     WaylayCredentials,
     NoCredentials,
-    WaylayTokenAuth, WaylayToken,
-    CredentialsCallback,
+    WaylayToken,
     parse_credentials,
+    AuthError
 )
-from .auth_interactive import (
+from ..auth.provider import (
+    WaylayTokenAuth,
+    CredentialsCallback,
+)
+from ..auth.interactive import (
+    DEFAULT_GATEWAY_URL,
     ask_gateway,
     request_client_credentials_interactive,
     request_migrate_to_gateway_interactive,
     request_store_config_interactive,
     _root_url_for
 )
-from .exceptions import AuthError, ConfigError
+from ..exceptions import ConfigError
 
 log = logging.getLogger(__name__)
 
@@ -38,6 +42,7 @@ def _http_get_global_settings(url, auth):
 
 
 TenantSettings = Mapping[str, str]
+
 Settings = MutableMapping[str, str]
 
 DEFAULT_PROFILE = '_default_'
@@ -335,7 +340,7 @@ class WaylayConfig():
         """
         config_path = Path(self.config_file_path(self.profile))
         config_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(config_path, mode='w') as config_file:
+        with open(config_path, mode='w', encoding='utf-8') as config_file:
             json.dump(self.to_dict(obfuscate=False), config_file)
             log.info("wrote waylay configuration: %s", config_path)
         return str(config_path)

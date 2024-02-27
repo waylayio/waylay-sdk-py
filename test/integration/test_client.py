@@ -1,7 +1,8 @@
 """Integration tests for waylay.sdk.auth module."""
+from typing import Mapping
 from waylay.sdk import WaylayClient
 
-import waylay.sdk.auth_interactive
+import waylay.sdk.auth.interactive
 from waylay.sdk.config import DEFAULT_PROFILE
 
 # Matches versions like v1.2.3, v1.2, v1 or 0+untagged.1.gd418139
@@ -26,7 +27,7 @@ def test_create_client_from_credentials(
     assert cred.gateway_url == waylay_test_gateway_url
     assert cred.accounts_url is None
 
-    assert isinstance(waylay_client.services, list)
+    assert isinstance(waylay_client.services, Mapping)
 
 
 def test_create_client_from_profile(
@@ -49,8 +50,8 @@ def test_create_client_from_profile(
         assert next(user_dialog) in prompt
         return next(user_dialog)
 
-    monkeypatch.setattr(waylay.sdk.auth_interactive, 'ask', mock_ask)
-    monkeypatch.setattr(waylay.sdk.auth_interactive, 'ask_secret', mock_ask_secret)
+    monkeypatch.setattr(waylay.sdk.auth.interactive, 'ask', mock_ask)
+    monkeypatch.setattr(waylay.sdk.auth.interactive, 'ask_secret', mock_ask_secret)
 
     waylay_client = WaylayClient.from_profile('example', gateway_url=waylay_test_gateway_url)
     assert waylay_test_gateway_url == waylay_client.config.gateway_url
