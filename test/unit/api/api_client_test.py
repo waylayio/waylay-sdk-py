@@ -134,16 +134,24 @@ async def test_serialize_and_call(
 def _headers_and_content_snap(headers: dict[str, str], content: bytes):
     # mask `boundary` from multipart/form-data uploads
     content_type = headers.get("content-type")
-    if content_type and content_type.startswith("multipart/form-data"):
+    if not content_type:
+        return (headers, content)
+    if content_type.startswith("multipart/form-data"):
         pattern = re.compile(r"(boundary=)([^\s;]+)")
         match = pattern.search(content_type)
-        if match:
-            boundary = match.group(2)
-            headers.update(
-                {"content-type": content_type.replace(boundary, "<boundary>")}
-            )
-            content = content.decode().replace(boundary, "<boundary>").encode()
-        re.sub(pattern, r"\1***", content_type)
+        if not match:
+            return (headers, content)
+        boundary = match.group(2)
+        headers.update(
+            {"content-type": content_type.replace(boundary, "<boundary>")}
+        )
+        content = content.decode().replace(boundary, "<boundary>").encode()
+    if content_type.startswith("application/x-www-form-urlencoded"):
+        decoded_content = content.decode().split('\r\n')
+        boundary = decoded_content[0]
+        content = '\r\n'.join(
+            c.replace(boundary, '--- boundary ---') for c in decoded_content
+        )
     return (headers, content)
 
 

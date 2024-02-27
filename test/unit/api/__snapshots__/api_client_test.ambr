@@ -493,7 +493,19 @@
     list([
       tuple(
         Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.3', 'content-type': 'application/x-www-form-urlencoded', 'content-length': '280'}),
-        b'--fcdd017f533bcf17ad19ba4a3d4c176f\r\nContent-Disposition: form-data; name="key"\r\n\r\nvalue\r\n--fcdd017f533bcf17ad19ba4a3d4c176f\r\nContent-Disposition: form-data; name="file1"; filename="upload"\r\nContent-Type: application/octet-stream\r\n\r\n<binary>\r\n--fcdd017f533bcf17ad19ba4a3d4c176f--\r\n',
+        '''
+          --- boundary ---
+          Content-Disposition: form-data; name="key"
+          
+          value
+          --- boundary ---
+          Content-Disposition: form-data; name="file1"; filename="upload"
+          Content-Type: application/octet-stream
+          
+          <binary>
+          --- boundary -----
+  
+        ''',
       ),
     ]),
   )
@@ -549,7 +561,7 @@
     list([
       tuple(
         Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.3', 'content-type': 'application/x-www-form-urlencoded', 'content-length': '9'}),
-        b'key=value',
+        '--- boundary ---',
       ),
     ]),
   )
