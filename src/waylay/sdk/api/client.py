@@ -22,7 +22,7 @@ _ALLOWED_METHODS = ["GET", "HEAD", "DELETE", "POST", "PUT", "PATCH", "OPTIONS"]
 class ApiClient(WithSerializationSupport):
     """Generic API client for OpenAPI client library builds.
 
-    OpenAPI generic API client. This client handles the client- server
+    OpenAPI generic API client. This client handles the client-server
     communication, and is invariant across implementations. Specifics of
     the methods and models for each application are generated from the
     OpenAPI templates.
