@@ -1,26 +1,26 @@
 # serializer version: 1
-# name: test_deserialize[response_kwargs0-response_type_map0][200:b'some_text_resopnse'@{'200': <class 'str'>}]
+# name: test_deserialize[response_kwargs0-response_type_map0-None][200:b'some_text_resopnse'@{'200': <class 'str'>}]
   tuple(
     ApiResponse(status_code=200, data='some_text_resopnse', raw_data=b'some_text_resopnse', headers=Headers({'x-resp-header': 'resp_header_value', 'content-length': '18', 'content-type': 'text/plain; charset=utf-8'})),
     'str',
     'some_text_resopnse',
   )
 # ---
-# name: test_deserialize[response_kwargs1-response_type_map1][200:b'some_text_resopnse'@{'200': 'str'}]
+# name: test_deserialize[response_kwargs1-response_type_map1-None][200:b'some_text_resopnse'@{'200': 'str'}]
   tuple(
     ApiResponse(status_code=200, data='some_text_resopnse', raw_data=b'some_text_resopnse', headers=Headers({'content-length': '18', 'content-type': 'text/plain; charset=utf-8'})),
     'str',
     'some_text_resopnse',
   )
 # ---
-# name: test_deserialize[response_kwargs10-response_type_map10][200:b'true'@{}]
+# name: test_deserialize[response_kwargs10-response_type_map10-None][200:b'true'@{}]
   tuple(
     ApiResponse(status_code=200, data=True, raw_data=b'true', headers=Headers({'content-length': '4', 'content-type': 'application/json'})),
     'bool',
     True,
   )
 # ---
-# name: test_deserialize[response_kwargs11-response_type_map11][200:b'{"hello": "world", "key": [1, 2, 3]}'@{'200': <class 'object'>}]
+# name: test_deserialize[response_kwargs11-response_type_map11-None][200:b'{"hello": "world", "key": [1, 2, 3]}'@{'200': <class 'object'>}]
   tuple(
     ApiResponse(status_code=200, data={'hello': 'world', 'key': [1, 2, 3]}, raw_data=b'{"hello": "world", "key": [1, 2, 3]}', headers=Headers({'content-length': '36', 'content-type': 'application/json'})),
     'dict',
@@ -34,42 +34,42 @@
     }),
   )
 # ---
-# name: test_deserialize[response_kwargs12-response_type_map12][200:b'{"hello": "world", "key": [1, 2, 3]}'@{}]
+# name: test_deserialize[response_kwargs12-response_type_map12-None][200:b'{"hello": "world", "key": [1, 2, 3]}'@{}]
   tuple(
     ApiResponse(status_code=200, data=namespace(hello='world', key=[1, 2, 3]), raw_data=b'{"hello": "world", "key": [1, 2, 3]}', headers=Headers({'content-length': '36', 'content-type': 'application/json'})),
     'SimpleNamespace',
     namespace(hello='world', key=[1, 2, 3]),
   )
 # ---
-# name: test_deserialize[response_kwargs13-response_type_map13][200:b''@{}]
+# name: test_deserialize[response_kwargs13-response_type_map13-None][200:b''@{}]
   tuple(
     ApiResponse(status_code=200, data='', raw_data=b'', headers=Headers({})),
     'str',
     '',
   )
 # ---
-# name: test_deserialize[response_kwargs14-response_type_map14][200:b''@{'200': None}]
+# name: test_deserialize[response_kwargs14-response_type_map14-None][200:b''@{'200': None}]
   tuple(
     ApiResponse(status_code=200, data='', raw_data=b'', headers=Headers({})),
     'str',
     '',
   )
 # ---
-# name: test_deserialize[response_kwargs15-response_type_map15][201:b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}'@{'201': typing.Dict[str, str]}]
+# name: test_deserialize[response_kwargs15-response_type_map15-None][201:b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}'@{'201': typing.Dict[str, str]}]
   tuple(
     ApiResponse(status_code=201, data=namespace(message='some not found message', code='RESOURCE_NOT_FOUND'), raw_data=b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}', headers=Headers({'content-length': '67', 'content-type': 'application/json'})),
     'SimpleNamespace',
     namespace(message='some not found message', code='RESOURCE_NOT_FOUND'),
   )
 # ---
-# name: test_deserialize[response_kwargs16-response_type_map16][201:b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}'@{'2XX': typing.Dict[str, str]}]
+# name: test_deserialize[response_kwargs16-response_type_map16-None][201:b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}'@{'2XX': typing.Dict[str, str]}]
   tuple(
     ApiResponse(status_code=201, data=namespace(message='some not found message', code='RESOURCE_NOT_FOUND'), raw_data=b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}', headers=Headers({'content-length': '67', 'content-type': 'application/json'})),
     'SimpleNamespace',
     namespace(message='some not found message', code='RESOURCE_NOT_FOUND'),
   )
 # ---
-# name: test_deserialize[response_kwargs17-response_type_map17][201:b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}'@{'*': 'Dict[str, str]'}]
+# name: test_deserialize[response_kwargs17-response_type_map17-None][201:b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}'@{'*': 'Dict[str, str]'}]
   tuple(
     ApiResponse(status_code=201, data={'message': 'some not found message', 'code': 'RESOURCE_NOT_FOUND'}, raw_data=b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}', headers=Headers({'content-length': '67', 'content-type': 'application/json'})),
     'dict',
@@ -79,49 +79,49 @@
     }),
   )
 # ---
-# name: test_deserialize[response_kwargs18-response_type_map18][201:b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}'@{'default': <class 'dict'>}]
+# name: test_deserialize[response_kwargs18-response_type_map18-None][201:b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}'@{'default': <class 'dict'>}]
   tuple(
     ApiResponse(status_code=201, data=namespace(message='some not found message', code='RESOURCE_NOT_FOUND'), raw_data=b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}', headers=Headers({'content-length': '67', 'content-type': 'application/json'})),
     'SimpleNamespace',
     namespace(message='some not found message', code='RESOURCE_NOT_FOUND'),
   )
 # ---
-# name: test_deserialize[response_kwargs19-response_type_map19][201:b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}'@{'4XX': typing.Dict[str, str]}]
+# name: test_deserialize[response_kwargs19-response_type_map19-None][201:b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}'@{'4XX': typing.Dict[str, str]}]
   tuple(
     ApiResponse(status_code=201, data=namespace(message='some not found message', code='RESOURCE_NOT_FOUND'), raw_data=b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}', headers=Headers({'content-length': '67', 'content-type': 'application/json'})),
     'SimpleNamespace',
     namespace(message='some not found message', code='RESOURCE_NOT_FOUND'),
   )
 # ---
-# name: test_deserialize[response_kwargs2-response_type_map2][200:b'some_text_resopnse'@{}]
+# name: test_deserialize[response_kwargs2-response_type_map2-None][200:b'some_text_resopnse'@{}]
   tuple(
     ApiResponse(status_code=200, data='some_text_resopnse', raw_data=b'some_text_resopnse', headers=Headers({'content-length': '18', 'content-type': 'text/plain; charset=utf-8'})),
     'str',
     'some_text_resopnse',
   )
 # ---
-# name: test_deserialize[response_kwargs20-response_type_map20][202:b'some binary file content,'@{'202': <class 'bytearray'>}]
+# name: test_deserialize[response_kwargs20-response_type_map20-None][202:b'some binary file content,'@{'202': <class 'bytearray'>}]
   tuple(
     ApiResponse(status_code=202, data=b'some binary file content,', raw_data=b'some binary file content,', headers=Headers({'content-type': 'application/octet-stream', 'content-length': '25'})),
     'bytes',
     b'some binary file content,',
   )
 # ---
-# name: test_deserialize[response_kwargs21-response_type_map21][202:b'some binary file content,'@{'2XX': 'bytearray'}]
+# name: test_deserialize[response_kwargs21-response_type_map21-None][202:b'some binary file content,'@{'2XX': 'bytearray'}]
   tuple(
     ApiResponse(status_code=202, data=b'some binary file content,', raw_data=b'some binary file content,', headers=Headers({'content-type': 'application/octet-stream', 'content-length': '25'})),
     'bytes',
     b'some binary file content,',
   )
 # ---
-# name: test_deserialize[response_kwargs22-response_type_map22][202:b'some binary file content,'@{'*': <class 'bytes'>}]
+# name: test_deserialize[response_kwargs22-response_type_map22-None][202:b'some binary file content,'@{'*': <class 'bytes'>}]
   tuple(
     ApiResponse(status_code=202, data=b'some binary file content,', raw_data=b'some binary file content,', headers=Headers({'content-type': 'application/octet-stream', 'content-length': '25'})),
     'bytes',
     b'some binary file content,',
   )
 # ---
-# name: test_deserialize[response_kwargs23-response_type_map23][200:b'["11", "22", 33]'@{'2XX': typing.List[int]}]
+# name: test_deserialize[response_kwargs23-response_type_map23-None][200:b'["11", "22", 33]'@{'2XX': typing.List[int]}]
   tuple(
     ApiResponse(status_code=200, data=['11', '22', 33], raw_data=b'["11", "22", 33]', headers=Headers({'content-length': '16', 'content-type': 'application/json'})),
     'list',
@@ -132,7 +132,7 @@
     ]),
   )
 # ---
-# name: test_deserialize[response_kwargs24-response_type_map24][200:b'["11", "22", 33]'@{'2XX': 'List[int]'}]
+# name: test_deserialize[response_kwargs24-response_type_map24-None][200:b'["11", "22", 33]'@{'2XX': 'List[int]'}]
   tuple(
     ApiResponse(status_code=200, data=[11, 22, 33], raw_data=b'["11", "22", 33]', headers=Headers({'content-length': '16', 'content-type': 'application/json'})),
     'list',
@@ -143,7 +143,7 @@
     ]),
   )
 # ---
-# name: test_deserialize[response_kwargs25-response_type_map25][200:b'["hello", "world", 123, {"key": "value"}]'@{'2XX': typing.List[typing.Union[str, int, typing.Dict[str, typing.Any]]]}]
+# name: test_deserialize[response_kwargs25-response_type_map25-None][200:b'["hello", "world", 123, {"key": "value"}]'@{'2XX': typing.List[typing.Union[str, int, typing.Dict[str, typing.Any]]]}]
   tuple(
     ApiResponse(status_code=200, data=['hello', 'world', 123, namespace(key='value')], raw_data=b'["hello", "world", 123, {"key": "value"}]', headers=Headers({'content-length': '41', 'content-type': 'application/json'})),
     'list',
@@ -155,7 +155,7 @@
     ]),
   )
 # ---
-# name: test_deserialize[response_kwargs26-response_type_map26][200:b'["hello", "world", 123, {"key": "value"}]'@{'2XX': <class 'list'>}]
+# name: test_deserialize[response_kwargs26-response_type_map26-None][200:b'["hello", "world", 123, {"key": "value"}]'@{'2XX': <class 'list'>}]
   tuple(
     ApiResponse(status_code=200, data=['hello', 'world', 123, namespace(key='value')], raw_data=b'["hello", "world", 123, {"key": "value"}]', headers=Headers({'content-length': '41', 'content-type': 'application/json'})),
     'list',
@@ -167,7 +167,7 @@
     ]),
   )
 # ---
-# name: test_deserialize[response_kwargs27-response_type_map27][200:b'["hello", "world", 123, {"key": "value"}]'@{}]
+# name: test_deserialize[response_kwargs27-response_type_map27-None][200:b'["hello", "world", 123, {"key": "value"}]'@{}]
   tuple(
     ApiResponse(status_code=200, data=['hello', 'world', 123, namespace(key='value')], raw_data=b'["hello", "world", 123, {"key": "value"}]', headers=Headers({'content-length': '41', 'content-type': 'application/json'})),
     'list',
@@ -179,154 +179,197 @@
     ]),
   )
 # ---
-# name: test_deserialize[response_kwargs28-response_type_map28][200:b'2023-12-25T00:01:00'@{'200': <class 'datetime.datetime'>}]
+# name: test_deserialize[response_kwargs28-response_type_map28-None][200:b'2023-12-25T00:01:00'@{'200': <class 'datetime.datetime'>}]
   tuple(
     ApiResponse(status_code=200, data=datetime.datetime(2023, 12, 25, 0, 1), raw_data=b'2023-12-25T00:01:00', headers=Headers({'content-length': '19', 'content-type': 'text/plain; charset=utf-8'})),
     'datetime',
     datetime.datetime(2023, 12, 25, 0, 1),
   )
 # ---
-# name: test_deserialize[response_kwargs29-response_type_map29][200:b'2023-12-25T00:01:00'@{'2XX': <class 'datetime.date'>}]
+# name: test_deserialize[response_kwargs29-response_type_map29-None][200:b'2023-12-25T00:01:00'@{'2XX': <class 'datetime.date'>}]
   tuple(
     ApiResponse(status_code=200, data=datetime.date(2023, 12, 25), raw_data=b'2023-12-25T00:01:00', headers=Headers({'content-length': '19', 'content-type': 'text/plain; charset=utf-8'})),
     'date',
     datetime.date(2023, 12, 25),
   )
 # ---
-# name: test_deserialize[response_kwargs3-response_type_map3][200:b'123'@{'200': <class 'int'>}]
+# name: test_deserialize[response_kwargs3-response_type_map3-None][200:b'123'@{'200': <class 'int'>}]
   tuple(
     ApiResponse(status_code=200, data=123, raw_data=b'123', headers=Headers({'content-length': '3', 'content-type': 'text/plain; charset=utf-8'})),
     'int',
     123,
   )
 # ---
-# name: test_deserialize[response_kwargs30-response_type_map30][200:b'2023/12/25:12.02.20'@{'2XX': <class 'datetime.date'>}]
+# name: test_deserialize[response_kwargs30-response_type_map30-None][200:b'2023/12/25:12.02.20'@{'2XX': <class 'datetime.date'>}]
   tuple(
     ApiResponse(status_code=200, data='2023/12/25:12.02.20', raw_data=b'2023/12/25:12.02.20', headers=Headers({'content-length': '19', 'content-type': 'text/plain; charset=utf-8'})),
     'str',
     '2023/12/25:12.02.20',
   )
 # ---
-# name: test_deserialize[response_kwargs31-response_type_map31][200:b'2023-12-25T00:01:00'@{'2XX': <class 'str'>}]
+# name: test_deserialize[response_kwargs31-response_type_map31-None][200:b'2023-12-25T00:01:00'@{'2XX': <class 'str'>}]
   tuple(
     ApiResponse(status_code=200, data='2023-12-25T00:01:00', raw_data=b'2023-12-25T00:01:00', headers=Headers({'content-length': '19', 'content-type': 'text/plain; charset=utf-8'})),
     'str',
     '2023-12-25T00:01:00',
   )
 # ---
-# name: test_deserialize[response_kwargs32-response_type_map32][200:b'2023-12-25T00:01:00'@{}]
+# name: test_deserialize[response_kwargs32-response_type_map32-None][200:b'2023-12-25T00:01:00'@{}]
   tuple(
     ApiResponse(status_code=200, data='2023-12-25T00:01:00', raw_data=b'2023-12-25T00:01:00', headers=Headers({'content-length': '19', 'content-type': 'text/plain; charset=utf-8'})),
     'str',
     '2023-12-25T00:01:00',
   )
 # ---
-# name: test_deserialize[response_kwargs33-response_type_map33][200:b'dog'@{'*': <enum 'PetType'>}]
+# name: test_deserialize[response_kwargs33-response_type_map33-None][200:b'dog'@{'*': <enum 'PetType'>}]
   tuple(
     ApiResponse(status_code=200, data=<PetType.DOG: 'dog'>, raw_data=b'dog', headers=Headers({'content-length': '3', 'content-type': 'text/plain; charset=utf-8'})),
     'PetType',
     <PetType.DOG: 'dog'>,
   )
 # ---
-# name: test_deserialize[response_kwargs34-response_type_map34][200:b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}'@{'200': <class 'unit.api.example.pet_model.Pet'>}]
+# name: test_deserialize[response_kwargs34-response_type_map34-None][200:b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}'@{'200': <class 'unit.api.example.pet_model.Pet'>}]
   tuple(
     ApiResponse(status_code=200, data=Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'), raw_data=b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}', headers=Headers({'content-length': '95', 'content-type': 'application/json'})),
     'Pet',
     Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[response_kwargs35-response_type_map35][200:b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}'@{'2XX': <class 'unit.api.example.pet_model.Pet'>}]
+# name: test_deserialize[response_kwargs35-response_type_map35-None][200:b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}'@{'2XX': <class 'unit.api.example.pet_model.Pet'>}]
   tuple(
     ApiResponse(status_code=200, data=Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'), raw_data=b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}', headers=Headers({'content-length': '87', 'content-type': 'text/plain; charset=utf-8'})),
     'Pet',
     Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[response_kwargs36-response_type_map36][200:b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}'@{'*': <class 'unit.api.example.pet_model.Pet'>}]
+# name: test_deserialize[response_kwargs36-response_type_map36-None][200:b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}'@{'*': <class 'unit.api.example.pet_model.Pet'>}]
   tuple(
     ApiResponse(status_code=200, data=Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'), raw_data=b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}', headers=Headers({'content-length': '87'})),
     'Pet',
     Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[response_kwargs37-response_type_map37][200:b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}'@{'200': typing.Any}]
+# name: test_deserialize[response_kwargs37-response_type_map37-None][200:b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}'@{'200': typing.Any}]
   tuple(
     ApiResponse(status_code=200, data=namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'), raw_data=b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}', headers=Headers({'content-length': '95', 'content-type': 'application/json'})),
     'SimpleNamespace',
     namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[response_kwargs38-response_type_map38][200:b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}'@{'200': None}]
+# name: test_deserialize[response_kwargs38-response_type_map38-None][200:b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}'@{'200': None}]
   tuple(
     ApiResponse(status_code=200, data=namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'), raw_data=b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}', headers=Headers({'content-length': '95', 'content-type': 'application/json'})),
     'SimpleNamespace',
     namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[response_kwargs39-response_type_map39][200:b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}'@{}]
+# name: test_deserialize[response_kwargs39-response_type_map39-None][200:b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}'@{}]
   tuple(
     ApiResponse(status_code=200, data=namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'), raw_data=b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}', headers=Headers({'content-length': '95', 'content-type': 'application/json'})),
     'SimpleNamespace',
     namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[response_kwargs4-response_type_map4][200:b'123.456'@{'200': <class 'float'>}]
+# name: test_deserialize[response_kwargs4-response_type_map4-None][200:b'123.456'@{'200': <class 'float'>}]
   tuple(
     ApiResponse(status_code=200, data=123.456, raw_data=b'123.456', headers=Headers({'content-length': '7', 'content-type': 'text/plain; charset=utf-8'})),
     'float',
     123.456,
   )
 # ---
-# name: test_deserialize[response_kwargs40-response_type_map40][200:b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}'@{'200': 'unit.api.example.pet_model.Pet'}]
+# name: test_deserialize[response_kwargs40-response_type_map40-None][200:b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}'@{'200': <class 'unit.api.example.pet_model.PetList'>}]
+  tuple(
+    ApiResponse(status_code=200, data=PetList(pets=[Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'), Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo')]), raw_data=b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}', headers=Headers({'content-length': '204', 'content-type': 'application/json'})),
+    'PetList',
+    PetList(pets=[Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'), Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo')]),
+  )
+# ---
+# name: test_deserialize[response_kwargs41-response_type_map41-None][200:b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}'@{'200': 'unit.api.example.pet_model.Pet'}]
   tuple(
     ApiResponse(status_code=200, data=Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'), raw_data=b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}', headers=Headers({'content-length': '95', 'content-type': 'application/json'})),
     'Pet',
     Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[response_kwargs41-response_type_map41][200:b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}'@{'200': 'unit.api.example.pet_model.Unexisting'}]
+# name: test_deserialize[response_kwargs42-response_type_map42-None][200:b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}'@{'200': 'unit.api.example.pet_model.Unexisting'}]
   tuple(
     ApiResponse(status_code=200, data=namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'), raw_data=b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}', headers=Headers({'content-length': '95', 'content-type': 'application/json'})),
     'SimpleNamespace',
     namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[response_kwargs42-response_type_map42][200:b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}'@{'200': 'some.unexisting.module.Pet'}]
+# name: test_deserialize[response_kwargs43-response_type_map43-None][200:b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}'@{'200': 'some.unexisting.module.Pet'}]
   tuple(
     ApiResponse(status_code=200, data=namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'), raw_data=b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}', headers=Headers({'content-length': '95', 'content-type': 'application/json'})),
     'SimpleNamespace',
     namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[response_kwargs5-response_type_map5][200:b'123.456'@{'200': 'float'}]
+# name: test_deserialize[response_kwargs44-response_type_map44-name][200:b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}'@{'200': <class 'str'>}]
+  tuple(
+    ApiResponse(status_code=200, data='Lord Biscuit, Master of Naps', raw_data=b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}', headers=Headers({'content-length': '95', 'content-type': 'application/json'})),
+    'str',
+    'Lord Biscuit, Master of Naps',
+  )
+# ---
+# name: test_deserialize[response_kwargs45-response_type_map45-pets][200:b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}'@{'200': typing.List[unit.api.example.pet_model.Pet]}]
+  tuple(
+    ApiResponse(status_code=200, data=[namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'), namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo')], raw_data=b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}', headers=Headers({'content-length': '204', 'content-type': 'application/json'})),
+    'list',
+    list([
+      namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'),
+      namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'),
+    ]),
+  )
+# ---
+# name: test_deserialize[response_kwargs46-response_type_map46-[*].name][200:b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}'@{'200': 'List[str]'}]
+  tuple(
+    ApiResponse(status_code=200, data=['Lord Biscuit, Master of Naps'], raw_data=b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}', headers=Headers({'content-length': '95', 'content-type': 'application/json'})),
+    'list',
+    list([
+      'Lord Biscuit, Master of Naps',
+    ]),
+  )
+# ---
+# name: test_deserialize[response_kwargs47-response_type_map47-pets[*].name][200:b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}'@{'200': 'List[str]'}]
+  tuple(
+    ApiResponse(status_code=200, data=['Lord Biscuit, Master of Naps', 'Lord Biscuit, Master of Naps'], raw_data=b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}', headers=Headers({'content-length': '204', 'content-type': 'application/json'})),
+    'list',
+    list([
+      'Lord Biscuit, Master of Naps',
+      'Lord Biscuit, Master of Naps',
+    ]),
+  )
+# ---
+# name: test_deserialize[response_kwargs5-response_type_map5-None][200:b'123.456'@{'200': 'float'}]
   tuple(
     ApiResponse(status_code=200, data=123.456, raw_data=b'123.456', headers=Headers({'content-length': '7', 'content-type': 'application/json'})),
     'float',
     123.456,
   )
 # ---
-# name: test_deserialize[response_kwargs6-response_type_map6][200:b'"123"'@{}]
+# name: test_deserialize[response_kwargs6-response_type_map6-None][200:b'"123"'@{}]
   tuple(
     ApiResponse(status_code=200, data='123', raw_data=b'"123"', headers=Headers({'content-length': '5', 'content-type': 'application/json'})),
     'str',
     '123',
   )
 # ---
-# name: test_deserialize[response_kwargs7-response_type_map7][200:b'123'@{}]
+# name: test_deserialize[response_kwargs7-response_type_map7-None][200:b'123'@{}]
   tuple(
     ApiResponse(status_code=200, data=123, raw_data=b'123', headers=Headers({'content-length': '3', 'content-type': 'application/json'})),
     'int',
     123,
   )
 # ---
-# name: test_deserialize[response_kwargs8-response_type_map8][200:b'true'@{'200': <class 'bool'>}]
+# name: test_deserialize[response_kwargs8-response_type_map8-None][200:b'true'@{'200': <class 'bool'>}]
   tuple(
     ApiResponse(status_code=200, data=True, raw_data=b'true', headers=Headers({'content-length': '4', 'content-type': 'text/plain; charset=utf-8'})),
     'bool',
     True,
   )
 # ---
-# name: test_deserialize[response_kwargs9-response_type_map9][200:b'false'@{'200': 'bool'}]
+# name: test_deserialize[response_kwargs9-response_type_map9-None][200:b'false'@{'200': 'bool'}]
   tuple(
     ApiResponse(status_code=200, data=False, raw_data=b'false', headers=Headers({'content-length': '5', 'content-type': 'application/json'})),
     'bool',

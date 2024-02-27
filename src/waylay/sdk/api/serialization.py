@@ -9,6 +9,7 @@ from types import SimpleNamespace
 from typing import Any, Mapping, Optional, cast
 
 from dateutil.parser import parse
+from jsonpath_ng import jsonpath, parse as jsonpath_parse  # type: ignore[import-untyped]
 
 from .response import ApiResponse
 from .http import Response as RESTResponse
@@ -101,6 +102,7 @@ class WithSerializationSupport:
         self,
         response_data: RESTResponse,
         response_types_map=None,
+        select_path: str = ''
     ) -> ApiResponse:
         """Deserialize response into an object.
 
@@ -135,6 +137,10 @@ class WithSerializationSupport:
             elif response_type is not None:
                 try:
                     _data = response_data.json()
+                    if select_path:
+                        jsonpath_expr = jsonpath_parse(select_path)
+                        match_values = [match.value for match in jsonpath_expr.find(_data)]
+                        _data = match_values[0] if not re.search(r"\[.*\]", select_path) else match_values
                 except ValueError:
                     _data = response_data.text
                 return_data = (
