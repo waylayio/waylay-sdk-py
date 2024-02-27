@@ -15,7 +15,6 @@ RESTTimeout = Union[
     Tuple[Optional[float], Optional[float], Optional[float], Optional[float]],
 ]
 _CHUNK_SIZE = 65_536
-_REQUEST_BODY_ARGS = ["body", "content", "data", "files", "json"]
 _ALLOWED_METHODS = ["GET", "HEAD", "DELETE", "POST", "PUT", "PATCH", "OPTIONS"]
 
 
@@ -125,14 +124,17 @@ class ApiClient(WithSerializationSupport):
         self,
         method: str,
         url: str,
+        # v DEPRECATED PARAMETERS: prefer native httpx parameters
         body: Optional[Any] = None,
         query_params: Optional[Mapping[str, Any]] = None,
         header_params: Optional[Mapping[str, str]] = None,
         _request_timeout: Optional[RESTTimeout] = None,
+        # ^ DEPRECATED PARAMETERS
         **kwargs,
     ) -> Response:
         """Make a HTTP request."""
         method = _validate_method(method)
+        # v DEPRECATED PARAMETERS: prefer native httpx parameters
         timeout = kwargs.pop("timeout", _request_timeout)
         if timeout is not None:
             kwargs["timeout"] = timeout
@@ -144,6 +146,7 @@ class ApiClient(WithSerializationSupport):
             kwargs["headers"] = headers
         if body:
             kwargs.update(self.convert_body(body, kwargs))
+        # ^ DEPRECATED PARAMETERS
         # perform request and return response
         return await self.http_client.request(
             method,
@@ -157,12 +160,6 @@ class ApiClient(WithSerializationSupport):
         kwargs,
     ) -> Mapping[str, Any]:
         """SDK invocation request with untyped body."""
-        body_args = [k for k in _REQUEST_BODY_ARGS if kwargs.get(k) is not None]
-        if len(body_args) > 0:
-            args = ",".join(f"'{k}'" for k in body_args)
-            raise ApiValueError(
-                f"The 'body' and {args} arguments are mutually exclusive."
-            )
         headers = kwargs.pop("headers", None) or {}
         content_type = headers.get("content-type", "")
         if isinstance(body, BufferedReader):
