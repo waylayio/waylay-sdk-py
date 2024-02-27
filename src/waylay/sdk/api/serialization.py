@@ -28,16 +28,7 @@ _NATIVE_TYPES_MAPPING = {
 
 
 class WithSerializationSupport:
-    """Generic API client for OpenAPI client library builds.
-
-    OpenAPI generic API client. This client handles the client- server
-    communication, and is invariant across implementations. Specifics of
-    the methods and models for each application are generated from the
-    OpenAPI templates.
-
-    :param configuration: configuration object for this client
-
-    """
+    """Serialization support for the SDK client."""
 
     base_url: str
 
@@ -63,6 +54,7 @@ class WithSerializationSupport:
         :param body: Request body.
         :param files dict: key -> filename, value -> filepath, for
             `multipart/form-data`.
+        :base_url: the host url to use
         :return: dict of form {path, method, query_params,
             header_params, body, files}
 
@@ -115,7 +107,6 @@ class WithSerializationSupport:
         :param response_data: RESTResponse object to be deserialized.
         :param response_types_map: dict of response types.
         :return: ApiResponse
-
         """
 
         response_type = response_types_map.get(str(response_data.status_code), None)
@@ -170,15 +161,15 @@ class WithSerializationSupport:
 def _sanitize_for_serialization(obj):
     """Build a JSON POST object.
 
-    If obj is None, return None. If obj is str, int, long, float,
-    bool, return directly. If obj is datetime.datetime,
-    datetime.date     convert to string in iso8601 format. If obj is
-    list, sanitize each element in the list. If obj is dict, return
-    the dict. If obj is OpenAPI model, return the properties dict.
+    If obj is None, return None.
+    If obj is str, int, long, float, bool, return directly.
+    If obj is datetime.datetime, datetime.date convert to string in iso8601 format.
+    If obj is list, sanitize each element in the list.
+    If obj is dict, return the dict.
+    If obj is OpenAPI model, return the properties dict.
 
     :param obj: The data to serialize.
     :return: The serialized form of data.
-
     """
     if obj is None:
         return None
@@ -212,7 +203,6 @@ def _deserialize(data: Any, klass: Any):
     if isinstance(klass, str) and klass in _NATIVE_TYPES_MAPPING:
         # if the response_type is string representing primitive type, replace it with the actual primitive class
         klass = _NATIVE_TYPES_MAPPING[klass]
-        # continue
     if klass in _PRIMITIVE_TYPES + _PRIMITIVE_BYTE_TYPES:
         return __deserialize_primitive(data, klass)
     elif klass == object:
@@ -236,9 +226,9 @@ def _deserialize(data: Any, klass: Any):
                 [types_module_name, class_name] = klass.rsplit(".", 1)
                 types_module = import_module(types_module_name)
                 klass = getattr(types_module, class_name)
-                # continue
             except (AttributeError, ValueError, TypeError, ImportError):
                 return __deserialize_simple_namespace(data)
+
     if isclass(klass) and issubclass(klass, Enum):
         return __deserialize_enum(data, klass)
     else:
