@@ -20,19 +20,19 @@ from .example.pet_model import Pet, PetType
 from .example.pet_fixtures import pet_instance, pet_instance_dict, pet_instance_json
 
 
-@pytest.fixture(name="waylay_token_credentials")
+@pytest.fixture(name="waylay_credentials")
 def _fixture_waylay_token_credentials() -> TokenCredentials:
     return TokenCredentials(token="dummy_token", gateway_url="https://api-example.io")
 
 
 @pytest.fixture(name="waylay_config")
-def _fixture_waylay_config(waylay_token_credentials: TokenCredentials) -> WaylayConfig:
-    return WaylayConfig(credentials=waylay_token_credentials)
+def _fixture_waylay_config(waylay_credentials) -> WaylayConfig:
+    return WaylayConfig(waylay_credentials)
 
 
 @pytest.fixture(name="waylay_api_client")
 def _fixture_waylay_api_client(waylay_config: WaylayConfig) -> ApiClient:
-    return ApiClient(waylay_config)
+    return ApiClient(waylay_config, { 'auth': None })
 
 
 SERIALIZE_CASES = {
@@ -96,6 +96,15 @@ SERIALIZE_CASES = {
         "header_params": {"Content-Type": "application/x-www-form-urlencoded"},
         "body": {"key": "value"},
     },
+    "body_and_files" : {
+        "method": "POST",
+        "resource_path": "/service/v1/bar/foo",
+        "header_params": {"Content-Type": "application/x-www-form-urlencoded"},
+        "body": {"key": "value"},
+        "files" : {
+            "file1": b"<binary>"
+        }
+    }
 }
 
 
@@ -104,7 +113,6 @@ SERIALIZE_CASES = {
 )
 async def test_serialize_and_call(
     snapshot,
-    mocker,
     httpx_mock: HTTPXMock,
     waylay_api_client: ApiClient,
     test_input: dict[str, Any],
@@ -114,11 +122,6 @@ async def test_serialize_and_call(
     test_input = _retrieve_fixture_values(request, test_input)
     serialized_params = waylay_api_client.param_serialize(**test_input)
     assert serialized_params == snapshot
-
-    mocker.patch(
-        "waylay.sdk.auth.provider.WaylayTokenAuth.assure_valid_token",
-        lambda *args: WaylayTokenStub(),
-    )
     httpx_mock.add_response()
     await waylay_api_client.call_api(**serialized_params)
     requests = httpx_mock.get_requests()
@@ -131,31 +134,25 @@ async def test_serialize_and_call(
 def _headers_and_content_snap(headers: dict[str, str], content: bytes):
     # mask `boundary` from multipart/form-data uploads
     content_type = headers.get("content-type")
-    if content_type and content_type.startswith("multipart/form-data"):
+    if not content_type:
+        return (headers, content)
+    if content_type.startswith("multipart/form-data"):
         pattern = re.compile(r"(boundary=)([^\s;]+)")
         match = pattern.search(content_type)
-        if match:
-            boundary = match.group(2)
-            headers.update(
-                {"content-type": content_type.replace(boundary, "<boundary>")}
-            )
-            content = content.decode().replace(boundary, "<boundary>").encode()
-        re.sub(pattern, r"\1***", content_type)
+        if not match:
+            return (headers, content)
+        boundary = match.group(2)
+        headers.update(
+            {"content-type": content_type.replace(boundary, "<boundary>")}
+        )
+        content = content.decode().replace(boundary, "<boundary>").encode()
+    if content_type.startswith("application/x-www-form-urlencoded"):
+        decoded_content = content.decode().split('\r\n')
+        boundary = decoded_content[0]
+        content = '\r\n'.join(
+            c.replace(boundary, '--- boundary ---') for c in decoded_content
+        )
     return (headers, content)
-
-
-async def test_serialize_and_call_does_not_support_body_and_files(
-    waylay_api_client: ApiClient,
-):
-    """REST param serializer should not support setting both `body` and `files`"""
-    serialized_params = waylay_api_client.param_serialize(
-        method="POST",
-        resource_path="/foo",
-        body={"key": "value"},
-        files={"file1": b"<binary>"},
-    )
-    with pytest.raises(ApiValueError):
-        await waylay_api_client.call_api(**serialized_params)
 
 
 async def test_call_invalid_method(waylay_api_client: ApiClient):
