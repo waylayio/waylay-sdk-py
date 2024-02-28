@@ -26,7 +26,6 @@ class PetList(BaseModel):
 
     def to_json(self) -> str:
         """Get the JSON representation of the model using alias."""
-        # TODO: pydantic v2: use .model_dump_json(by_alias=True, exclude_unset=True) instead
         return json.dumps(self.to_dict(), default=str)
 
     @classmethod
@@ -35,8 +34,6 @@ class PetList(BaseModel):
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
-        # pylint: disable=not-an-iterable, no-member, unsupported-membership-test
-        # pylint has some issues with `field` https://github.com/pylint-dev/pylint/issues/7437, so disable some checks
         """Get the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
