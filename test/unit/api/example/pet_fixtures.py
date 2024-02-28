@@ -16,3 +16,7 @@ def pet_instance_json(pet_instance) -> str:
 @pytest.fixture
 def pet_instance_dict(pet_instance) -> dict:
     return pet_instance.to_dict()
+
+@pytest.fixture
+def pet_list_instance_dict(pet_instance) -> dict:
+    return {'pets': [pet_instance.to_dict(), pet_instance.to_dict()]}

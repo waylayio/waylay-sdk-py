@@ -16,8 +16,8 @@ from waylay.sdk.api.http import Response as RESTResponse
 from waylay.sdk.api.exceptions import ApiError, ApiValueError
 
 from ..fixtures import WaylayTokenStub
-from .example.pet_model import Pet, PetType
-from .example.pet_fixtures import pet_instance, pet_instance_dict, pet_instance_json
+from .example.pet_model import Pet, PetType, PetList
+from .example.pet_fixtures import pet_instance, pet_instance_dict, pet_instance_json, pet_list_instance_dict
 
 
 @pytest.fixture(name="waylay_credentials")
@@ -162,7 +162,7 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
 
 
 @pytest.mark.parametrize(
-    "response_kwargs,response_type_map",
+    "response_kwargs,response_type_map,select_path",
     [
         # primitive response types
         (
@@ -172,47 +172,56 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
                 "headers": {"x-resp-header": "resp_header_value"},
             },
             {"200": str},
+            None
         ),
-        ({"status_code": 200, "text": "some_text_resopnse"}, {"200": "str"}),
+        ({"status_code": 200, "text": "some_text_resopnse"}, {"200": "str"}, None),
         (
             {"status_code": 200, "text": "some_text_resopnse"},
             {},  # no response mapping
+            None
         ),
-        ({"status_code": 200, "text": "123"}, {"200": int}),
-        ({"status_code": 200, "text": "123.456"}, {"200": float}),
-        ({"status_code": 200, "json": 123.456}, {"200": "float"}),
+        ({"status_code": 200, "text": "123"}, {"200": int}, None),
+        ({"status_code": 200, "text": "123.456"}, {"200": float}, None),
+        ({"status_code": 200, "json": 123.456}, {"200": "float"}, None),
         (
             {"status_code": 200, "json": "123"},
             {},  # no response mapping
+            None
         ),
         (
             {"status_code": 200, "json": 123},
             {},  # no response mapping
+            None
         ),
-        ({"status_code": 200, "text": "true"}, {"200": bool}),
+        ({"status_code": 200, "text": "true"}, {"200": bool}, None),
         (
             {"status_code": 200, "json": False},
             {
                 "200": "bool"
             },  # TODO fix parsing of falsy boolean values (currently returns 'bytes')
+            None
         ),
         (
             {"status_code": 200, "json": True},
             {},  # no response mapping
+            None
         ),
         (
             {"status_code": 200, "json": {"hello": "world", "key": [1, 2, 3]}},
             {"200": object},
+            None
         ),
         (
             {"status_code": 200, "json": {"hello": "world", "key": [1, 2, 3]}},
             {},  # no response mapping
+            None
         ),
         (
             {"status_code": 200, "content": None},
             {},  # no response mapping
+            None
         ),
-        ({"status_code": 200, "content": None}, {"200": None}),
+        ({"status_code": 200, "content": None}, {"200": None}, None),
         # dict response type
         (
             {
@@ -223,6 +232,7 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
                 },
             },
             {"201": Dict[str, str]},
+            None
         ),
         (
             {
@@ -233,6 +243,7 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
                 },
             },
             {"2XX": Dict[str, str]},
+            None
         ),
         (
             {
@@ -243,6 +254,7 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
                 },
             },
             {"*": "Dict[str, str]"},
+            None
         ),
         (
             {
@@ -253,6 +265,7 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
                 },
             },
             {"default": dict},
+            None
         ),
         (
             {
@@ -263,6 +276,7 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
                 },
             },
             {"4XX": Dict[str, str]},  # no response mapping
+            None
         ),
         # binary response types
         (
@@ -272,6 +286,7 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
                 "headers": {"content-type": "application/octet-stream"},
             },
             {"202": bytearray},
+            None
         ),
         (
             {
@@ -280,6 +295,7 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
                 "headers": {"content-type": "application/octet-stream"},
             },
             {"2XX": "bytearray"},
+            None
         ),
         (
             {
@@ -288,6 +304,7 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
                 "headers": {"content-type": "application/octet-stream"},
             },
             {"*": bytes},
+            None
         ),
         # list response types
         (
@@ -295,19 +312,23 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
             {
                 "2XX": List[int]
             },  # TODO fix parsing subtype (currently array elements aren't converted to int)
+            None
         ),
-        ({"status_code": 200, "json": ["11", "22", 33]}, {"2XX": "List[int]"}),
+        ({"status_code": 200, "json": ["11", "22", 33]}, {"2XX": "List[int]"}, None),
         (
             {"status_code": 200, "json": ["hello", "world", 123, {"key": "value"}]},
             {"2XX": List[Union[str, int, Dict[str, Any]]]},
+            None
         ),
         (
             {"status_code": 200, "json": ["hello", "world", 123, {"key": "value"}]},
             {"2XX": list},
+            None
         ),
         (
             {"status_code": 200, "json": ["hello", "world", 123, {"key": "value"}]},
             {},  # no response type
+            None
         ),
         # datetime response types
         (
@@ -316,6 +337,7 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
                 "text": str(datetime(2023, 12, 25, minute=1).isoformat()),
             },
             {"200": datetime},
+            None
         ),
         (
             {
@@ -323,6 +345,7 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
                 "text": str(datetime(2023, 12, 25, minute=1).isoformat()),
             },
             {"2XX": date},
+            None
         ),
         (
             {
@@ -330,6 +353,7 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
                 "text": str("2023/12/25:12.02.20"),
             },  # invalid date should result in str
             {"2XX": date},
+            None
         ),
         (
             {
@@ -337,6 +361,7 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
                 "text": str(datetime(2023, 12, 25, minute=1).isoformat()),
             },
             {"2XX": str},
+            None
         ),
         (
             {
@@ -344,28 +369,55 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
                 "text": str(datetime(2023, 12, 25, minute=1).isoformat()),
             },
             {},  # no response type
+            None
         ),
         # enum response types
-        ({"status_code": 200, "text": "dog"}, {"*": PetType}),
+        ({"status_code": 200, "text": "dog"}, {"*": PetType}, None),
         # custom model response types
-        ({"status_code": 200, "json": pet_instance_dict}, {"200": Pet}),
-        ({"status_code": 200, "text": pet_instance_json}, {"2XX": Pet}),
-        ({"status_code": 200, "content": pet_instance_json}, {"*": Pet}),
-        ({"status_code": 200, "json": pet_instance_dict}, {"200": Any}),
-        ({"status_code": 200, "json": pet_instance_dict}, {"200": None}),
-        ({"status_code": 200, "json": pet_instance_dict}, {}),
+        ({"status_code": 200, "json": pet_instance_dict}, {"200": Pet}, None),
+        ({"status_code": 200, "text": pet_instance_json}, {"2XX": Pet}, None),
+        ({"status_code": 200, "content": pet_instance_json}, {"*": Pet}, None),
+        ({"status_code": 200, "json": pet_instance_dict}, {"200": Any}, None),
+        ({"status_code": 200, "json": pet_instance_dict}, {"200": None}, None),
+        ({"status_code": 200, "json": pet_instance_dict}, {}, None),
+        ({"status_code": 200, "json": pet_list_instance_dict}, {"200": PetList}, None),
         (
             {"status_code": 200, "json": pet_instance_dict},
             {"200": "unit.api.example.pet_model.Pet"},
+            None
         ),
         (
             {"status_code": 200, "json": pet_instance_dict},
             {"200": "unit.api.example.pet_model.Unexisting"},
+            None
         ),
         (
             {"status_code": 200, "json": pet_instance_dict},
             {"200": "some.unexisting.module.Pet"},
+            None
         ),
+        # select path argument
+        (
+            {"status_code": 200, "json": pet_instance_dict},
+            {"200": str},
+            'name',
+        ),
+        (
+            {"status_code": 200, "json": pet_list_instance_dict},
+            {"200": List[Pet]}, # TODO fix (currently serializes to namespaces instead of Pet instance)
+            'pets',
+        ),
+        (
+            {"status_code": 200, "json": [pet_instance_dict]},
+            {"200": 'List[str]'},
+            '[*].name',
+        ),
+        (
+            {"status_code": 200, "json": pet_list_instance_dict},
+            {"200": 'List[str]'},
+            'pets[*].name',
+        ),
+
     ],
 )
 def test_deserialize(
@@ -373,12 +425,13 @@ def test_deserialize(
     waylay_api_client: ApiClient,
     response_kwargs: Dict[str, Any],
     response_type_map: Any,
+    select_path: str | None,
     request,
 ):
     """Test REST param deserializer."""
     response_kwargs = _retrieve_fixture_values(request, response_kwargs)
     deserialized = waylay_api_client.response_deserialize(
-        RESTResponse(**response_kwargs), response_type_map
+        RESTResponse(**response_kwargs), response_type_map, select_path
     )
     assert (
         deserialized,
@@ -460,9 +513,16 @@ def test_deserialize_error_responses(
 
 def _retrieve_fixture_values(request, kwargs: Dict[str, Any]) -> Dict[str, Any]:
     for arg_key, arg_value in kwargs.items():
-        if callable(arg_value):
-            _arg_value = request.getfixturevalue(arg_value.__name__)
-            kwargs.update({arg_key: _arg_value})
+        def _update_fixture_value(x):
+            if callable(x):
+                _arg_value = request.getfixturevalue(x.__name__)
+                kwargs.update({arg_key: _arg_value})
+        
+        if isinstance(arg_value, list):
+            for x in arg_value:
+                _update_fixture_value(x)
+        else: 
+            _update_fixture_value(arg_value)
     return kwargs
 
 
