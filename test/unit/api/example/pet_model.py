@@ -3,7 +3,7 @@ from enum import Enum
 import pprint
 import json
 
-from typing import Annotated, Any, ClassVar, Dict, List, NotRequired, Optional
+from typing import Annotated, Any, ClassVar, Dict, List, NotRequired, Optional, Union
 from typing_extensions import TypedDict
 from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictStr
 try:
@@ -185,6 +185,8 @@ class PetOwner(BaseModel):
             "name": obj.get("name")
         })
         return _obj
+    
+PetUnion = Union[PetList, Pet]
     
 class PetType(Enum):
     """Pet Type."""

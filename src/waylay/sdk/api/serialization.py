@@ -6,10 +6,11 @@ from enum import Enum
 from importlib import import_module
 from inspect import isclass
 from types import SimpleNamespace
-from typing import Any, Mapping, Optional, cast
+from typing import Any, Dict, Mapping, Optional, Union, cast, get_args, get_origin
 
 from dateutil.parser import parse
 from jsonpath_ng import jsonpath, parse as jsonpath_parse  # type: ignore[import-untyped]
+from pydantic import BaseModel, Field, TypeAdapter, ValidationError
 
 from .response import ApiResponse
 from .http import Response as RESTResponse
@@ -219,12 +220,13 @@ def _deserialize(data: Any, klass: Any):
         return __deserialize_datetime(data)
     if isinstance(klass, str):
         if klass.startswith("List["):
-            sub_kls = re.match(r"List\[(.*)]", klass).group(1)  # type: ignore[union-attr]
-            return [_deserialize(sub_data, sub_kls) for sub_data in data]
+            inner_kls = re.match(r"List\[(.*)]", klass).group(1)  # type: ignore[union-attr]
+            return [_deserialize(sub_data, inner_kls) for sub_data in data]
 
         if klass.startswith("Dict["):
-            sub_kls = re.match(r"Dict\[([^,]*), (.*)]", klass).group(2)  # type: ignore[union-attr]
-            return {k: _deserialize(v, sub_kls) for k, v in data.items()}
+            match = re.match(r"Dict\[([^,]*), (.*)]", klass)
+            (key_kls, val_kls) = (match.group(1), match.group(2))  # type: ignore[union-attr]
+            return {_deserialize(k, key_kls): _deserialize(v, val_kls) for k, v in data.items()}
 
         else:
             try:
@@ -234,6 +236,13 @@ def _deserialize(data: Any, klass: Any):
                 klass = getattr(types_module, class_name)
             except (AttributeError, ValueError, TypeError, ImportError):
                 return __deserialize_simple_namespace(data)
+
+    if get_origin(klass):
+        KlassTypeAdapter = TypeAdapter(klass)
+        try:
+            return KlassTypeAdapter.validate_python(data)
+        except ValidationError:
+            return __deserialize_simple_namespace(data)
 
     if isclass(klass) and issubclass(klass, Enum):
         return __deserialize_enum(data, klass)
