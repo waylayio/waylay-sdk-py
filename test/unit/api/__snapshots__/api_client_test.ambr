@@ -1,5 +1,5 @@
 # serializer version: 1
-# name: test_deserialize[content_bin_*_bytearray][bytes@{'*': <class 'bytes'>}]
+# name: test_deserialize[content_bin_*_bytearray]
   tuple(
     b'some binary file content,',
     202,
@@ -11,7 +11,7 @@
     b'some binary file content,',
   )
 # ---
-# name: test_deserialize[content_bin_XX_bytearay][bytes@{'2XX': 'bytearray'}]
+# name: test_deserialize[content_bin_XX_bytearay]
   tuple(
     b'some binary file content,',
     202,
@@ -23,7 +23,7 @@
     b'some binary file content,',
   )
 # ---
-# name: test_deserialize[content_bin_bytearray][bytes@{'202': <class 'bytearray'>}]
+# name: test_deserialize[content_bin_bytearray]
   tuple(
     b'some binary file content,',
     202,
@@ -35,7 +35,7 @@
     b'some binary file content,',
   )
 # ---
-# name: test_deserialize[content_none][str@]
+# name: test_deserialize[content_none]
   tuple(
     b'',
     200,
@@ -46,7 +46,7 @@
     '',
   )
 # ---
-# name: test_deserialize[content_none_none][str@{'200': None}]
+# name: test_deserialize[content_none_none]
   tuple(
     b'',
     200,
@@ -58,7 +58,7 @@
     '',
   )
 # ---
-# name: test_deserialize[content_str_model][Pet@{'*': <class 'unit.api.example.pet_model.Pet'>}]
+# name: test_deserialize[content_str_model]
   tuple(
     b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}',
     200,
@@ -70,7 +70,7 @@
     Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[json_bool][bool@]
+# name: test_deserialize[json_bool]
   tuple(
     b'true',
     200,
@@ -81,7 +81,7 @@
     True,
   )
 # ---
-# name: test_deserialize[json_bool_bool][bool@{'200': 'bool'}]
+# name: test_deserialize[json_bool_bool]
   tuple(
     b'false',
     200,
@@ -93,7 +93,7 @@
     False,
   )
 # ---
-# name: test_deserialize[json_dict0][SimpleNamespace@]
+# name: test_deserialize[json_dict0]
   tuple(
     b'{"hello": "world", "key": [1, 2, 3]}',
     200,
@@ -104,7 +104,7 @@
     namespace(hello='world', key=[1, 2, 3]),
   )
 # ---
-# name: test_deserialize[json_dict1][SimpleNamespace@]
+# name: test_deserialize[json_dict1]
   tuple(
     b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
     200,
@@ -115,7 +115,7 @@
     namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[json_dict_*_dict][dict@{'*': 'Dict[str, str]'}]
+# name: test_deserialize[json_dict_*_dict]
   tuple(
     b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}',
     201,
@@ -130,7 +130,7 @@
     }),
   )
 # ---
-# name: test_deserialize[json_dict_*_union][Pet@{'*': <class 'unit.api.example.pet_model.Pet'>}]
+# name: test_deserialize[json_dict_*_union]
   tuple(
     b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
     200,
@@ -142,7 +142,7 @@
     Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[json_dict_*_union_str][Pet@{'*': 'unit.api.example.pet_model.PetUnion'}]
+# name: test_deserialize[json_dict_*_union_str]
   tuple(
     b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
     200,
@@ -154,7 +154,7 @@
     Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[json_dict_2XX_dict][dict@{'2XX': typing.Dict[str, str]}]
+# name: test_deserialize[json_dict_2XX_dict]
   tuple(
     b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}',
     201,
@@ -169,7 +169,7 @@
     }),
   )
 # ---
-# name: test_deserialize[json_dict_any][SimpleNamespace@{'200': typing.Any}]
+# name: test_deserialize[json_dict_any]
   tuple(
     b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
     200,
@@ -181,7 +181,7 @@
     namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[json_dict_default_dict][SimpleNamespace@{'default': <class 'dict'>}]
+# name: test_deserialize[json_dict_default_dict]
   tuple(
     b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}',
     201,
@@ -193,7 +193,7 @@
     namespace(message='some not found message', code='RESOURCE_NOT_FOUND'),
   )
 # ---
-# name: test_deserialize[json_dict_dict][dict@{'201': typing.Dict[str, str]}]
+# name: test_deserialize[json_dict_dict]
   tuple(
     b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}',
     201,
@@ -208,7 +208,7 @@
     }),
   )
 # ---
-# name: test_deserialize[json_dict_model][Pet@{'200': <class 'unit.api.example.pet_model.Pet'>}]
+# name: test_deserialize[json_dict_model]
   tuple(
     b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
     200,
@@ -220,7 +220,7 @@
     Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[json_dict_modelstr][Pet@{'200': 'unit.api.example.pet_model.Pet'}]
+# name: test_deserialize[json_dict_modelstr]
   tuple(
     b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
     200,
@@ -232,7 +232,7 @@
     Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[json_dict_no_mapping][SimpleNamespace@{'4XX': typing.Dict[str, str]}]
+# name: test_deserialize[json_dict_no_mapping]
   tuple(
     b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}',
     201,
@@ -244,7 +244,7 @@
     namespace(message='some not found message', code='RESOURCE_NOT_FOUND'),
   )
 # ---
-# name: test_deserialize[json_dict_none][SimpleNamespace@{'200': None}]
+# name: test_deserialize[json_dict_none]
   tuple(
     b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
     200,
@@ -256,7 +256,7 @@
     namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[json_dict_object][dict@{'200': <class 'object'>}]
+# name: test_deserialize[json_dict_object]
   tuple(
     b'{"hello": "world", "key": [1, 2, 3]}',
     200,
@@ -275,7 +275,7 @@
     }),
   )
 # ---
-# name: test_deserialize[json_dict_str_path_name][str@{'200': <class 'str'>}name]
+# name: test_deserialize[json_dict_str_path_name]
   tuple(
     b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
     200,
@@ -287,7 +287,7 @@
     'Lord Biscuit, Master of Naps',
   )
 # ---
-# name: test_deserialize[json_dict_union][Pet@{'200': typing.Union[str, list[unit.api.example.pet_model.Pet], unit.api.example.pet_model.Pet]}]
+# name: test_deserialize[json_dict_union]
   tuple(
     b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
     200,
@@ -299,7 +299,7 @@
     Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[json_dict_wrongmodelstr][SimpleNamespace@{'200': 'unit.api.example.pet_model.Unexisting'}]
+# name: test_deserialize[json_dict_wrongmodelstr]
   tuple(
     b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
     200,
@@ -311,7 +311,7 @@
     namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[json_dict_wrongmodulestr][SimpleNamespace@{'200': 'some.unexisting.module.Pet'}]
+# name: test_deserialize[json_dict_wrongmodulestr]
   tuple(
     b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
     200,
@@ -323,7 +323,7 @@
     namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[json_list][list@]
+# name: test_deserialize[json_list]
   tuple(
     b'["hello", "world", 123, {"key": "value"}]',
     200,
@@ -339,7 +339,7 @@
     ]),
   )
 # ---
-# name: test_deserialize[json_list_*_union][PetList@{'*': 'unit.api.example.pet_model.PetUnion'}]
+# name: test_deserialize[json_list_*_union]
   tuple(
     b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}',
     200,
@@ -351,7 +351,7 @@
     PetList(pets=[Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'), Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo')]),
   )
 # ---
-# name: test_deserialize[json_list_XX_list_int][list@{'2XX': typing.List[int]}]
+# name: test_deserialize[json_list_XX_list_int]
   tuple(
     b'["11", "22", 33]',
     200,
@@ -367,7 +367,7 @@
     ]),
   )
 # ---
-# name: test_deserialize[json_list_X_list_int_str][list@{'2XX': 'List[int]'}]
+# name: test_deserialize[json_list_X_list_int_str]
   tuple(
     b'["11", "22", 33]',
     200,
@@ -383,7 +383,7 @@
     ]),
   )
 # ---
-# name: test_deserialize[json_list_X_union][list@{'2XX': typing.List[typing.Union[str, int, typing.Dict[str, typing.Any]]]}]
+# name: test_deserialize[json_list_X_union]
   tuple(
     b'["hello", "world", 123, {"key": "value"}]',
     200,
@@ -402,7 +402,7 @@
     ]),
   )
 # ---
-# name: test_deserialize[json_list_list_path_[*].name][list@{'200': 'List[str]'}[*].name]
+# name: test_deserialize[json_list_list_path_[*].name]
   tuple(
     b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
     200,
@@ -416,7 +416,7 @@
     ]),
   )
 # ---
-# name: test_deserialize[json_list_list_path_pets[*].name][list@{'200': 'List[str]'}pets[*].name]
+# name: test_deserialize[json_list_list_path_pets[*].name]
   tuple(
     b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}',
     200,
@@ -431,7 +431,7 @@
     ]),
   )
 # ---
-# name: test_deserialize[json_list_model][PetList@{'200': <class 'unit.api.example.pet_model.PetList'>}]
+# name: test_deserialize[json_list_model]
   tuple(
     b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}',
     200,
@@ -443,7 +443,7 @@
     PetList(pets=[Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'), Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo')]),
   )
 # ---
-# name: test_deserialize[json_list_model_path_pets][list@{'200': typing.List[unit.api.example.pet_model.Pet]}pets]
+# name: test_deserialize[json_list_model_path_pets]
   tuple(
     b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}',
     200,
@@ -458,7 +458,7 @@
     ]),
   )
 # ---
-# name: test_deserialize[json_list_x_list][list@{'2XX': <class 'list'>}]
+# name: test_deserialize[json_list_x_list]
   tuple(
     b'["hello", "world", 123, {"key": "value"}]',
     200,
@@ -475,7 +475,7 @@
     ]),
   )
 # ---
-# name: test_deserialize[json_number][int@]
+# name: test_deserialize[json_number]
   tuple(
     b'123',
     200,
@@ -486,7 +486,7 @@
     123,
   )
 # ---
-# name: test_deserialize[json_str][str@]
+# name: test_deserialize[json_str]
   tuple(
     b'"123"',
     200,
@@ -497,7 +497,7 @@
     '123',
   )
 # ---
-# name: test_deserialize[json_str_bool][bool@{'200': <class 'bool'>}]
+# name: test_deserialize[json_str_bool]
   tuple(
     b'true',
     200,
@@ -509,7 +509,7 @@
     True,
   )
 # ---
-# name: test_deserialize[primitive_json_float][float@{'200': 'float'}]
+# name: test_deserialize[primitive_json_float]
   tuple(
     b'123.456',
     200,
@@ -521,7 +521,7 @@
     123.456,
   )
 # ---
-# name: test_deserialize[primitive_text_float][float@{'200': <class 'float'>}]
+# name: test_deserialize[primitive_text_float]
   tuple(
     b'123.456',
     200,
@@ -533,7 +533,7 @@
     123.456,
   )
 # ---
-# name: test_deserialize[primitive_text_int][int@{'200': <class 'int'>}]
+# name: test_deserialize[primitive_text_int]
   tuple(
     b'123',
     200,
@@ -545,7 +545,7 @@
     123,
   )
 # ---
-# name: test_deserialize[text_datestr_str][str@{'2XX': <class 'str'>}]
+# name: test_deserialize[text_datestr_str]
   tuple(
     b'2023-12-25T00:01:00',
     200,
@@ -557,7 +557,7 @@
     '2023-12-25T00:01:00',
   )
 # ---
-# name: test_deserialize[text_str0][str@]
+# name: test_deserialize[text_str0]
   tuple(
     b'some_text_resopnse',
     200,
@@ -568,7 +568,7 @@
     'some_text_resopnse',
   )
 # ---
-# name: test_deserialize[text_str1][str@]
+# name: test_deserialize[text_str1]
   tuple(
     b'2023-12-25T00:01:00',
     200,
@@ -579,7 +579,7 @@
     '2023-12-25T00:01:00',
   )
 # ---
-# name: test_deserialize[text_str_Enum][PetType@{'*': <enum 'PetType'>}]
+# name: test_deserialize[text_str_Enum]
   tuple(
     b'dog',
     200,
@@ -591,7 +591,7 @@
     <PetType.DOG: 'dog'>,
   )
 # ---
-# name: test_deserialize[text_str_date][date@{'2XX': <class 'datetime.date'>}]
+# name: test_deserialize[text_str_date]
   tuple(
     b'2023-12-25T00:01:00',
     200,
@@ -603,7 +603,7 @@
     datetime.date(2023, 12, 25),
   )
 # ---
-# name: test_deserialize[text_str_datetime][datetime@{'200': <class 'datetime.datetime'>}]
+# name: test_deserialize[text_str_datetime]
   tuple(
     b'2023-12-25T00:01:00',
     200,
@@ -615,7 +615,7 @@
     datetime.datetime(2023, 12, 25, 0, 1),
   )
 # ---
-# name: test_deserialize[text_str_invalid_date][str@{'2XX': <class 'datetime.date'>}]
+# name: test_deserialize[text_str_invalid_date]
   tuple(
     b'2023/12/25:12.02.20',
     200,
@@ -627,7 +627,7 @@
     '2023/12/25:12.02.20',
   )
 # ---
-# name: test_deserialize[text_str_model][Pet@{'2XX': <class 'unit.api.example.pet_model.Pet'>}]
+# name: test_deserialize[text_str_model]
   tuple(
     b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}',
     200,
@@ -639,7 +639,7 @@
     Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[text_str_str][str@{'200': <class 'str'>}]
+# name: test_deserialize[text_str_str]
   tuple(
     b'some_text_resopnse',
     200,
@@ -651,7 +651,7 @@
     'some_text_resopnse',
   )
 # ---
-# name: test_deserialize[text_str_str_str][str@{'200': 'str'}]
+# name: test_deserialize[text_str_str_str]
   tuple(
     b'some_text_resopnse',
     200,

@@ -532,9 +532,7 @@ def test_deserialize(
         select_path,
         type(deserialized).__name__,
         deserialized,
-    ) == snapshot(
-        name=f"{type(deserialized).__name__}@{response_type_map or ''}{select_path or ''}"
-    )
+    ) == snapshot()
 
 
 ERROR_RESP_CASES = [
