@@ -1,8 +1,10 @@
 """API response object."""
 
 from __future__ import annotations
-from typing import Dict, Optional, Generic, TypeVar
+from typing import Generic, TypeVar
 from dataclasses import dataclass, field
+
+from .http import HeaderTypes
 
 T = TypeVar("T")
 
@@ -17,5 +19,5 @@ class ApiResponse(Generic[T]):
     """Deserialized data given the data type."""
     raw_data: bytes
     """Raw data (HTTP response body)"""
-    headers: Optional[Dict[str, str]] = field(default_factory=dict)
+    headers: HeaderTypes = field(default_factory=dict)
     """HTTP headers."""

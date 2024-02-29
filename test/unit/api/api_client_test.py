@@ -32,7 +32,7 @@ def _fixture_waylay_config(waylay_credentials) -> WaylayConfig:
 
 @pytest.fixture(name="waylay_api_client")
 def _fixture_waylay_api_client(waylay_config: WaylayConfig) -> ApiClient:
-    return ApiClient(waylay_config, { 'auth': None })
+    return ApiClient(waylay_config, {"auth": None})
 
 
 SERIALIZE_CASES = {
@@ -41,7 +41,7 @@ SERIALIZE_CASES = {
         "resource_path": "/service/v1/{param1}/foo/{param2}",
         "path_params": {"param1": "A", "param2": "B"},
         "query_params": {"key1": "value1", "key2": "value2"},
-        "header_params": {"x-my-header": "header_value"},
+        "headers": {"x-my-header": "header_value"},
         "body": None,
         "files": None,
     },
@@ -50,7 +50,7 @@ SERIALIZE_CASES = {
         "resource_path": "/service/v1/{param1}/bar/{missing_param}",
         "path_params": {"param1": "A", "param_not_in_resource_path": "B"},
         "query_params": None,
-        "header_params": {"x-my-header": "header_value"},
+        "headers": {"x-my-header": "header_value"},
         "body": {
             "array_key": ["val1", "val2"],
             "tuple_key": ("val3", 123, {"key": "value"}, None),
@@ -93,18 +93,16 @@ SERIALIZE_CASES = {
     "form": {
         "method": "POST",
         "resource_path": "/service/v1/bar/foo",
-        "header_params": {"Content-Type": "application/x-www-form-urlencoded"},
+        "headers": {"Content-Type": "application/x-www-form-urlencoded"},
         "body": {"key": "value"},
     },
-    "body_and_files" : {
+    "body_and_files": {
         "method": "POST",
         "resource_path": "/service/v1/bar/foo",
-        "header_params": {"Content-Type": "application/x-www-form-urlencoded"},
+        "headers": {"Content-Type": "application/x-www-form-urlencoded"},
         "body": {"key": "value"},
-        "files" : {
-            "file1": b"<binary>"
-        }
-    }
+        "files": {"file1": b"<binary>"},
+    },
 }
 
 
@@ -117,48 +115,29 @@ async def test_serialize_and_call(
     waylay_api_client: ApiClient,
     test_input: dict[str, Any],
     request,
+    mocker,
 ):
     """Test REST param serializer."""
     test_input = _retrieve_fixture_values(request, test_input)
-    serialized_params = waylay_api_client.param_serialize(**test_input)
-    assert serialized_params == snapshot
+    mocker.patch(
+        "httpx._models.get_multipart_boundary_from_content_type",
+        lambda content_type: b"---boundary---",
+    )
+    request = waylay_api_client.build_api_request(**test_input)
+    assert request.__dict__ == snapshot
     httpx_mock.add_response()
-    await waylay_api_client.call_api(**serialized_params)
+    await waylay_api_client.send(request)
     requests = httpx_mock.get_requests()
     assert (
         requests,
-        [_headers_and_content_snap(r.headers, r.read()) for r in requests],
+        [(r.headers, r.read()) for r in requests],
     ) == snapshot
-
-
-def _headers_and_content_snap(headers: dict[str, str], content: bytes):
-    # mask `boundary` from multipart/form-data uploads
-    content_type = headers.get("content-type")
-    if not content_type:
-        return (headers, content)
-    if content_type.startswith("multipart/form-data"):
-        pattern = re.compile(r"(boundary=)([^\s;]+)")
-        match = pattern.search(content_type)
-        if not match:
-            return (headers, content)
-        boundary = match.group(2)
-        headers.update(
-            {"content-type": content_type.replace(boundary, "<boundary>")}
-        )
-        content = content.decode().replace(boundary, "<boundary>").encode()
-    if content_type.startswith("application/x-www-form-urlencoded"):
-        decoded_content = content.decode().split('\r\n')
-        boundary = decoded_content[0]
-        content = '\r\n'.join(
-            c.replace(boundary, '--- boundary ---') for c in decoded_content
-        )
-    return (headers, content)
 
 
 async def test_call_invalid_method(waylay_api_client: ApiClient):
     """REST client should throw on invalid http method."""
     with pytest.raises(ApiValueError):
-        await waylay_api_client.call_api(method="invalid", url="https://dummy.io")
+        waylay_api_client.build_api_request(method="invalid", resource_path="/")
 
 
 @pytest.mark.parametrize(
@@ -547,36 +526,41 @@ def _retrieve_fixture_values(request, kwargs: Dict[str, Any]) -> Dict[str, Any]:
 
 
 @pytest.mark.parametrize(
-    "method, url, timeout",
+    "method, url, timeout, expected_timeout",
     [
-        ["GET", "https://example.com/foo/", 10.0],
-        ["GET", "https://example.com/foo/", 10],
+        [
+            "GET",
+            "https://example.com/foo/",
+            10.0,
+            {"connect": 10.0, "read": 10.0, "write": 10.0, "pool": 10.0},
+        ],
+        [
+            "GET",
+            "https://example.com/foo/",
+            10,
+            {"connect": 10.0, "read": 10.0, "write": 10.0, "pool": 10.0},
+        ],
         [
             "GET",
             "https://example.com/foo/",
             (10, 5, 5, 5),
+            {"connect": 10, "read": 5, "write": 5, "pool": 5},
         ],  # (connect, read, write, pool)
-        ["GET", "https://example.com/foo/", None],  # default
+        [
+            "GET",
+            "https://example.com/foo/",
+            None,
+            {"connect": 5.0, "read": 5.0, "write": 5.0, "pool": 5.0},
+        ],
     ],
 )
 async def test_request_timeout(
     method,
     url,
     timeout,
+    expected_timeout,
     waylay_api_client: ApiClient,
-    httpx_mock: HTTPXMock,
-    mocker: MockerFixture,
 ):
     """Test request timeout."""
-    spy = mocker.spy(waylay_api_client.http_client, "request")
-    mocker.patch(
-        "waylay.sdk.auth.provider.WaylayTokenAuth.assure_valid_token",
-        lambda *args: WaylayTokenStub(),
-    )
-    httpx_mock.add_response()
-    await waylay_api_client.call_api(method, url, _request_timeout=timeout)
-    expected_timeout = timeout
-    if expected_timeout:
-        spy.assert_called_once_with(method, url, timeout=expected_timeout)
-    else:
-        spy.assert_called_once_with(method, url)
+    request = waylay_api_client.build_api_request(method, url, timeout=timeout)
+    assert request.extensions.get("timeout", None) == expected_timeout

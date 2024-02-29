@@ -19,7 +19,8 @@ class MyService(WaylayService):
 
     async def echo(self, message) -> ApiResponse:
         """Echo."""
-        resp = await self.api_client.call_api("POST", "/", body=message)
+        req = self.api_client.build_api_request("POST", "/", body=message)
+        resp = await self.api_client.send(req)
         return self.api_client.response_deserialize(resp, {})
 
 
