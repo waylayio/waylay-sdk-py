@@ -311,7 +311,7 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
             {"status_code": 200, "json": ["11", "22", 33]},
             {
                 "2XX": List[int]
-            },  # TODO fix parsing subtype (currently array elements aren't converted to int)
+            },
             None
         ),
         ({"status_code": 200, "json": ["11", "22", 33]}, {"2XX": "List[int]"}, None),
@@ -396,6 +396,26 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
             {"200": "some.unexisting.module.Pet"},
             None
         ),
+        (
+            {"status_code": 200, "json": pet_instance_dict},
+            {"200": Union[str, list[Pet], Pet]},
+            None
+        ),
+        (
+            {"status_code": 200, "json": pet_instance_dict},
+            {"*": Union[Pet]},
+            None
+        ),
+        (
+            {"status_code": 200, "json": pet_instance_dict},
+            {"*": "unit.api.example.pet_model.PetUnion"},
+            None
+        ),
+        (
+            {"status_code": 200, "json": pet_list_instance_dict},
+            {"*": "unit.api.example.pet_model.PetUnion"},
+            None
+        ),
         # select path argument
         (
             {"status_code": 200, "json": pet_instance_dict},
@@ -404,7 +424,7 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
         ),
         (
             {"status_code": 200, "json": pet_list_instance_dict},
-            {"200": List[Pet]}, # TODO fix (currently serializes to namespaces instead of Pet instance)
+            {"200": List[Pet]},
             'pets',
         ),
         (
