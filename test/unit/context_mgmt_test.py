@@ -8,7 +8,7 @@ from starlette.requests import Request as StarletteRequest
 from starlette.responses import Response as StarletteResponse
 
 from waylay.sdk import WaylayClient, WaylayService, WaylayTool, WaylayConfig
-from waylay.sdk.api import ApiResponse, AsyncClient
+from waylay.sdk.api import AsyncClient
 
 
 class MyService(WaylayService):
@@ -17,11 +17,13 @@ class MyService(WaylayService):
     name = "tst"
     title = "Test"
 
-    async def echo(self, message) -> ApiResponse:
+    async def echo(self, message, with_http_info=False, select_path=''):
         """Echo."""
         req = self.api_client.build_api_request("POST", "/", body=message)
         resp = await self.api_client.send(req)
-        return self.api_client.response_deserialize(resp, {})
+        if with_http_info:
+            return resp
+        return self.api_client.response_deserialize(resp, {}, select_path)
 
 
 class MyTool(WaylayTool):
@@ -36,9 +38,9 @@ class MyTool(WaylayTool):
         super().__init__(*args, services=services, tools=tools)
         self.my = services.require(MyService)
 
-    async def echo(self, message):
+    async def echo(self, message, with_http_info=False, select_path=''):
         """Echo."""
-        return await self.my.echo(message)
+        return await self.my.echo(message, with_http_info, select_path)
 
 
 class MyService2(MyService):
@@ -76,8 +78,12 @@ async def assert_call_echo(srv: MyService):
     """Invoke the remote service."""
     data = SimpleNamespace(message="hello world")
     api_response = await srv.echo(vars(data))
-    assert api_response.status_code == 200
-    assert data == api_response.data
+    assert data == api_response
+    message = await srv.echo(vars(data), select_path='message')
+    assert message == data.message
+    response = await srv.echo(vars(data), with_http_info=True)
+    assert response.status_code == 200
+    assert response.json() == vars(data)
 
 
 async def test_lazy_init(my_client: WaylayClient):

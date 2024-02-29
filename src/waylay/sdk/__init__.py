@@ -10,4 +10,4 @@ from .auth import (
     WaylayToken,
 )
 from .plugin import WaylayService, WaylayTool, WaylayPlugin, PluginAccess
-from .api import ApiClient, ApiResponse
+from .api import ApiClient

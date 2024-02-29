@@ -17,7 +17,12 @@ from waylay.sdk.api.exceptions import ApiError, ApiValueError
 
 from ..fixtures import WaylayTokenStub
 from .example.pet_model import Pet, PetType, PetList
-from .example.pet_fixtures import pet_instance, pet_instance_dict, pet_instance_json, pet_list_instance_dict
+from .example.pet_fixtures import (
+    pet_instance,
+    pet_instance_dict,
+    pet_instance_json,
+    pet_list_instance_dict,
+)
 
 
 @pytest.fixture(name="waylay_credentials")
@@ -140,284 +145,371 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
         waylay_api_client.build_api_request(method="invalid", resource_path="/")
 
 
+DESERIALIZE_CASES = [
+    (
+        "text_str_str",
+        {
+            "status_code": 200,
+            "text": "some_text_resopnse",
+            "headers": {"x-resp-header": "resp_header_value"},
+        },
+        {"200": str},
+        None,
+    ),
+    (
+        "text_str_str_str",
+        {"status_code": 200, "text": "some_text_resopnse"},
+        {"200": "str"},
+        None,
+    ),
+    (
+        "text_str",
+        {"status_code": 200, "text": "some_text_resopnse"},
+        {},  # no response mapping
+        None,
+    ),
+    ("primitive_text_int", {"status_code": 200, "text": "123"}, {"200": int}, None),
+    (
+        "primitive_text_float",
+        {"status_code": 200, "text": "123.456"},
+        {"200": float},
+        None,
+    ),
+    (
+        "primitive_json_float",
+        {"status_code": 200, "json": 123.456},
+        {"200": "float"},
+        None,
+    ),
+    (
+        "json_str",
+        {"status_code": 200, "json": "123"},
+        {},  # no response mapping
+        None,
+    ),
+    (
+        "json_number",
+        {"status_code": 200, "json": 123},
+        {},  # no response mapping
+        None,
+    ),
+    ("json_str_bool", {"status_code": 200, "text": "true"}, {"200": bool}, None),
+    (
+        "json_bool_bool",
+        {"status_code": 200, "json": False},
+        {
+            "200": "bool"
+        },  # TODO fix parsing of falsy boolean values (currently returns 'bytes')
+        None,
+    ),
+    (
+        "json_bool",
+        {"status_code": 200, "json": True},
+        {},  # no response mapping
+        None,
+    ),
+    (
+        "json_dict_object",
+        {"status_code": 200, "json": {"hello": "world", "key": [1, 2, 3]}},
+        {"200": object},
+        None,
+    ),
+    (
+        "json_dict",
+        {"status_code": 200, "json": {"hello": "world", "key": [1, 2, 3]}},
+        {},  # no response mapping
+        None,
+    ),
+    (
+        "content_none",
+        {"status_code": 200, "content": None},
+        {},  # no response mapping
+        None,
+    ),
+    ("content_none_none", {"status_code": 200, "content": None}, {"200": None}, None),
+    # dict response type
+    (
+        "json_dict_dict",
+        {
+            "status_code": 201,
+            "json": {
+                "message": "some not found message",
+                "code": "RESOURCE_NOT_FOUND",
+            },
+        },
+        {"201": Dict[str, str]},
+        None,
+    ),
+    (
+        "json_dict_2XX_dict",
+        {
+            "status_code": 201,
+            "json": {
+                "message": "some not found message",
+                "code": "RESOURCE_NOT_FOUND",
+            },
+        },
+        {"2XX": Dict[str, str]},
+        None,
+    ),
+    (
+        "json_dict_*_dict",
+        {
+            "status_code": 201,
+            "json": {
+                "message": "some not found message",
+                "code": "RESOURCE_NOT_FOUND",
+            },
+        },
+        {"*": "Dict[str, str]"},
+        None,
+    ),
+    (
+        "json_dict_default_dict",
+        {
+            "status_code": 201,
+            "json": {
+                "message": "some not found message",
+                "code": "RESOURCE_NOT_FOUND",
+            },
+        },
+        {"default": dict},
+        None,
+    ),
+    (
+        "json_dict_no_mapping",
+        {
+            "status_code": 201,
+            "json": {
+                "message": "some not found message",
+                "code": "RESOURCE_NOT_FOUND",
+            },
+        },
+        {"4XX": Dict[str, str]},  # no response mapping
+        None,
+    ),
+    # binary response types
+    (
+        "content_bin_bytearray",
+        {
+            "status_code": 202,
+            "content": b"some binary file content,",
+            "headers": {"content-type": "application/octet-stream"},
+        },
+        {"202": bytearray},
+        None,
+    ),
+    (
+        "content_bin_XX_bytearay",
+        {
+            "status_code": 202,
+            "content": b"some binary file content,",
+            "headers": {"content-type": "application/octet-stream"},
+        },
+        {"2XX": "bytearray"},
+        None,
+    ),
+    (
+        "content_bin_*_bytearray",
+        {
+            "status_code": 202,
+            "content": b"some binary file content,",
+            "headers": {"content-type": "application/octet-stream"},
+        },
+        {"*": bytes},
+        None,
+    ),
+    # list response types
+    (
+        "json_list_XX_list_int",
+        {"status_code": 200, "json": ["11", "22", 33]},
+        {"2XX": List[int]},
+        None,
+    ),
+    (
+        "json_list_X_list_int_str",
+        {"status_code": 200, "json": ["11", "22", 33]},
+        {"2XX": "List[int]"},
+        None,
+    ),
+    (
+        "json_list_X_union",
+        {"status_code": 200, "json": ["hello", "world", 123, {"key": "value"}]},
+        {"2XX": List[Union[str, int, Dict[str, Any]]]},
+        None,
+    ),
+    (
+        "json_list_x_list",
+        {"status_code": 200, "json": ["hello", "world", 123, {"key": "value"}]},
+        {"2XX": list},
+        None,
+    ),
+    (
+        "json_list",
+        {"status_code": 200, "json": ["hello", "world", 123, {"key": "value"}]},
+        {},  # no response type
+        None,
+    ),
+    # datetime response types
+    (
+        "text_str_datetime",
+        {
+            "status_code": 200,
+            "text": str(datetime(2023, 12, 25, minute=1).isoformat()),
+        },
+        {"200": datetime},
+        None,
+    ),
+    (
+        "text_str_date",
+        {
+            "status_code": 200,
+            "text": str(datetime(2023, 12, 25, minute=1).isoformat()),
+        },
+        {"2XX": date},
+        None,
+    ),
+    (
+        "text_str_invalid_date",
+        {
+            "status_code": 200,
+            "text": str("2023/12/25:12.02.20"),
+        },  # invalid date should result in str
+        {"2XX": date},
+        None,
+    ),
+    (
+        "text_datestr_str",
+        {
+            "status_code": 200,
+            "text": str(datetime(2023, 12, 25, minute=1).isoformat()),
+        },
+        {"2XX": str},
+        None,
+    ),
+    (
+        "text_str",
+        {
+            "status_code": 200,
+            "text": str(datetime(2023, 12, 25, minute=1).isoformat()),
+        },
+        {},  # no response type
+        None,
+    ),
+    # enum response types
+    ("text_str_Enum", {"status_code": 200, "text": "dog"}, {"*": PetType}, None),
+    # custom model response types
+    (
+        "json_dict_model",
+        {"status_code": 200, "json": pet_instance_dict},
+        {"200": Pet},
+        None,
+    ),
+    (
+        "text_str_model",
+        {"status_code": 200, "text": pet_instance_json},
+        {"2XX": Pet},
+        None,
+    ),
+    (
+        "content_str_model",
+        {"status_code": 200, "content": pet_instance_json},
+        {"*": Pet},
+        None,
+    ),
+    (
+        "json_dict_any",
+        {"status_code": 200, "json": pet_instance_dict},
+        {"200": Any},
+        None,
+    ),
+    (
+        "json_dict_none",
+        {"status_code": 200, "json": pet_instance_dict},
+        {"200": None},
+        None,
+    ),
+    ("json_dict", {"status_code": 200, "json": pet_instance_dict}, {}, None),
+    (
+        "json_list_model",
+        {"status_code": 200, "json": pet_list_instance_dict},
+        {"200": PetList},
+        None,
+    ),
+    (
+        "json_dict_modelstr",
+        {"status_code": 200, "json": pet_instance_dict},
+        {"200": "unit.api.example.pet_model.Pet"},
+        None,
+    ),
+    (
+        "json_dict_wrongmodelstr",
+        {"status_code": 200, "json": pet_instance_dict},
+        {"200": "unit.api.example.pet_model.Unexisting"},
+        None,
+    ),
+    (
+        "json_dict_wrongmodulestr",
+        {"status_code": 200, "json": pet_instance_dict},
+        {"200": "some.unexisting.module.Pet"},
+        None,
+    ),
+    (
+        "json_dict_union",
+        {"status_code": 200, "json": pet_instance_dict},
+        {"200": Union[str, list[Pet], Pet]},
+        None,
+    ),
+    (
+        "json_dict_*_union",
+        {"status_code": 200, "json": pet_instance_dict},
+        {"*": Union[Pet]},
+        None,
+    ),
+    (
+        "json_dict_*_union_str",
+        {"status_code": 200, "json": pet_instance_dict},
+        {"*": "unit.api.example.pet_model.PetUnion"},
+        None,
+    ),
+    (
+        "json_list_*_union",
+        {"status_code": 200, "json": pet_list_instance_dict},
+        {"*": "unit.api.example.pet_model.PetUnion"},
+        None,
+    ),
+    # select path argument
+    (
+        "json_dict_str_path_name",
+        {"status_code": 200, "json": pet_instance_dict},
+        {"200": str},
+        "name",
+    ),
+    (
+        "json_list_model_path_pets",
+        {"status_code": 200, "json": pet_list_instance_dict},
+        {"200": List[Pet]},
+        "pets",
+    ),
+    (
+        "json_list_list_path_[*].name",
+        {"status_code": 200, "json": [pet_instance_dict]},
+        {"200": "List[str]"},
+        "[*].name",
+    ),
+    (
+        "json_list_list_path_pets[*].name",
+        {"status_code": 200, "json": pet_list_instance_dict},
+        {"200": "List[str]"},
+        "pets[*].name",
+    ),
+]
+
+
 @pytest.mark.parametrize(
     "response_kwargs,response_type_map,select_path",
-    [
-        # primitive response types
-        (
-            {
-                "status_code": 200,
-                "text": "some_text_resopnse",
-                "headers": {"x-resp-header": "resp_header_value"},
-            },
-            {"200": str},
-            None
-        ),
-        ({"status_code": 200, "text": "some_text_resopnse"}, {"200": "str"}, None),
-        (
-            {"status_code": 200, "text": "some_text_resopnse"},
-            {},  # no response mapping
-            None
-        ),
-        ({"status_code": 200, "text": "123"}, {"200": int}, None),
-        ({"status_code": 200, "text": "123.456"}, {"200": float}, None),
-        ({"status_code": 200, "json": 123.456}, {"200": "float"}, None),
-        (
-            {"status_code": 200, "json": "123"},
-            {},  # no response mapping
-            None
-        ),
-        (
-            {"status_code": 200, "json": 123},
-            {},  # no response mapping
-            None
-        ),
-        ({"status_code": 200, "text": "true"}, {"200": bool}, None),
-        (
-            {"status_code": 200, "json": False},
-            {
-                "200": "bool"
-            },  # TODO fix parsing of falsy boolean values (currently returns 'bytes')
-            None
-        ),
-        (
-            {"status_code": 200, "json": True},
-            {},  # no response mapping
-            None
-        ),
-        (
-            {"status_code": 200, "json": {"hello": "world", "key": [1, 2, 3]}},
-            {"200": object},
-            None
-        ),
-        (
-            {"status_code": 200, "json": {"hello": "world", "key": [1, 2, 3]}},
-            {},  # no response mapping
-            None
-        ),
-        (
-            {"status_code": 200, "content": None},
-            {},  # no response mapping
-            None
-        ),
-        ({"status_code": 200, "content": None}, {"200": None}, None),
-        # dict response type
-        (
-            {
-                "status_code": 201,
-                "json": {
-                    "message": "some not found message",
-                    "code": "RESOURCE_NOT_FOUND",
-                },
-            },
-            {"201": Dict[str, str]},
-            None
-        ),
-        (
-            {
-                "status_code": 201,
-                "json": {
-                    "message": "some not found message",
-                    "code": "RESOURCE_NOT_FOUND",
-                },
-            },
-            {"2XX": Dict[str, str]},
-            None
-        ),
-        (
-            {
-                "status_code": 201,
-                "json": {
-                    "message": "some not found message",
-                    "code": "RESOURCE_NOT_FOUND",
-                },
-            },
-            {"*": "Dict[str, str]"},
-            None
-        ),
-        (
-            {
-                "status_code": 201,
-                "json": {
-                    "message": "some not found message",
-                    "code": "RESOURCE_NOT_FOUND",
-                },
-            },
-            {"default": dict},
-            None
-        ),
-        (
-            {
-                "status_code": 201,
-                "json": {
-                    "message": "some not found message",
-                    "code": "RESOURCE_NOT_FOUND",
-                },
-            },
-            {"4XX": Dict[str, str]},  # no response mapping
-            None
-        ),
-        # binary response types
-        (
-            {
-                "status_code": 202,
-                "content": b"some binary file content,",
-                "headers": {"content-type": "application/octet-stream"},
-            },
-            {"202": bytearray},
-            None
-        ),
-        (
-            {
-                "status_code": 202,
-                "content": b"some binary file content,",
-                "headers": {"content-type": "application/octet-stream"},
-            },
-            {"2XX": "bytearray"},
-            None
-        ),
-        (
-            {
-                "status_code": 202,
-                "content": b"some binary file content,",
-                "headers": {"content-type": "application/octet-stream"},
-            },
-            {"*": bytes},
-            None
-        ),
-        # list response types
-        (
-            {"status_code": 200, "json": ["11", "22", 33]},
-            {
-                "2XX": List[int]
-            },
-            None
-        ),
-        ({"status_code": 200, "json": ["11", "22", 33]}, {"2XX": "List[int]"}, None),
-        (
-            {"status_code": 200, "json": ["hello", "world", 123, {"key": "value"}]},
-            {"2XX": List[Union[str, int, Dict[str, Any]]]},
-            None
-        ),
-        (
-            {"status_code": 200, "json": ["hello", "world", 123, {"key": "value"}]},
-            {"2XX": list},
-            None
-        ),
-        (
-            {"status_code": 200, "json": ["hello", "world", 123, {"key": "value"}]},
-            {},  # no response type
-            None
-        ),
-        # datetime response types
-        (
-            {
-                "status_code": 200,
-                "text": str(datetime(2023, 12, 25, minute=1).isoformat()),
-            },
-            {"200": datetime},
-            None
-        ),
-        (
-            {
-                "status_code": 200,
-                "text": str(datetime(2023, 12, 25, minute=1).isoformat()),
-            },
-            {"2XX": date},
-            None
-        ),
-        (
-            {
-                "status_code": 200,
-                "text": str("2023/12/25:12.02.20"),
-            },  # invalid date should result in str
-            {"2XX": date},
-            None
-        ),
-        (
-            {
-                "status_code": 200,
-                "text": str(datetime(2023, 12, 25, minute=1).isoformat()),
-            },
-            {"2XX": str},
-            None
-        ),
-        (
-            {
-                "status_code": 200,
-                "text": str(datetime(2023, 12, 25, minute=1).isoformat()),
-            },
-            {},  # no response type
-            None
-        ),
-        # enum response types
-        ({"status_code": 200, "text": "dog"}, {"*": PetType}, None),
-        # custom model response types
-        ({"status_code": 200, "json": pet_instance_dict}, {"200": Pet}, None),
-        ({"status_code": 200, "text": pet_instance_json}, {"2XX": Pet}, None),
-        ({"status_code": 200, "content": pet_instance_json}, {"*": Pet}, None),
-        ({"status_code": 200, "json": pet_instance_dict}, {"200": Any}, None),
-        ({"status_code": 200, "json": pet_instance_dict}, {"200": None}, None),
-        ({"status_code": 200, "json": pet_instance_dict}, {}, None),
-        ({"status_code": 200, "json": pet_list_instance_dict}, {"200": PetList}, None),
-        (
-            {"status_code": 200, "json": pet_instance_dict},
-            {"200": "unit.api.example.pet_model.Pet"},
-            None
-        ),
-        (
-            {"status_code": 200, "json": pet_instance_dict},
-            {"200": "unit.api.example.pet_model.Unexisting"},
-            None
-        ),
-        (
-            {"status_code": 200, "json": pet_instance_dict},
-            {"200": "some.unexisting.module.Pet"},
-            None
-        ),
-        (
-            {"status_code": 200, "json": pet_instance_dict},
-            {"200": Union[str, list[Pet], Pet]},
-            None
-        ),
-        (
-            {"status_code": 200, "json": pet_instance_dict},
-            {"*": Union[Pet]},
-            None
-        ),
-        (
-            {"status_code": 200, "json": pet_instance_dict},
-            {"*": "unit.api.example.pet_model.PetUnion"},
-            None
-        ),
-        (
-            {"status_code": 200, "json": pet_list_instance_dict},
-            {"*": "unit.api.example.pet_model.PetUnion"},
-            None
-        ),
-        # select path argument
-        (
-            {"status_code": 200, "json": pet_instance_dict},
-            {"200": str},
-            'name',
-        ),
-        (
-            {"status_code": 200, "json": pet_list_instance_dict},
-            {"200": List[Pet]},
-            'pets',
-        ),
-        (
-            {"status_code": 200, "json": [pet_instance_dict]},
-            {"200": 'List[str]'},
-            '[*].name',
-        ),
-        (
-            {"status_code": 200, "json": pet_list_instance_dict},
-            {"200": 'List[str]'},
-            'pets[*].name',
-        ),
-
-    ],
+    [c[1:] for c in DESERIALIZE_CASES],
+    ids=[c[0] for c in DESERIALIZE_CASES],
 )
 def test_deserialize(
     snapshot,
@@ -429,67 +521,71 @@ def test_deserialize(
 ):
     """Test REST param deserializer."""
     response_kwargs = _retrieve_fixture_values(request, response_kwargs)
+    response = RESTResponse(**response_kwargs)
     deserialized = waylay_api_client.response_deserialize(
-        RESTResponse(**response_kwargs), response_type_map, select_path
+        response, response_type_map, select_path
     )
     assert (
+        response.content,
+        response.status_code,
+        response_type_map,
+        select_path,
+        type(deserialized).__name__,
         deserialized,
-        type(deserialized.data).__name__,
-        deserialized.data,
     ) == snapshot(
-        name=f"{deserialized.status_code}:{deserialized.raw_data}@{str(response_type_map)}"
+        name=f"{type(deserialized).__name__}@{response_type_map or ''}{select_path or ''}"
     )
 
 
-@pytest.mark.parametrize(
-    "response_kwargs,response_type_map",
-    [
-        (
-            {
-                "status_code": 404,
-                "json": {
-                    "message": "some not found message",
-                    "code": "RESOURCE_NOT_FOUND",
-                },
+ERROR_RESP_CASES = [
+    (
+        {
+            "status_code": 404,
+            "json": {
+                "message": "some not found message",
+                "code": "RESOURCE_NOT_FOUND",
             },
-            {"404": Dict[str, str]},
-        ),
-        (
-            {
-                "status_code": 404,
-                "json": {
-                    "message": "some not found message",
-                    "code": "RESOURCE_NOT_FOUND",
-                },
+        },
+        {"404": Dict[str, str]},
+    ),
+    (
+        {
+            "status_code": 404,
+            "json": {
+                "message": "some not found message",
+                "code": "RESOURCE_NOT_FOUND",
             },
-            {"4XX": dict},
-        ),
-        (
-            {
-                "status_code": 404,
-                "json": {
-                    "message": "some not found message",
-                    "code": "RESOURCE_NOT_FOUND",
-                },
+        },
+        {"4XX": dict},
+    ),
+    (
+        {
+            "status_code": 404,
+            "json": {
+                "message": "some not found message",
+                "code": "RESOURCE_NOT_FOUND",
             },
-            {"4XX": Any},
-        ),
-        ({"status_code": 404, "text": "some not found message"}, {"4XX": Any}),
-        (
-            {
-                "status_code": 404,
-                "json": {
-                    "message": "some not found message",
-                    "code": "RESOURCE_NOT_FOUND",
-                },
+        },
+        {"4XX": Any},
+    ),
+    ({"status_code": 404, "text": "some not found message"}, {"4XX": Any}),
+    (
+        {
+            "status_code": 404,
+            "json": {
+                "message": "some not found message",
+                "code": "RESOURCE_NOT_FOUND",
             },
-            {},  # no response mapping
-        ),
-        ({"status_code": 400, "json": pet_instance_dict}, {"400": Pet}),
-        ({"status_code": 400, "content": pet_instance_json}, {"default": Any}),
-        ({"status_code": 400, "json": pet_instance_dict}, {}),
-    ],
-)
+        },
+        {},  # no response mapping
+    ),
+    ({"status_code": 400, "json": pet_instance_dict}, {"400": Pet}),
+    ({"status_code": 400, "content": pet_instance_json}, {"default": Any}),
+    ({"status_code": 400, "json": pet_instance_dict}, {}),
+]
+
+
+@pytest.mark.parametrize("response_kwargs,response_type_map", ERROR_RESP_CASES)
 def test_deserialize_error_responses(
     snapshot,
     waylay_api_client: ApiClient,
@@ -512,15 +608,16 @@ def test_deserialize_error_responses(
 
 def _retrieve_fixture_values(request, kwargs: Dict[str, Any]) -> Dict[str, Any]:
     for arg_key, arg_value in kwargs.items():
+
         def _update_fixture_value(x):
             if callable(x):
                 _arg_value = request.getfixturevalue(x.__name__)
                 kwargs.update({arg_key: _arg_value})
-        
+
         if isinstance(arg_value, list):
             for x in arg_value:
                 _update_fixture_value(x)
-        else: 
+        else:
             _update_fixture_value(arg_value)
     return kwargs
 

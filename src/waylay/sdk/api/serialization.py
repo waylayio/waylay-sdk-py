@@ -17,7 +17,6 @@ from httpx import QueryParams
 
 from .http import Response, HeaderTypes, RequestFiles, Request, AsyncClient, QueryParamTypes
 from .exceptions import ApiValueError, ApiError
-from .response import ApiResponse
 
 
 _PRIMITIVE_BYTE_TYPES = (bytes, bytearray)
@@ -98,26 +97,28 @@ class WithSerializationSupport:
 
     def response_deserialize(
         self,
-        response_data: Response,
+        response: Response,
         response_types_map=None,
         select_path: str = ''
-    ) -> ApiResponse:
-        """Deserialize response into an object.
+    ) -> Any:
+        """Deserialize response into a model object.
 
-        :param response_data: RESTResponse object to be deserialized.
+        :param response_data: Response object to be deserialized.
         :param response_types_map: dict of response types.
+        :param select_path: json path into the json payload.
         :return: ApiResponse
         """
-
-        response_type = response_types_map.get(str(response_data.status_code), None)
+        status_code = response.status_code
+        status_code_key = str(status_code)
+        response_type = response_types_map.get(status_code_key, None)
         if (
             not response_type
-            and isinstance(response_data.status_code, int)
-            and 100 <= response_data.status_code <= 599
+            and isinstance(status_code, int)
+            and 100 <= response.status_code <= 599
         ):
             # if not found, look for '1XX', '2XX', etc.
             response_type = response_types_map.get(
-                str(response_data.status_code)[0] + "XX"
+                status_code_key[0] + "XX"
             )
         if not response_type:
             # if still not found, look for default response type, otherwise use `Any`
@@ -131,35 +132,27 @@ class WithSerializationSupport:
             if response_type in _PRIMITIVE_BYTE_TYPES + tuple(
                 t.__name__ for t in _PRIMITIVE_BYTE_TYPES
             ):
-                return_data = response_data.content
+                return_data = response.content
             elif response_type is not None:
                 try:
-                    _data = response_data.json()
+                    _data = response.json()
                     if select_path:
                         jsonpath_expr = jsonpath_parse(select_path)
                         match_values = [match.value for match in jsonpath_expr.find(_data)]
                         _data = match_values[0] if not re.search(r"\[.*\]", select_path) else match_values
                 except ValueError:
-                    _data = response_data.text
-                return_data = (
-                    _deserialize(_data, response_type)
-                    if _data is not None
-                    else response_data.content
-                )
+                    _data = response.text
+                if _data is not None:
+                    return_data = _deserialize(_data, response_type)
+                else:
+                    return_data = response.content
         finally:
-            if not 200 <= response_data.status_code <= 299:
-                raise ApiError.from_response(  # pylint: disable=raising-bad-type
-                    http_resp=response_data,
-                    content=response_data.content,
-                    data=return_data,
+            if not 200 <= status_code <= 299:
+                raise ApiError.from_response(
+                    response,
+                    return_data,
                 )
-
-        return ApiResponse(
-            status_code=response_data.status_code,
-            data=return_data,
-            headers=cast(dict[str, str], response_data.headers),
-            raw_data=response_data.content,
-        )
+        return return_data
 
 
 _CHUNK_SIZE = 65_536
