@@ -10,6 +10,7 @@ from starlette.responses import Response as StarletteResponse
 
 from waylay.sdk import WaylayClient, WaylayService, WaylayTool, WaylayConfig
 from waylay.sdk.api import AsyncClient
+from waylay.sdk.api._models import Model, _Model
 
 
 class MyService(WaylayService):
@@ -24,7 +25,7 @@ class MyService(WaylayService):
         resp = await self.api_client.send(req)
         if with_http_info:
             return resp
-        return self.api_client.response_deserialize(resp, {}, select_path)
+        return self.api_client.response_deserialize(resp, {"*": Model}, select_path)
 
 
 class MyTool(WaylayTool):
@@ -77,14 +78,15 @@ def _fixture_my_client(config: WaylayConfig, echo_app):
 
 async def assert_call_echo(srv: MyService):
     """Invoke the remote service."""
-    data = SimpleNamespace(message="hello world")
-    api_response = await srv.echo(vars(data))
-    assert data == api_response
-    message = await srv.echo(vars(data), select_path='message')
-    assert message == data.message
-    response = await srv.echo(vars(data), with_http_info=True)
+    data = {"message": "hello world"}
+    api_response = await srv.echo(data)
+    assert api_response == _Model(**data)
+    assert api_response.message == data['message']
+    message = await srv.echo(data, select_path='message')
+    assert message == data['message']
+    response = await srv.echo(data, with_http_info=True)
     assert response.status_code == 200
-    assert response.json() == vars(data)
+    assert response.json() == data
 
 
 async def test_direct_request(my_client: WaylayClient):

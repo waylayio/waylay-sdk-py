@@ -100,8 +100,8 @@
     dict({
     }),
     None,
-    'SimpleNamespace',
-    namespace(hello='world', key=[1, 2, 3]),
+    '_Model',
+    _Model(hello='world', key=[1, 2, 3]),
   )
 # ---
 # name: test_deserialize[json_dict1]
@@ -111,8 +111,8 @@
     dict({
     }),
     None,
-    'SimpleNamespace',
-    namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'),
+    '_Model',
+    _Model(name='Lord Biscuit, Master of Naps', owner=_Model(id=123, name='Simon'), tag='doggo'),
   )
 # ---
 # name: test_deserialize[json_dict_*_dict]
@@ -177,8 +177,27 @@
       '200': typing.Any,
     }),
     None,
-    'SimpleNamespace',
-    namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'),
+    'dict',
+    dict({
+      'name': 'Lord Biscuit, Master of Naps',
+      'owner': dict({
+        'id': 123,
+        'name': 'Simon',
+      }),
+      'tag': 'doggo',
+    }),
+  )
+# ---
+# name: test_deserialize[json_dict_any_model]
+  tuple(
+    b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
+    200,
+    dict({
+      '200': Model,
+    }),
+    None,
+    '_Model',
+    _Model(name='Lord Biscuit, Master of Naps', owner=_Model(id=123, name='Simon'), tag='doggo'),
   )
 # ---
 # name: test_deserialize[json_dict_default_dict]
@@ -189,8 +208,11 @@
       'default': <class 'dict'>,
     }),
     None,
-    'SimpleNamespace',
-    namespace(message='some not found message', code='RESOURCE_NOT_FOUND'),
+    'dict',
+    dict({
+      'code': 'RESOURCE_NOT_FOUND',
+      'message': 'some not found message',
+    }),
   )
 # ---
 # name: test_deserialize[json_dict_dict]
@@ -240,8 +262,8 @@
       '4XX': typing.Dict[str, str],
     }),
     None,
-    'SimpleNamespace',
-    namespace(message='some not found message', code='RESOURCE_NOT_FOUND'),
+    '_Model',
+    _Model(message='some not found message', code='RESOURCE_NOT_FOUND'),
   )
 # ---
 # name: test_deserialize[json_dict_none]
@@ -252,8 +274,8 @@
       '200': None,
     }),
     None,
-    'SimpleNamespace',
-    namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'),
+    '_Model',
+    _Model(name='Lord Biscuit, Master of Naps', owner=_Model(id=123, name='Simon'), tag='doggo'),
   )
 # ---
 # name: test_deserialize[json_dict_object]
@@ -307,8 +329,8 @@
       '200': 'unit.api.example.pet_model.Unexisting',
     }),
     None,
-    'SimpleNamespace',
-    namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'),
+    '_Model',
+    _Model(name='Lord Biscuit, Master of Naps', owner=_Model(id=123, name='Simon'), tag='doggo'),
   )
 # ---
 # name: test_deserialize[json_dict_wrongmodulestr]
@@ -319,8 +341,8 @@
       '200': 'some.unexisting.module.Pet',
     }),
     None,
-    'SimpleNamespace',
-    namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'),
+    '_Model',
+    _Model(name='Lord Biscuit, Master of Naps', owner=_Model(id=123, name='Simon'), tag='doggo'),
   )
 # ---
 # name: test_deserialize[json_list]
@@ -335,7 +357,7 @@
       'hello',
       'world',
       123,
-      namespace(key='value'),
+      _Model(key='value'),
     ]),
   )
 # ---
@@ -399,6 +421,33 @@
       dict({
         'key': 'value',
       }),
+    ]),
+  )
+# ---
+# name: test_deserialize[json_list_any_model]
+  tuple(
+    b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}',
+    200,
+    dict({
+      '*': Model,
+    }),
+    None,
+    '_Model',
+    _Model(pets=[_Model(name='Lord Biscuit, Master of Naps', owner=_Model(id=123, name='Simon'), tag='doggo'), _Model(name='Lord Biscuit, Master of Naps', owner=_Model(id=123, name='Simon'), tag='doggo')]),
+  )
+# ---
+# name: test_deserialize[json_list_any_model_path_pets]
+  tuple(
+    b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}',
+    200,
+    dict({
+      '200': typing.List[Model],
+    }),
+    'pets',
+    'list',
+    list([
+      _Model(name='Lord Biscuit, Master of Naps', owner=_Model(id=123, name='Simon'), tag='doggo'),
+      _Model(name='Lord Biscuit, Master of Naps', owner=_Model(id=123, name='Simon'), tag='doggo'),
     ]),
   )
 # ---
@@ -471,7 +520,9 @@
       'hello',
       'world',
       123,
-      namespace(key='value'),
+      dict({
+        'key': 'value',
+      }),
     ]),
   )
 # ---
@@ -593,7 +644,7 @@
 # ---
 # name: test_deserialize[text_str_date]
   tuple(
-    b'2023-12-25T00:01:00',
+    b'2023-12-25',
     200,
     dict({
       '2XX': <class 'datetime.date'>,
@@ -686,12 +737,15 @@
       ApiError(404)
       Reason: Not Found
       HTTP response headers: Headers({'content-length': '67', 'content-type': 'application/json'})
-      HTTP response content: namespace(message='some not found message', code='RESOURCE_NOT_FOUND')
+      HTTP response content: {'message': 'some not found message', 'code': 'RESOURCE_NOT_FOUND'}
       
       )
     ''',
-    'SimpleNamespace',
-    namespace(message='some not found message', code='RESOURCE_NOT_FOUND'),
+    'dict',
+    dict({
+      'code': 'RESOURCE_NOT_FOUND',
+      'message': 'some not found message',
+    }),
   )
 # ---
 # name: test_deserialize_error_responses[response_kwargs2-response_type_map2][{'4XX': typing.Any}]
@@ -700,12 +754,15 @@
       ApiError(404)
       Reason: Not Found
       HTTP response headers: Headers({'content-length': '67', 'content-type': 'application/json'})
-      HTTP response content: namespace(message='some not found message', code='RESOURCE_NOT_FOUND')
+      HTTP response content: {'message': 'some not found message', 'code': 'RESOURCE_NOT_FOUND'}
       
       )
     ''',
-    'SimpleNamespace',
-    namespace(message='some not found message', code='RESOURCE_NOT_FOUND'),
+    'dict',
+    dict({
+      'code': 'RESOURCE_NOT_FOUND',
+      'message': 'some not found message',
+    }),
   )
 # ---
 # name: test_deserialize_error_responses[response_kwargs3-response_type_map3][{'4XX': typing.Any}]
@@ -728,12 +785,12 @@
       ApiError(404)
       Reason: Not Found
       HTTP response headers: Headers({'content-length': '67', 'content-type': 'application/json'})
-      HTTP response content: namespace(message='some not found message', code='RESOURCE_NOT_FOUND')
+      HTTP response content: message='some not found message' code='RESOURCE_NOT_FOUND'
       
       )
     ''',
-    'SimpleNamespace',
-    namespace(message='some not found message', code='RESOURCE_NOT_FOUND'),
+    '_Model',
+    _Model(message='some not found message', code='RESOURCE_NOT_FOUND'),
   )
 # ---
 # name: test_deserialize_error_responses[response_kwargs5-response_type_map5][{'400': <class 'unit.api.example.pet_model.Pet'>}]
@@ -756,12 +813,19 @@
       ApiError(400)
       Reason: Bad Request
       HTTP response headers: Headers({'content-length': '87'})
-      HTTP response content: namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo')
+      HTTP response content: {'name': 'Lord Biscuit, Master of Naps', 'owner': {'id': 123, 'name': 'Simon'}, 'tag': 'doggo'}
       
       )
     ''',
-    'SimpleNamespace',
-    namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'),
+    'dict',
+    dict({
+      'name': 'Lord Biscuit, Master of Naps',
+      'owner': dict({
+        'id': 123,
+        'name': 'Simon',
+      }),
+      'tag': 'doggo',
+    }),
   )
 # ---
 # name: test_deserialize_error_responses[response_kwargs7-response_type_map7][{}]
@@ -770,12 +834,12 @@
       ApiError(400)
       Reason: Bad Request
       HTTP response headers: Headers({'content-length': '95', 'content-type': 'application/json'})
-      HTTP response content: namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo')
+      HTTP response content: name='Lord Biscuit, Master of Naps' owner=_Model(id=123, name='Simon') tag='doggo'
       
       )
     ''',
-    'SimpleNamespace',
-    namespace(name='Lord Biscuit, Master of Naps', owner=namespace(id=123, name='Simon'), tag='doggo'),
+    '_Model',
+    _Model(name='Lord Biscuit, Master of Naps', owner=_Model(id=123, name='Simon'), tag='doggo'),
   )
 # ---
 # name: test_serialize_and_call[binary_body]

@@ -16,6 +16,7 @@ dependencies = [
     "typing_extensions",
     "typeguard",
     "jsonpath-ng",
+    "pydantic",
 ]
 
 [project.entry-points.dynamic]
@@ -49,7 +50,6 @@ dev = [
     'types-appdirs',
     'types-python-dateutil',
     'docformatter',
-    'pydantic',
 ]
 services = [
     "waylay_registry_api @ git+https://github.com/waylayio/waylay-py-services@main#subdirectory=services/registry/waylay_registry_api"
