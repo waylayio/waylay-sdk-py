@@ -9,7 +9,6 @@ from types import SimpleNamespace
 from typing import Any, Mapping, Optional, cast, AsyncIterable, get_origin
 from io import BufferedReader
 from abc import abstractmethod
-import warnings
 
 from dateutil.parser import parse
 from pydantic import TypeAdapter, ValidationError
@@ -100,24 +99,17 @@ class WithSerializationSupport:
         self,
         response: Response,
         response_types_map=None,
-        select_path: str = '',
-        stream: bool = False
+        select_path: str = ''
     ) -> Any:
         """Deserialize response into a model object.
 
         :param response_data: Response object to be deserialized.
         :param response_types_map: dict of response types.
         :param select_path: json path into the json payload.
-        :return: The response model
+        :return: ApiResponse
         """
-        if stream:
-            warnings.warn(
-                'Using `stream=True` is currently only supported with `raw_response=True`.'
-            )
-            return response
         status_code = response.status_code
         status_code_key = str(status_code)
-        response_types_map = response_types_map or {}
         response_type = response_types_map.get(status_code_key, None)
         if (
             not response_type

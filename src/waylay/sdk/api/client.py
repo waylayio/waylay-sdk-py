@@ -44,7 +44,7 @@ class ApiClient(WithSerializationSupport):
         if http_options:
             self.set_options(http_options)
 
-    def set_options(self, http_options: HttpClientOptions | AsyncClient | None):
+    def set_options(self, http_options: HttpClientOptions | AsyncClient):
         """Update http options on not open client."""
         if not self.is_closed:
             raise AttributeError("Cannot set options on open client.")
