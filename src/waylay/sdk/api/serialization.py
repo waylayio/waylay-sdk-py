@@ -6,15 +6,18 @@ from enum import Enum
 from importlib import import_module
 from inspect import isclass
 from types import SimpleNamespace
-from typing import Any, Dict, Mapping, Optional, Union, cast, get_args, get_origin
+from typing import Any, Mapping, Optional, cast, AsyncIterable, get_origin
+from io import BufferedReader
+from abc import abstractmethod
 
 from dateutil.parser import parse
-from jsonpath_ng import jsonpath, parse as jsonpath_parse  # type: ignore[import-untyped]
-from pydantic import BaseModel, Field, TypeAdapter, ValidationError
+from pydantic import TypeAdapter, ValidationError
+from jsonpath_ng import parse as jsonpath_parse  # type: ignore[import-untyped]
+from httpx import QueryParams
 
-from .response import ApiResponse
-from .http import Response as RESTResponse
+from .http import Response, HeaderTypes, RequestFiles, Request, AsyncClient, QueryParamTypes
 from .exceptions import ApiValueError, ApiError
+
 
 _PRIMITIVE_BYTE_TYPES = (bytes, bytearray)
 _PRIMITIVE_TYPES = (float, bool, str, int)
@@ -27,6 +30,9 @@ _NATIVE_TYPES_MAPPING = {
     "datetime": datetime.datetime,
     "object": object,
 }
+_ALLOWED_METHODS = ["GET", "HEAD", "DELETE", "POST", "PUT", "PATCH", "OPTIONS"]
+_REMOVE_NONE_DEFAULT = ["timeout"]
+_REMOVE_FALSY_DEFAULT = ["params", "headers", "files"]
 
 
 class WithSerializationSupport:
@@ -34,93 +40,85 @@ class WithSerializationSupport:
 
     base_url: str
 
-    def param_serialize(
+    @property
+    @abstractmethod
+    def http_client(self) -> AsyncClient:
+        """Get (or open) a http client."""
+
+    def build_api_request(
         self,
         method: str,
         resource_path: str,
         path_params: Optional[Mapping[str, str]] = None,
         query_params: Optional[Mapping[str, Any]] = None,
-        header_params: Optional[Mapping[str, Optional[str]]] = None,
         body: Optional[Any] = None,
-        files: Optional[Mapping[str, str]] = None,
-        base_url: Optional[str] = None,
-    ) -> dict[str, Any]:
+        files: Optional[RequestFiles] = None,
+        headers: Optional[HeaderTypes] = None,
+        **kwargs,
+    ) -> Request:
         """Build the HTTP request params needed by the request.
 
         :param method: Method to call.
         :param resource_path: Path to method endpoint.
         :param path_params: Path parameters in the url.
         :param query_params: Query parameters in the url.
-        :param header_params: Header parameters to be placed in the
-            request header.
+
         :param body: Request body.
         :param files dict: key -> filename, value -> filepath, for
             `multipart/form-data`.
-        :base_url: the host url to use
-        :return: dict of form {path, method, query_params,
-            header_params, body, files}
+        :param headers: Header parameters to be placed in the
+            request header.
+        :param kwargs: Other options passed to the http client.
+            See waylay.sdk.api.HttpClientOptions
+        :return: Sanitized http call arguments of form {
+            path, method, url, params, headers, body, files, *kwargs
+            }
 
         """
-
-        # header parameters
-        header_params = dict(header_params or {})
-        if header_params:
-            header_params = {k.lower(): v for k, v in header_params.items()}
-            header_params = _sanitize_for_serialization(header_params)
-
-        # path parameters
-        if path_params:
-            path_params = _sanitize_for_serialization(path_params)
-
-            for k, v in path_params.items() if path_params else []:
-                # specified safe chars, encode everything
-                resource_path = resource_path.replace("{%s}" % k, quote(str(v)))
-
-        # post parameters
-        if files:
-            files = _sanitize_files_parameters(files)
-
+        method = _validate_method(method)
+        url = _interpolate_resource_path(resource_path, path_params)
+        extra_params: Optional[QueryParamTypes] = kwargs.pop('params', None)
+        request = {
+            "params": build_params(query_params, extra_params),
+            "headers": _sanitize_for_serialization(headers),
+            "files": _sanitize_files_parameters(files),
+            **kwargs,
+        }
+        for key in _REMOVE_NONE_DEFAULT:
+            if key in request and request[key] is None:
+                request.pop(key)
+        for key in _REMOVE_FALSY_DEFAULT:
+            if key in request and not request[key]:
+                request.pop(key)
         if body:
             body = _sanitize_for_serialization(body)
-
-        # request url
-        url = (base_url or self.base_url) + resource_path
-
-        # query parameters
-        if query_params:
-            query_params = _sanitize_for_serialization(query_params)
-
-        return {
-            "method": method,
-            "url": url,
-            "query_params": query_params,
-            "header_params": header_params,
-            "body": body,
-            "files": files,
-        }
+            request.update(convert_body(body, request))
+        return self.http_client.build_request(method, url, **request)
 
     def response_deserialize(
         self,
-        response_data: RESTResponse,
+        response: Response,
         response_types_map=None,
         select_path: str = ''
-    ) -> ApiResponse:
-        """Deserialize response into an object.
+    ) -> Any:
+        """Deserialize response into a model object.
 
-        :param response_data: RESTResponse object to be deserialized.
+        :param response_data: Response object to be deserialized.
         :param response_types_map: dict of response types.
+        :param select_path: json path into the json payload.
         :return: ApiResponse
         """
-
-        response_type = response_types_map.get(str(response_data.status_code), None)
+        status_code = response.status_code
+        status_code_key = str(status_code)
+        response_type = response_types_map.get(status_code_key, None)
         if (
             not response_type
-            and isinstance(response_data.status_code, int)
-            and 100 <= response_data.status_code <= 599
+            and isinstance(status_code, int)
+            and 100 <= response.status_code <= 599
         ):
             # if not found, look for '1XX', '2XX', etc.
             response_type = response_types_map.get(
-                str(response_data.status_code)[0] + "XX"
+                status_code_key[0] + "XX"
             )
         if not response_type:
             # if still not found, look for default response type, otherwise use `Any`
@@ -134,35 +132,95 @@ class WithSerializationSupport:
             if response_type in _PRIMITIVE_BYTE_TYPES + tuple(
                 t.__name__ for t in _PRIMITIVE_BYTE_TYPES
             ):
-                return_data = response_data.content
+                return_data = response.content
             elif response_type is not None:
                 try:
-                    _data = response_data.json()
+                    _data = response.json()
                     if select_path:
                         jsonpath_expr = jsonpath_parse(select_path)
                         match_values = [match.value for match in jsonpath_expr.find(_data)]
                         _data = match_values[0] if not re.search(r"\[.*\]", select_path) else match_values
                 except ValueError:
-                    _data = response_data.text
-                return_data = (
-                    _deserialize(_data, response_type)
-                    if _data is not None
-                    else response_data.content
-                )
+                    _data = response.text
+                if _data is not None:
+                    return_data = _deserialize(_data, response_type)
+                else:
+                    return_data = response.content
         finally:
-            if not 200 <= response_data.status_code <= 299:
-                raise ApiError.from_response(  # pylint: disable=raising-bad-type
-                    http_resp=response_data,
-                    content=response_data.content,
-                    data=return_data,
+            if not 200 <= status_code <= 299:
+                raise ApiError.from_response(
+                    response,
+                    return_data,
                 )
+        return return_data
 
-        return ApiResponse(
-            status_code=response_data.status_code,
-            data=return_data,
-            headers=cast(dict[str, str], response_data.headers),
-            raw_data=response_data.content,
-        )
+
+_CHUNK_SIZE = 65_536
+
+
+def build_params(
+    api_params: Optional[Mapping[str, Any]],
+    extra_params: Optional[QueryParamTypes]
+) -> Optional[QueryParamTypes]:
+    """Sanitize and merge parameters."""
+    api_params = cast(dict, _sanitize_for_serialization(api_params))
+    if not api_params:
+        return extra_params
+    if not extra_params:
+        return api_params
+    # merge parameters
+    return QueryParams(api_params).merge(extra_params)
+
+
+def convert_body(
+    body: Any,
+    kwargs,
+) -> Mapping[str, Any]:
+    """SDK invocation request with untyped body."""
+    headers = kwargs.pop("headers", None) or {}
+    content_type = headers.get("content-type", "").lower()
+    if isinstance(body, BufferedReader):
+
+        async def read_buffer():
+            while chunk := body.read(_CHUNK_SIZE):
+                yield chunk
+
+        kwargs["content"] = read_buffer()
+    elif isinstance(body, (bytes, AsyncIterable)):
+        kwargs["content"] = body
+    elif content_type.startswith("application/x-www-form-urlencoded"):
+        kwargs["data"] = body
+    elif not content_type:
+        # TBD: check string case
+        # body='"abc"', content-type:'application/json' => content='"abc"'
+        # body='abc' => json='abc' (encoded '"abc"')
+        # body='abc', content-type:'application/json' => content='abc' (invalid)
+        kwargs["json"] = body
+    else:
+        kwargs["content"] = body
+    if "content" in kwargs and not content_type:
+        headers["content-type"] = "application/octet-stream"
+    kwargs["headers"] = headers
+    return kwargs
+
+
+def _validate_method(method: str):
+    method = method.upper()
+    if method not in _ALLOWED_METHODS:
+        raise ApiValueError(f"Method {method} is not supported.")
+    return method
+
+
+def _interpolate_resource_path(
+    resource_path: str,
+    path_params: Optional[Mapping[str, str]] = None,
+):
+    if not path_params:
+        return resource_path
+    for k, v in path_params.items():
+        # specified safe chars, encode everything
+        resource_path = resource_path.replace("{%s}" % k, quote(str(v)))
+    return resource_path
 
 
 def _sanitize_for_serialization(obj):
@@ -250,7 +308,7 @@ def _deserialize(data: Any, klass: Any):
         return __deserialize_model(data, klass)
 
 
-def _sanitize_files_parameters(files=None):
+def _sanitize_files_parameters(files=Optional[RequestFiles]):
     """Build form parameters.
 
     :param files: File parameters.

@@ -32,71 +32,46 @@ class ApiValueError(RequestError, ValueError):
 class ApiError(RestResponseError):
     """Exception class wrapping the response data of a REST call."""
 
+    response: RESTResponse
+    data: Optional[Any]
+
     def __init__(
         self,
-        status: Optional[int] = None,
-        reason: Optional[str] = None,
-        http_resp: Optional[RESTResponse] = None,
-        *,
-        content: Optional[bytes] = None,
-        data: Optional[Any] = None,
+        response: RESTResponse,
+        data: Optional[Any],
     ) -> None:
         """Create an instance."""
-        self.status_code = status
-        self.reason = reason
-        self.content = content
+        self.response = response
         self.data = data
-        self.headers = None
-        self.url = None
-        self.method = None
-
-        if http_resp:
-            try:
-                self.url = http_resp.url
-                self.method = http_resp.request.method
-            except RuntimeError:
-                pass
-            if self.status_code is None:
-                self.status_code = http_resp.status_code
-            if self.reason is None:
-                self.reason = http_resp.reason_phrase
-            if self.content is None:
-                try:
-                    self.content = http_resp.content
-                except Exception:
-                    pass
-            self.headers = http_resp.headers
 
     @classmethod
     def from_response(
         cls,
-        *,
-        http_resp: Optional[RESTResponse] = None,
-        content: Optional[bytes],
+        response: RESTResponse,
         data: Optional[Any],
     ):
         """Create an instance from a REST exception response."""
-        # TODO throw specific errors? e.g. `NotFoundException`,
-        # `UnauthorizedException`, etc. based on `http_resp.status_code``
-        return cls(http_resp=http_resp, content=content, data=data)
+        return cls(response, data)
 
     def __str__(self):
         """Get the string representation of the exception."""
-
-        error_message = "{0}({1})\n" "Reason: {2}\n".format(
-            self.__class__.__name__, self.status_code, self.reason
+        resp = self.response
+        error_message = (
+            f"{self.__class__.__name__}({resp.status_code})\n"
+            f"Reason: {self.response.reason_phrase}\n"
         )
-        if self.url and self.method:
-            error_message += "{0} {1}\n".format(self.method, self.url)
+        if resp._request:
+            error_message += f"{resp.request.method} {resp.url}\n"
 
-        if self.headers:
-            error_message += "HTTP response headers: {0}\n".format(self.headers)
+        if resp.headers:
+            error_message += f"HTTP response headers: {resp.headers}\n"
 
-        if self.data or self.content:
-            error_message += "HTTP response content: {0}\n".format(
-                self.data or str(self.content)
-            )
-
+        if self.data:
+            error_message += f"HTTP response content: {self.data}\n"
+        elif resp._content:
+            error_message += f"HTTP response content: <bytes: len={len(resp._content)}>\n"
+        else:
+            error_message += f"HTTP response content: <streaming: len={resp.num_bytes_downloaded}>\n"
         return error_message + "\n)"
 
 

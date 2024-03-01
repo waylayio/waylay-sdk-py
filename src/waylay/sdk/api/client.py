@@ -1,21 +1,17 @@
 """API client."""
-from typing import Any, Mapping, Optional, Tuple, Union, AsyncIterable
-from io import BufferedReader
+from typing import Mapping, Optional, Tuple, Union
 
 from ..__version__ import __version__
 from ..config import WaylayConfig
 
 from .exceptions import SyncCtxMgtNotSupportedError
 from .serialization import WithSerializationSupport
-from .exceptions import ApiValueError
-from .http import AsyncClient, Response, HttpClientOptions
+from .http import AsyncClient, HttpClientOptions, Request, Response
 
 RESTTimeout = Union[
     Optional[float],
     Tuple[Optional[float], Optional[float], Optional[float], Optional[float]],
 ]
-_CHUNK_SIZE = 65_536
-_ALLOWED_METHODS = ["GET", "HEAD", "DELETE", "POST", "PUT", "PATCH", "OPTIONS"]
 
 
 class ApiClient(WithSerializationSupport):
@@ -120,75 +116,13 @@ class ApiClient(WithSerializationSupport):
             await self._http_client.aclose()
             self._http_client = None
 
-    async def call_api(
-        self,
-        method: str,
-        url: str,
-        # v DEPRECATED PARAMETERS: prefer native httpx parameters
-        body: Optional[Any] = None,
-        query_params: Optional[Mapping[str, Any]] = None,
-        header_params: Optional[Mapping[str, str]] = None,
-        _request_timeout: Optional[RESTTimeout] = None,
-        # ^ DEPRECATED PARAMETERS
-        **kwargs,
-    ) -> Response:
-        """Make a HTTP request."""
-        method = _validate_method(method)
-        # v DEPRECATED PARAMETERS: prefer native httpx parameters
-        timeout = kwargs.pop("timeout", _request_timeout)
-        if timeout is not None:
-            kwargs["timeout"] = timeout
-        params = kwargs.pop("params", query_params)
-        if params:
-            kwargs["params"] = params
-        headers = kwargs.pop("headers", header_params)
-        if headers:
-            kwargs["headers"] = headers
-        if body:
-            kwargs.update(self.convert_body(body, kwargs))
-        # ^ DEPRECATED PARAMETERS
-        # perform request and return response
-        return await self.http_client.request(
-            method,
-            url,
-            **kwargs,
+    async def request(self, *args, **kwargs) -> Response:
+        """Invoke a http request."""
+        return await self.http_client.request(*args, **kwargs)
+
+    async def send(
+            self, request: Request, *, stream: bool = False, **kwargs) -> Response:
+        """Send an http request."""
+        return await self.http_client.send(
+            request, stream=stream, **kwargs
         )
-
-    def convert_body(
-        self,
-        body: Any,
-        kwargs,
-    ) -> Mapping[str, Any]:
-        """SDK invocation request with untyped body."""
-        headers = kwargs.pop("headers", None) or {}
-        content_type = headers.get("content-type", "")
-        if isinstance(body, BufferedReader):
-
-            async def read_buffer():
-                while chunk := body.read(_CHUNK_SIZE):
-                    yield chunk
-
-            kwargs["content"] = read_buffer()
-        elif isinstance(body, (bytes, AsyncIterable)):
-            kwargs["content"] = body
-        elif content_type.startswith("application/x-www-form-urlencoded"):
-            kwargs["data"] = body
-        elif not content_type:
-            # TBD: check string case
-            # body='"abc"', content-type:'application/json' => content='"abc"'
-            # body='abc' => json='abc' (encoded '"abc"')
-            # body='abc', content-type:'application/json' => content='abc' (invalid)
-            kwargs["json"] = body
-        else:
-            kwargs["content"] = body
-        if "content" in kwargs and not content_type:
-            headers["content-type"] = "application/octet-stream"
-        kwargs["headers"] = headers
-        return kwargs
-
-
-def _validate_method(method: str):
-    method = method.upper()
-    if method not in _ALLOWED_METHODS:
-        raise ApiValueError(f"Method {method} is not supported.")
-    return method
