@@ -1,7 +1,7 @@
 """Base classes for Waylay SDK Plugins."""
 from typing import Iterator, Optional, Generic, Type, TypeVar
 from collections.abc import Mapping
-from ..api import ApiClient
+from ..api import ApiClient, HttpClientOptions
 from ..api.exceptions import SyncCtxMgtNotSupportedError
 
 
@@ -19,14 +19,19 @@ class WithApiClient:
         self.api_client = api_client
 
     async def __aenter__(self):
+        """Initialize the api client."""
+        self(None)
+        self.api_client = await self.api_client.__aenter__()
+        return self
+
+    def __call__(self, http_options: Optional[HttpClientOptions] = None):
         """Initialize the http client."""
         if self.api_client.is_closed:
-            api_client = self.api_client
+            self.api_client.set_options(http_options)
         else:
             # create a new api client.
             # leave the previous client for other services.
-            api_client = self.api_client.clone()
-        self.api_client = await api_client.__aenter__()
+            self.api_client = self.api_client.clone(http_options)
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
