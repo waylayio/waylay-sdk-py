@@ -1,6 +1,7 @@
 """Test http client context managment."""
 from types import SimpleNamespace
 from typing import Optional
+import json
 
 import pytest
 import httpx
@@ -84,6 +85,34 @@ async def assert_call_echo(srv: MyService):
     response = await srv.echo(vars(data), with_http_info=True)
     assert response.status_code == 200
     assert response.json() == vars(data)
+
+
+async def test_direct_request(my_client: WaylayClient):
+    """Test the native httpx.request method."""
+    response = await my_client.tst.api_client.request(
+        'post', url='/', json={'message': 'hello'}
+    )
+    assert response.status_code == 200
+    assert response.json() == {'message': 'hello'}
+
+
+async def test_async_request(my_client: WaylayClient):
+    """Test the native httpx async mode."""
+    request = my_client.tst.api_client.build_api_request(
+        'POST', '/{target}', {'target': 'world'}, {'polite': True},
+        body={'message': 'hello'}
+    )
+    response = await my_client.tst.api_client.send(request, stream=True)
+    assert response.status_code == 200
+    assert response.num_bytes_downloaded == 0
+    chuncks = 0
+    buff = ''
+    async for chunck in response.aiter_text(10):
+        buff = buff + chunck
+        chuncks += 1
+    assert chuncks == 2
+    assert response.num_bytes_downloaded == 20
+    assert json.loads(buff) == {'message': 'hello'}
 
 
 async def test_lazy_init(my_client: WaylayClient):
