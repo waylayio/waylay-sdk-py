@@ -69,9 +69,13 @@ class ApiError(RestResponseError):
         if self.data:
             error_message += f"HTTP response content: {self.data}\n"
         elif resp._content:
-            error_message += f"HTTP response content: <bytes: len={len(resp._content)}>\n"
+            error_message += (
+                f"HTTP response content: <bytes: len={len(resp._content)}>\n"
+            )
         else:
-            error_message += f"HTTP response content: <streaming: len={resp.num_bytes_downloaded}>\n"
+            error_message += (
+                f"HTTP response content: <streaming: len={resp.num_bytes_downloaded}>\n"
+            )
         return error_message + "\n)"
 
 

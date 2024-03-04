@@ -1,4 +1,5 @@
 """Shared unit test fixtures."""
+
 from datetime import datetime
 
 import pytest

@@ -1,4 +1,5 @@
 """Integration tests for waylay.sdk.auth module."""
+
 from typing import Mapping
 from waylay.sdk import WaylayClient
 
@@ -6,7 +7,7 @@ import waylay.sdk.auth.interactive
 from waylay.sdk.config import DEFAULT_PROFILE
 
 # Matches versions like v1.2.3, v1.2, v1 or 0+untagged.1.gd418139
-VERSION_STRING_PATTERN = r'(v\d+(\.\d+)?(\.\d+)?(\+.*)?|\d+\+[^.]+\.\d+\.\w+)'
+VERSION_STRING_PATTERN = r"(v\d+(\.\d+)?(\.\d+)?(\+.*)?|\d+\+[^.]+\.\d+\.\w+)"
 
 
 def test_create_client_from_credentials(
@@ -14,7 +15,9 @@ def test_create_client_from_credentials(
 ):
     """Test authentication with client credentials."""
     waylay_client = WaylayClient.from_client_credentials(
-        waylay_test_user_id, waylay_test_user_secret, gateway_url=waylay_test_gateway_url
+        waylay_test_user_id,
+        waylay_test_user_secret,
+        gateway_url=waylay_test_gateway_url,
     )
     assert waylay_client.config is not None
 
@@ -34,24 +37,33 @@ def test_create_client_from_profile(
     waylay_test_user_id, waylay_test_user_secret, waylay_test_gateway_url, monkeypatch
 ):
     """Test profile creation dialog."""
-    user_dialog = (response for response in [
-        "alternate gateway", waylay_test_gateway_url,
-        "apiKey", waylay_test_user_id,
-        "apiSecret", waylay_test_user_secret,
-        "store these credentials", 'N'
-    ])
+    user_dialog = (
+        response
+        for response in [
+            "alternate gateway",
+            waylay_test_gateway_url,
+            "apiKey",
+            waylay_test_user_id,
+            "apiSecret",
+            waylay_test_user_secret,
+            "store these credentials",
+            "N",
+        ]
+    )
 
     def mock_ask(prompt: str) -> str:
         assert next(user_dialog) in prompt
         return next(user_dialog)
 
     def mock_ask_secret(prompt: str) -> str:
-        assert 'Secret' in prompt
+        assert "Secret" in prompt
         assert next(user_dialog) in prompt
         return next(user_dialog)
 
-    monkeypatch.setattr(waylay.sdk.auth.interactive, 'ask', mock_ask)
-    monkeypatch.setattr(waylay.sdk.auth.interactive, 'ask_secret', mock_ask_secret)
+    monkeypatch.setattr(waylay.sdk.auth.interactive, "ask", mock_ask)
+    monkeypatch.setattr(waylay.sdk.auth.interactive, "ask_secret", mock_ask_secret)
 
-    waylay_client = WaylayClient.from_profile('example', gateway_url=waylay_test_gateway_url)
+    waylay_client = WaylayClient.from_profile(
+        "example", gateway_url=waylay_test_gateway_url
+    )
     assert waylay_test_gateway_url == waylay_client.config.gateway_url

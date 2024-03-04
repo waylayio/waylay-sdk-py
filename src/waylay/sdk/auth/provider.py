@@ -1,12 +1,17 @@
 """Httpx Authentication provider."""
+
 from typing import Optional, Callable, Generator
 
 import httpx
 
 from .model import (
-    WaylayCredentials, WaylayToken, TokenString,
-    TokenCredentials, NoCredentials,
-    ApplicationCredentials, ClientCredentials
+    WaylayCredentials,
+    WaylayToken,
+    TokenString,
+    TokenCredentials,
+    NoCredentials,
+    ApplicationCredentials,
+    ClientCredentials,
 )
 from .exceptions import AuthError
 
@@ -28,7 +33,7 @@ class WaylayTokenAuth(httpx.Auth):
         self,
         credentials: WaylayCredentials,
         initial_token: Optional[TokenString] = None,
-        credentials_callback: Optional[CredentialsCallback] = None
+        credentials_callback: Optional[CredentialsCallback] = None,
     ):
         """Create a Waylay Token authentication provider."""
         self.credentials = credentials
@@ -45,7 +50,9 @@ class WaylayTokenAuth(httpx.Auth):
 
         self.credentials_callback = credentials_callback
 
-    def auth_flow(self, request: httpx.Request) -> Generator[httpx.Request, httpx.Response, None]:
+    def auth_flow(
+        self, request: httpx.Request
+    ) -> Generator[httpx.Request, httpx.Response, None]:
         """Authenticate a http request.
 
         Implements the authentication callback for the http client.
@@ -61,7 +68,9 @@ class WaylayTokenAuth(httpx.Auth):
             # token exists and is valid
             return self.current_token
 
-        self.current_token = self._create_and_validate_token(self._request_token_string())
+        self.current_token = self._create_and_validate_token(
+            self._request_token_string()
+        )
         return self.current_token
 
     def _create_and_validate_token(self, token: TokenString) -> WaylayToken:
@@ -99,17 +108,21 @@ class WaylayTokenAuth(httpx.Auth):
 
 
 def _request_token(credentials: ClientCredentials) -> str:
-    token_url_prefix = credentials.accounts_url or f'{credentials.gateway_url}/accounts/v1'
+    token_url_prefix = (
+        credentials.accounts_url or f"{credentials.gateway_url}/accounts/v1"
+    )
     token_url = f"{token_url_prefix}/tokens?grant_type=client_credentials"
     token_req = {
-        'clientId': credentials.api_key,
-        'clientSecret': credentials.api_secret,
+        "clientId": credentials.api_key,
+        "clientSecret": credentials.api_secret,
     }
     try:
         token_resp = httpx.post(url=token_url, json=token_req)
         if token_resp.status_code != 200:
-            raise AuthError(f'could not obtain waylay token: {token_resp.content!r} [{token_resp.status_code}]')
+            raise AuthError(
+                f"could not obtain waylay token: {token_resp.content!r} [{token_resp.status_code}]"
+            )
         token_resp_json = token_resp.json()
     except httpx.HTTPError as exc:
-        raise AuthError(f'could not obtain waylay token: {exc}') from exc
-    return token_resp_json['token']
+        raise AuthError(f"could not obtain waylay token: {exc}") from exc
+    return token_resp_json["token"]

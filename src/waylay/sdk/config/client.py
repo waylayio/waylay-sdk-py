@@ -9,13 +9,16 @@ from ..auth import (
 )
 
 from .model import (
-    WaylayConfig, TenantSettings,
-    DEFAULT_PROFILE, SERVICE_KEY_GATEWAY, SERVICE_KEY_ACCOUNTS
+    WaylayConfig,
+    TenantSettings,
+    DEFAULT_PROFILE,
+    SERVICE_KEY_GATEWAY,
+    SERVICE_KEY_ACCOUNTS,
 )
 from ..api import HttpClientOptions, AsyncClient
 
 
-class WithConfig():
+class WithConfig:
     """A configuration Mixin."""
 
     config: WaylayConfig
@@ -27,8 +30,11 @@ class WithConfig():
 
     @classmethod
     def from_profile(
-        cls, profile: str = DEFAULT_PROFILE,
-        *, interactive=True, gateway_url=None,
+        cls,
+        profile: str = DEFAULT_PROFILE,
+        *,
+        interactive=True,
+        gateway_url=None,
         options: Optional[HttpClientOptions | AsyncClient] = None,
     ):
         """Create a WaylayClient named profile.
@@ -37,14 +43,21 @@ class WithConfig():
         configuration.
 
         """
-        return cls(WaylayConfig.load(
-            profile, interactive=interactive, gateway_url=gateway_url
-        ), options=options)
+        return cls(
+            WaylayConfig.load(
+                profile, interactive=interactive, gateway_url=gateway_url
+            ),
+            options=options,
+        )
 
     @classmethod
     def from_client_credentials(
-        cls, api_key: str, api_secret: str, *,
-        gateway_url=None, accounts_url=None,
+        cls,
+        api_key: str,
+        api_secret: str,
+        *,
+        gateway_url=None,
+        accounts_url=None,
         settings: Optional[TenantSettings] = None,
         options: Optional[HttpClientOptions | AsyncClient] = None,
     ):
@@ -52,14 +65,15 @@ class WithConfig():
         credentials = ClientCredentials(
             api_key, api_secret, **_auth_urls(gateway_url, accounts_url, settings)
         )
-        return cls.from_credentials(
-            credentials, settings=settings, options=options
-        )
+        return cls.from_credentials(credentials, settings=settings, options=options)
 
     @classmethod
     def from_token(
-        cls, token_string: str, *,
-        gateway_url=None, accounts_url=None,
+        cls,
+        token_string: str,
+        *,
+        gateway_url=None,
+        accounts_url=None,
         settings: Optional[TenantSettings] = None,
         options: Optional[HttpClientOptions | AsyncClient] = None,
     ):
@@ -67,28 +81,29 @@ class WithConfig():
         credentials = TokenCredentials(
             token_string, **_auth_urls(gateway_url, accounts_url, settings)
         )
-        return cls.from_credentials(
-            credentials, settings=settings,
-            options=options
-        )
+        return cls.from_credentials(credentials, settings=settings, options=options)
 
     @classmethod
     def from_credentials(
-        cls, credentials: WaylayCredentials,
+        cls,
+        credentials: WaylayCredentials,
         settings: Optional[TenantSettings] = None,
         options: Optional[HttpClientOptions | AsyncClient] = None,
     ):
         """Create a WaylayClient using the given client credentials."""
-        return cls(WaylayConfig(
+        return cls(
+            WaylayConfig(
                 credentials,
                 settings=settings,
             ),
-            options=options
+            options=options,
         )
 
 
-def _auth_urls(gateway_url=None, accounts_url=None, settings: Optional[TenantSettings] = None):
+def _auth_urls(
+    gateway_url=None, accounts_url=None, settings: Optional[TenantSettings] = None
+):
     if settings:
         gateway_url = gateway_url or settings.get(SERVICE_KEY_GATEWAY)
         accounts_url = accounts_url or settings.get(SERVICE_KEY_ACCOUNTS)
-    return {'gateway_url': gateway_url, 'accounts_url': accounts_url}
+    return {"gateway_url": gateway_url, "accounts_url": accounts_url}

@@ -41,15 +41,13 @@ dev = [
     "pytest-asyncio",
     "starlette",
     "syrupy",
-    'pylint',
-    'pycodestyle',
-    'pydocstyle',
+    "ruff",
     'mypy',
-    'autopep8',
     'types-python-jose',
     'types-appdirs',
     'types-python-dateutil',
     'docformatter',
+    'pre-commit',
 ]
 services = [
     "waylay_registry_api @ git+https://github.com/waylayio/waylay-py-services@main#subdirectory=services/registry/waylay_registry_api"
@@ -70,12 +68,6 @@ ignore-init-module-imports = true
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 "conftest.py" = ["F401"]
-
-[tool.pylint]
-no-docstring-rgx = "^(_|test_|fixture_).*"
-
-[tool.docstyle]
-no-docstring-rgx = "^(_|test_|fixture_).*"
 
 [tool.coverage.report]
 exclude_also = [

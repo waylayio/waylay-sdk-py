@@ -1,5 +1,5 @@
 """Test http client context managment."""
-from types import SimpleNamespace
+
 from typing import Optional
 import json
 
@@ -19,7 +19,7 @@ class MyService(WaylayService):
     name = "tst"
     title = "Test"
 
-    async def echo(self, message, with_http_info=False, select_path=''):
+    async def echo(self, message, with_http_info=False, select_path=""):
         """Echo."""
         req = self.api_client.build_api_request("POST", "/", body=message)
         resp = await self.api_client.send(req)
@@ -40,7 +40,7 @@ class MyTool(WaylayTool):
         super().__init__(*args, services=services, tools=tools)
         self.my = services.require(MyService)
 
-    async def echo(self, message, with_http_info=False, select_path=''):
+    async def echo(self, message, with_http_info=False, select_path=""):
         """Echo."""
         return await self.my.echo(message, with_http_info, select_path)
 
@@ -81,9 +81,9 @@ async def assert_call_echo(srv: MyService):
     data = {"message": "hello world"}
     api_response = await srv.echo(data)
     assert api_response == _Model(**data)
-    assert api_response.message == data['message']
-    message = await srv.echo(data, select_path='message')
-    assert message == data['message']
+    assert api_response.message == data["message"]
+    message = await srv.echo(data, select_path="message")
+    assert message == data["message"]
     response = await srv.echo(data, with_http_info=True)
     assert response.status_code == 200
     assert response.json() == data
@@ -92,29 +92,32 @@ async def assert_call_echo(srv: MyService):
 async def test_direct_request(my_client: WaylayClient):
     """Test the native httpx.request method."""
     response = await my_client.tst.api_client.request(
-        'post', url='/', json={'message': 'hello'}
+        "post", url="/", json={"message": "hello"}
     )
     assert response.status_code == 200
-    assert response.json() == {'message': 'hello'}
+    assert response.json() == {"message": "hello"}
 
 
 async def test_async_request(my_client: WaylayClient):
     """Test the native httpx async mode."""
     request = my_client.tst.api_client.build_api_request(
-        'POST', '/{target}', {'target': 'world'}, {'polite': True},
-        body={'message': 'hello'}
+        "POST",
+        "/{target}",
+        {"target": "world"},
+        {"polite": True},
+        body={"message": "hello"},
     )
     response = await my_client.tst.api_client.send(request, stream=True)
     assert response.status_code == 200
     assert response.num_bytes_downloaded == 0
     chuncks = 0
-    buff = ''
+    buff = ""
     async for chunck in response.aiter_text(10):
         buff = buff + chunck
         chuncks += 1
     assert chuncks == 2
     assert response.num_bytes_downloaded == 20
-    assert json.loads(buff) == {'message': 'hello'}
+    assert json.loads(buff) == {"message": "hello"}
 
 
 async def test_lazy_init(my_client: WaylayClient):

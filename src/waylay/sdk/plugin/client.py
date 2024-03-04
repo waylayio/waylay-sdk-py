@@ -4,11 +4,7 @@ from typing import Type, Dict, Optional
 from importlib.metadata import entry_points
 import warnings
 
-from .base import (
-    WaylayService, WaylayTool,
-    WithApiClient,
-    WaylayPlugin, PluginAccess
-)
+from .base import WaylayService, WaylayTool, WithApiClient, WaylayPlugin, PluginAccess
 from ..api import ApiClient
 
 
@@ -30,7 +26,7 @@ class WithServicesAndTools(WithApiClient):
         self._load_plugins()
 
     def _load_plugins(self):
-        for entry_point in entry_points(group='dynamic', name='waylay_sdk_plugins'):
+        for entry_point in entry_points(group="dynamic", name="waylay_sdk_plugins"):
             for plugin_class in entry_point.load():
                 self.register(plugin_class)
 
@@ -48,7 +44,7 @@ class WithServicesAndTools(WithApiClient):
             )
             self._tools[tool.name] = tool
             return tool
-        warnings.warn(f'Invalid plug class: {plugin_class}')
+        warnings.warn(f"Invalid plug class: {plugin_class}")
         return None
 
     def __getattr__(self, name: str):

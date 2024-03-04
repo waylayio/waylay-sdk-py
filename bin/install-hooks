@@ -1,5 +1,0 @@
-#!/bin/bash
-pushd $(dirname "$0") 
-bin_dir=$(pwd)
-ln -s "$bin_dir/git_hooks/pre-commit" "$bin_dir/../.git/hooks/pre-commit"
-popd

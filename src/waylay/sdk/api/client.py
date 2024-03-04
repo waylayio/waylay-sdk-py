@@ -1,4 +1,5 @@
 """API client."""
+
 from typing import Mapping, Optional, Tuple, Union
 
 from ..__version__ import __version__
@@ -121,8 +122,7 @@ class ApiClient(WithSerializationSupport):
         return await self.http_client.request(*args, **kwargs)
 
     async def send(
-            self, request: Request, *, stream: bool = False, **kwargs) -> Response:
+        self, request: Request, *, stream: bool = False, **kwargs
+    ) -> Response:
         """Send an http request."""
-        return await self.http_client.send(
-            request, stream=stream, **kwargs
-        )
+        return await self.http_client.send(request, stream=stream, **kwargs)

@@ -6,6 +6,7 @@ import json
 from typing import Annotated, Any, ClassVar, Dict, List, NotRequired, Optional, Union
 from typing_extensions import TypedDict
 from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictStr
+
 try:
     from typing import Self
 except ImportError:
@@ -45,8 +46,7 @@ class PetList(BaseModel):
         """
         _dict = self.model_dump(
             by_alias=True,
-            exclude={
-            },
+            exclude={},
             exclude_none=True,
         )
         # override the default output from pydantic by calling `to_dict()` of each item in pets (list)
@@ -55,7 +55,7 @@ class PetList(BaseModel):
             for _item in self.pets:  # type: ignore
                 if _item:
                     _items.append(_item.to_dict())
-            _dict['pets'] = _items
+            _dict["pets"] = _items
         return _dict
 
     @classmethod
@@ -67,13 +67,19 @@ class PetList(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "pets": [Pet.from_dict(_item) for _item in obj.get("pets")] if obj.get("pets") is not None else None  # type: ignore
-        })
+        _obj = cls.model_validate(
+            {
+                "pets": [Pet.from_dict(_item) for _item in obj.get("pets")]
+                if obj.get("pets") is not None
+                else None  # type: ignore
+            }
+        )
         return _obj
+
 
 class Pet(BaseModel):
     """Pet."""
+
     name: StrictStr
     owner: PetOwner
     tag: Optional[StrictStr] = None
@@ -102,12 +108,11 @@ class Pet(BaseModel):
         """Return the dictionary representation."""
         _dict = self.model_dump(
             by_alias=True,
-            exclude={
-            },
+            exclude={},
             exclude_none=True,
         )
         if self.owner:
-            _dict['owner'] = self.owner.to_dict()
+            _dict["owner"] = self.owner.to_dict()
         return _dict
 
     @classmethod
@@ -119,16 +124,21 @@ class Pet(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "name": obj.get("name"),
-            "owner": PetOwner.from_dict(obj.get("owner")) if obj.get("owner") is not None else None,
-            "tag": obj.get("tag")
-        })
+        _obj = cls.model_validate(
+            {
+                "name": obj.get("name"),
+                "owner": PetOwner.from_dict(obj.get("owner"))
+                if obj.get("owner") is not None
+                else None,
+                "tag": obj.get("tag"),
+            }
+        )
         return _obj
 
 
 class PetOwner(BaseModel):
     """Owner."""
+
     id: StrictInt
     name: StrictStr
     __properties: ClassVar[List[str]] = ["id", "name"]
@@ -165,8 +175,7 @@ class PetOwner(BaseModel):
         """
         _dict = self.model_dump(
             by_alias=True,
-            exclude={
-            },
+            exclude={},
             exclude_none=True,
         )
         return _dict
@@ -180,23 +189,29 @@ class PetOwner(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "id": obj.get("id"),
-            "name": obj.get("name")
-        })
+        _obj = cls.model_validate({"id": obj.get("id"), "name": obj.get("name")})
         return _obj
-    
+
+
 PetUnion = Union[PetList, Pet]
-    
+
+
 class PetType(Enum):
     """Pet Type."""
+
     DOG = "dog"
     CAT = "cat"
 
 
-
 class CreatePetQuery(TypedDict):
     """create_pet query parameters."""
-    limit: NotRequired[Annotated[Optional[Annotated[int, Field(
-        le=100, strict=True)]], Field(description="How many biscuits?")]]
-    good_boy: NotRequired[Annotated[Optional[StrictBool], Field(description="Is the pet a good boy?")]]
+
+    limit: NotRequired[
+        Annotated[
+            Optional[Annotated[int, Field(le=100, strict=True)]],
+            Field(description="How many biscuits?"),
+        ]
+    ]
+    good_boy: NotRequired[
+        Annotated[Optional[StrictBool], Field(description="Is the pet a good boy?")]
+    ]

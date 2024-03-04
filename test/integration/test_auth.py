@@ -1,8 +1,6 @@
 """Integration tests for waylay.sdk.auth module."""
-from waylay.sdk.auth.provider import (
-    TokenCredentials,
-    WaylayTokenAuth
-)
+
+from waylay.sdk.auth.provider import TokenCredentials, WaylayTokenAuth
 
 
 def test_client_authentication(waylay_test_client_credentials):
@@ -16,7 +14,9 @@ def test_client_authentication(waylay_test_client_credentials):
 
 def test_token_authentication(waylay_test_gateway_url, waylay_test_token_string):
     """Test authentication with  TokenCredentials."""
-    token_cred = TokenCredentials(waylay_test_token_string, gateway_url=waylay_test_gateway_url)
+    token_cred = TokenCredentials(
+        waylay_test_token_string, gateway_url=waylay_test_gateway_url
+    )
     auth = WaylayTokenAuth(token_cred)
     assert auth.current_token is not None
     current_token = auth.current_token

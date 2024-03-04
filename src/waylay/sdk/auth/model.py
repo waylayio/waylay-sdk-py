@@ -3,10 +3,7 @@
 from datetime import datetime
 from enum import Enum
 from dataclasses import dataclass
-from typing import (
-    Optional, ClassVar,
-    Dict, Any, List
-)
+from typing import Optional, ClassVar, Dict, Any, List
 import json
 import abc
 
@@ -26,10 +23,10 @@ class CredentialsType(str, Enum):
 
     """
 
-    CLIENT = 'client_credentials'
-    APPLICATION = 'application_credentials'
-    TOKEN = 'token'
-    CALLBACK = 'interactive'
+    CLIENT = "client_credentials"
+    APPLICATION = "application_credentials"
+    TOKEN = "token"
+    CALLBACK = "interactive"
 
     def __str__(self):
         """Get the string representation."""
@@ -59,7 +56,7 @@ class WaylayCredentials(abc.ABC):
 
     def __repr__(self):
         """Show the implementing class and public information."""
-        return f'<{self.__class__.__name__}({str(self)})>'
+        return f"<{self.__class__.__name__}({str(self)})>"
 
     def __str__(self):
         """Show the credential attributes, with secrets obfuscated."""
@@ -87,12 +84,16 @@ class AccountsUrlMixin:
 class ApiKeySecretMixin(AccountsUrlMixin):
     """Dataclass mixin for the 'api_key' and 'api_secret'."""
 
-    api_key: str = ''
-    api_secret: str = ''
+    api_key: str = ""
+    api_secret: str = ""
 
     def __init__(
-        self, api_key: str, api_secret: str,
-        *, gateway_url: Optional[str] = None, accounts_url: Optional[str] = None
+        self,
+        api_key: str,
+        api_secret: str,
+        *,
+        gateway_url: Optional[str] = None,
+        accounts_url: Optional[str] = None,
     ):
         """Initialise with the api_key and api_secret."""
         super().__init__(gateway_url=gateway_url, accounts_url=accounts_url)
@@ -106,12 +107,19 @@ class ApiKeySecretMixin(AccountsUrlMixin):
 
     @classmethod
     def create(
-        cls, api_key: str, api_secret: str,
-        *, gateway_url: Optional[str] = None, accounts_url: Optional[str] = None
+        cls,
+        api_key: str,
+        api_secret: str,
+        *,
+        gateway_url: Optional[str] = None,
+        accounts_url: Optional[str] = None,
     ):
         """Create a client credentials object."""
         return cls(
-            api_key=api_key, api_secret=api_secret, gateway_url=gateway_url, accounts_url=accounts_url
+            api_key=api_key,
+            api_secret=api_secret,
+            gateway_url=gateway_url,
+            accounts_url=accounts_url,
         )
 
     def to_dict(self, obfuscate=True):
@@ -119,9 +127,9 @@ class ApiKeySecretMixin(AccountsUrlMixin):
         return dict(
             type=self.credentials_type.value,
             api_key=self.api_key,
-            api_secret='********' if obfuscate else self.api_secret,
+            api_secret="********" if obfuscate else self.api_secret,
             gateway_url=self.gateway_url,
-            accounts_url=self.accounts_url
+            accounts_url=self.accounts_url,
         )
 
     def is_well_formed(self) -> bool:
@@ -159,7 +167,7 @@ class NoCredentials(AccountsUrlMixin, WaylayCredentials):
         return dict(
             type=str(self.credentials_type),
             gateway_url=self.gateway_url,
-            accounts_url=self.accounts_url
+            accounts_url=self.accounts_url,
         )
 
     def is_well_formed(self) -> bool:
@@ -184,7 +192,7 @@ class ApplicationCredentials(ApiKeySecretMixin, WaylayCredentials):
     """Waylay Credentials: api key and secret of type 'application_credentials'."""
 
     credentials_type: ClassVar[CredentialsType] = CredentialsType.APPLICATION
-    tenant_id: str = ''
+    tenant_id: str = ""
 
 
 @dataclass(repr=False, init=False)
@@ -192,11 +200,14 @@ class TokenCredentials(AccountsUrlMixin, WaylayCredentials):
     """Waylay JWT Token credentials."""
 
     credentials_type: ClassVar[CredentialsType] = CredentialsType.TOKEN
-    token: TokenString = ''
+    token: TokenString = ""
 
     def __init__(
-        self, token: TokenString,
-        *, gateway_url: Optional[str] = None, accounts_url: Optional[str] = None
+        self,
+        token: TokenString,
+        *,
+        gateway_url: Optional[str] = None,
+        accounts_url: Optional[str] = None,
     ):
         """Create a TokenCredentials from a token string."""
         super().__init__(gateway_url=gateway_url, accounts_url=accounts_url)
@@ -207,17 +218,17 @@ class TokenCredentials(AccountsUrlMixin, WaylayCredentials):
         """Get the main identifier for this credential."""
         try:
             token = WaylayToken(self.token)
-            return f'[{token.domain}] {token.subject}'
+            return f"[{token.domain}] {token.subject}"
         except AuthError as exc:
-            return f'INVALID_TOKEN({exc})'
+            return f"INVALID_TOKEN({exc})"
 
     def to_dict(self, obfuscate=True):
         """Get the credential attributes."""
         return dict(
             type=str(self.credentials_type),
-            token='*********' if obfuscate else self.token,
+            token="*********" if obfuscate else self.token,
             gateway_url=self.gateway_url,
-            accounts_url=self.accounts_url
+            accounts_url=self.accounts_url,
         )
 
     def is_well_formed(self) -> bool:
@@ -237,12 +248,14 @@ class WaylayToken:
         self.token_string = token_string
         if token_data is None:
             try:
-                token_data = jwt.decode(token_string, '', options=dict(verify_signature=False))
+                token_data = jwt.decode(
+                    token_string, "", options=dict(verify_signature=False)
+                )
             except (TypeError, ValueError, JWTError) as exc:
                 raise TokenParseError(exc) from exc
         self.token_data = token_data
 
-    def validate(self) -> 'WaylayToken':
+    def validate(self) -> "WaylayToken":
         """Verify essential assertions, and its expiry state.
 
         This implementation does not verify the signature of a token, as
@@ -250,71 +263,71 @@ class WaylayToken:
 
         """
         if not self.token_string:
-            raise AuthError('no token')
+            raise AuthError("no token")
 
         if not self.token_data:
-            raise AuthError('could not parse token data')
+            raise AuthError("could not parse token data")
 
         if not self.tenant:
-            raise AuthError('invalid token')
+            raise AuthError("invalid token")
 
         # assert expiry
         if self.is_expired:
-            raise AuthError('token expired')
+            raise AuthError("token expired")
         return self
 
     @property
     def tenant(self) -> Optional[str]:
         """Get the tenant id asserted by the token."""
-        return self.token_data.get('tenant', None)
+        return self.token_data.get("tenant", None)
 
     @property
     def domain(self) -> Optional[str]:
         """Get the waylay domain asserted by the token."""
-        return self.token_data.get('domain', None)
+        return self.token_data.get("domain", None)
 
     @property
     def subject(self) -> Optional[str]:
         """Get the subject asserted by the token."""
-        return self.token_data.get('sub', None)
+        return self.token_data.get("sub", None)
 
     @property
     def licenses(self) -> List[str]:
         """Get the licenses asserted by the token."""
-        return self.token_data.get('licenses', [])
+        return self.token_data.get("licenses", [])
 
     @property
     def groups(self) -> List[str]:
         """Get the groups asserted by the token."""
-        return self.token_data.get('groups', [])
+        return self.token_data.get("groups", [])
 
     @property
     def permissions(self) -> List[str]:
         """Get the permissions asserted by the token."""
-        return self.token_data.get('permissions', [])
+        return self.token_data.get("permissions", [])
 
     @property
     def expires_at(self) -> Optional[datetime]:
         """Get the token expiry timestamp."""
-        exp = self.token_data.get('exp', None)
+        exp = self.token_data.get("exp", None)
         return None if exp is None else datetime.fromtimestamp(exp)
 
     @property
     def issued_at(self) -> Optional[datetime]:
         """Get the token issuance timestamp."""
-        iat = self.token_data.get('iat', None)
+        iat = self.token_data.get("iat", None)
         return None if iat is None else datetime.fromtimestamp(iat)
 
     @property
     def expires_seconds(self) -> int:
         """Get seconds until expiry."""
-        exp = self.token_data.get('exp', None)
+        exp = self.token_data.get("exp", None)
         return 0 if exp is None else exp - datetime.now().timestamp()
 
     @property
     def age(self) -> int:
         """Get seconds sinds issuance."""
-        iat = self.token_data.get('iat', 0)
+        iat = self.token_data.get("iat", 0)
         return int(datetime.now().timestamp() - iat)
 
     @property
@@ -350,12 +363,12 @@ class WaylayToken:
             domain=self.domain,
             subject=self.subject,
             expires_at=str(self.expires_at),
-            is_valid=self.is_valid
+            is_valid=self.is_valid,
         )
 
     def __repr__(self) -> str:
         """Show the implementing class an main attributes."""
-        return f'<{self.__class__.__name__}({json.dumps(self.to_dict())})>'
+        return f"<{self.__class__.__name__}({json.dumps(self.to_dict())})>"
 
     def __str__(self) -> str:
         """Render the token string."""
