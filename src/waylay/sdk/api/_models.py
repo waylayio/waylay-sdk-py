@@ -1,10 +1,17 @@
 from __future__ import annotations
-from typing import Any, List, Union
+from typing import TYPE_CHECKING, Any, List, Union
 from typing_extensions import TypeAliasType
 try:
     from typing import Annotated
 except ImportError:
-    from typing_extensions import Annotated  # type: ignore
+    from typing_extensions import Annotated  # type: ignore[assignment]  # < Python 3.9
+
+if TYPE_CHECKING:
+    try:
+        from typing import TypeAlias
+    except ImportError:
+        from typing_extensions import TypeAlias  # < Python 3.10
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -33,7 +40,7 @@ class _Model(BaseModel):
         return self.model_dump()
 
 
-Model = TypeAliasType(
+Model: TypeAlias = TypeAliasType(  # type: ignore[valid-type]  #(https://github.com/python/mypy/issues/16614)
     'Model',
     Annotated[
         Union[List['Model'], '_Model', Any],  # type: ignore[misc,possible cyclic definition]
