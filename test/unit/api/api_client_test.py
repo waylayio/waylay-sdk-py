@@ -11,6 +11,7 @@ from pytest_mock import MockerFixture
 from waylay.sdk.auth import TokenCredentials
 from waylay.sdk.config import WaylayConfig
 from waylay.sdk.api import ApiClient
+from waylay.sdk.api._models import Model
 
 from waylay.sdk.api.http import Response as RESTResponse
 from waylay.sdk.api.exceptions import ApiError, ApiValueError
@@ -355,7 +356,7 @@ DESERIALIZE_CASES = [
         "text_str_datetime",
         {
             "status_code": 200,
-            "text": str(datetime(2023, 12, 25, minute=1).isoformat()),
+            "text": datetime(2023, 12, 25, minute=1).isoformat(),
         },
         {"200": datetime},
         None,
@@ -364,7 +365,7 @@ DESERIALIZE_CASES = [
         "text_str_date",
         {
             "status_code": 200,
-            "text": str(datetime(2023, 12, 25, minute=1).isoformat()),
+            "text": date(2023, 12, 25).isoformat(),
         },
         {"2XX": date},
         None,
@@ -382,7 +383,7 @@ DESERIALIZE_CASES = [
         "text_datestr_str",
         {
             "status_code": 200,
-            "text": str(datetime(2023, 12, 25, minute=1).isoformat()),
+            "text": datetime(2023, 12, 25, minute=1).isoformat(),
         },
         {"2XX": str},
         None,
@@ -391,13 +392,26 @@ DESERIALIZE_CASES = [
         "text_str",
         {
             "status_code": 200,
-            "text": str(datetime(2023, 12, 25, minute=1).isoformat()),
+            "text": datetime(2023, 12, 25, minute=1).isoformat(),
         },
         {},  # no response type
         None,
     ),
     # enum response types
     ("text_str_Enum", {"status_code": 200, "text": "dog"}, {"*": PetType}, None),
+    # namespace responses
+    (
+        "json_dict_any_model",
+        {"status_code": 200, "json": pet_instance_dict},
+        {"200": Model},
+        None,
+    ),
+    (
+        "json_list_any_model",
+        {"status_code": 200, "json": pet_list_instance_dict},
+        {"*": Model},
+        None,
+    ),
     # custom model response types
     (
         "json_dict_model",
@@ -489,6 +503,12 @@ DESERIALIZE_CASES = [
         "json_list_model_path_pets",
         {"status_code": 200, "json": pet_list_instance_dict},
         {"200": List[Pet]},
+        "pets",
+    ),
+    (
+        "json_list_any_model_path_pets",
+        {"status_code": 200, "json": pet_list_instance_dict},
+        {"200": List[Model]},
         "pets",
     ),
     (
