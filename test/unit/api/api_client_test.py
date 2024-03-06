@@ -1,12 +1,10 @@
 """Test suite for package `waylay.api`."""
 
-import re
 from typing import Any, Dict, List, Union
 from datetime import datetime, date
 
 import pytest
 from pytest_httpx import HTTPXMock
-from pytest_mock import MockerFixture
 
 from waylay.sdk.auth import TokenCredentials
 from waylay.sdk.config import WaylayConfig
@@ -16,7 +14,6 @@ from waylay.sdk.api._models import Model
 from waylay.sdk.api.http import Response as RESTResponse
 from waylay.sdk.api.exceptions import ApiError, ApiValueError
 
-from ..fixtures import WaylayTokenStub
 from .example.pet_model import Pet, PetType, PetList
 from .example.pet_fixtures import (
     pet_instance,

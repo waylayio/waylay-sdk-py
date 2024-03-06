@@ -7,8 +7,21 @@ help:
 	@awk 'BEGIN {FS = ":[^#]*? ## "} /^[a-zA-Z_-]+:[^#]* ## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 .DEFAULT_GOAL := help
 
-install-hooks:
-	bin/install-hooks
+VENV_DIR=.venv
+VENV_ACTIVATE_CMD=${VENV_DIR}/bin/activate
+VENV_ACTIVATE=. ${VENV_ACTIVATE_CMD}
+
+${VENV_ACTIVATE_CMD}:
+	python3 -m venv ${VENV_DIR}
+	${VENV_ACTIVATE} && make dev-install
+
+install: ${VENV_ACTIVATE_CMD}
+
+clean:
+	rm -fr ${VENV_DIR}
+	rm -fr .*_cache
+	rm -fr */.*_cache
+	rm -fr */src/*.egg-info
 
 install-dependencies:
 	pip install -r requirements/requirements.$$(bin/pyversion).txt
@@ -60,65 +73,48 @@ dev-install:  ### Install a development environment with frozen dependencies fro
 	make ci-upgrade-buildtools
 	make install-dev-dependencies
 	make dev-install-pkg
-	make install-hooks
 
 install-pkg:  ### Install waylay-sdk with dependency constraints as specified in the package. (e.g. for notebook tests)
 	pip install .
 
-install:  ### install waylay with frozen dependencies
-	make install-dependencies
-	make install-pkg
-
 dev-reinstall: full-clean  dev-install  ### Remove all dependences and reinstall with frozen dependencies
 
-lint:
-	@pylint -E src test/*/*.py
-	@${printMsg} lint OK
+exec-lint-fix:
+	@ruff check --fix
 
-lint-minimal:
-	@pylint -E src test/*/*.py --confidence=INFERENCE
-	@${printMsg} lint-minimal OK
+exec-lint:
+	@ruff check
 
-codestyle:
-	@pycodestyle src test/*/*.py
-	@${printMsg} codestyle OK
-
-typecheck:
+exec-typecheck:
 	@mypy -p waylay.sdk
 	@mypy test/*/*.py
 	@${printMsg} typecheck OK
 
-docstyle:
-	@pydocstyle src test/*/*.py
-	@${printMsg} docstyle OK
+exec-format: 
+	@ruff format
 
-code-qa: codestyle docstyle lint typecheck ### perform code quality checks
+code-qa: install ### perform code quality checks
+	${VENV_ACTIVATE} && make exec-code-qa
+exec-code-qa: exec-lint-fix exec-format exec-typecheck
 
-test-integration-cleanup-models:
-	pytest test/integration -m cleanup --log-cli-level=INFO
 
-pre-commit: codestyle
+test-unit: install
+	${VENV_ACTIVATE} && pytest test/unit
 
-format: 
-	autopep8 . && docformatter --config setup.cfg .
+test-unit-coverage: install
+	${VENV_ACTIVATE} && pytest --cov-report term-missing:skip-covered --cov=src --cov-fail-under=90 test/unit
 
-test-unit:
-	@pytest test/unit
+test-unit-coverage-report: install ### generate html coverage report for the unit tests
+	${VENV_ACTIVATE} && pytest --cov-report html:cov_report --cov=src --cov-fail-under=90 test/unit
 
-test-unit-coverage:
-	@pytest --cov-report term-missing:skip-covered --cov=src --cov-fail-under=90 test/unit
+test-coverage-report: install ### generate html coverage report for the unit and integration tests
+	${VENV_ACTIVATE} && pytest --cov-report html:cov_report_all --cov=src --cov-fail-under=90 test/unit test/integration
 
-test-unit-coverage-report: ### generate html coverage report for the unit tests
-	@pytest --cov-report html:cov_report --cov=src --cov-fail-under=90 test/unit
+test-integration: install
+	${VENV_ACTIVATE} && pytest test/integration
 
-test-coverage-report: ### generate html coverage report for the unit and integration tests
-	@pytest --cov-report html:cov_report_all --cov=src --cov-fail-under=90 test/unit test/integration -m "not byoml_integration"
-
-test-integration:
-	@pytest test/integration -m "not byoml_integration"
-
-test-integration-coverage-report: ### generate html coverage report for the integration tests
-	@pytest --cov-report html:cov_report/integration --cov=src test/integration
+test-integration-coverage-report: install ### generate html coverage report for the integration tests
+	${VENV_ACTIVATE} && pytest --cov-report html:cov_report/integration --cov=src test/integration
 
 test: code-qa test-unit ### perform all quality checks and tests, except for integration tests
 
@@ -157,7 +153,7 @@ ci-install-latest:
 	# frozen development dependencies
 	make install-dev-dependencies
 
-ci-code-qa: code-qa
+ci-code-qa: exec-lint exec-typecheck ### perform code quality checks
 
 ## TODO: enable test-unit-coverage
 ci-test-unit: test-unit 
@@ -169,17 +165,17 @@ ci-dist: dist-clean clean-caches
 	rm -fr build
 
 freeze-dependencies: ## perform a full reinstall procedure and regenerate the 'requirements/requirements[.dev][.pyversion].txt' files
-	make full-clean
-	@if [ "`pip freeze | wc -l | xargs`" != "0" ]; then \
-		echo "`pip freeze | wc -l | xargs` packages still installed, please use a clean python environment"; \
-		exit 1; \
-	fi
+	make clean
+	python3 -m venv ${VENV_DIR}
+	@${VENV_ACTIVATE} && make execute_freeze_scripts
+
+make execute_freeze_scripts: 
 	make upgrade-buildtools
-	# install with dependencies specified in setup.py
+	# install with dependencies specified in pyproject.toml
 	make install-pkg 
 	pip uninstall waylay-sdk -y
 	bin/freeze-dependencies
-	# install with dependencies specified in setup.py (development mode)
+	# install with dependencies specified in pyproject.toml (development mode)
 	make dev-install-pkg
 	bin/freeze-dev-dependencies
 

@@ -1,3 +1,4 @@
+annotated-types==0.6.0
 anyio==4.3.0
 appdirs==1.4.4
 certifi>=2024.2.2
@@ -7,8 +8,11 @@ httpcore==1.0.4
 httpx==0.27.0
 idna==3.6
 jsonpath-ng==1.6.1
+ply==3.11
 pyasn1==0.5.1
-python-dateutil==2.8.2
+pydantic==2.6.3
+pydantic_core==2.16.3
+python-dateutil==2.9.0.post0
 python-jose==3.3.0
 rsa==4.9
 six==1.16.0

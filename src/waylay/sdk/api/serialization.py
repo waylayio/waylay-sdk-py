@@ -1,23 +1,28 @@
 """API client."""
+
 import logging
 import re
 import datetime
 from urllib.parse import quote
-from enum import Enum
 from importlib import import_module
 from inspect import isclass
-from types import SimpleNamespace
-from typing import Any, Mapping, Optional, TypedDict, cast, AsyncIterable
+from typing import Any, Mapping, Optional, cast, AsyncIterable
 from io import BufferedReader
 from abc import abstractmethod
 import warnings
 
-from dateutil.parser import parse
 from pydantic import BaseModel, ConfigDict, TypeAdapter, ValidationError
 from jsonpath_ng import parse as jsonpath_parse  # type: ignore[import-untyped]
 from httpx import QueryParams
 
-from .http import Response, HeaderTypes, RequestFiles, Request, AsyncClient, QueryParamTypes
+from .http import (
+    Response,
+    HeaderTypes,
+    RequestFiles,
+    Request,
+    AsyncClient,
+    QueryParamTypes,
+)
 from .exceptions import ApiValueError, ApiError
 from ._models import Model
 
@@ -80,7 +85,7 @@ class WithSerializationSupport:
         """
         method = _validate_method(method)
         url = _interpolate_resource_path(resource_path, path_params)
-        extra_params: Optional[QueryParamTypes] = kwargs.pop('params', None)
+        extra_params: Optional[QueryParamTypes] = kwargs.pop("params", None)
         request = {
             "params": build_params(query_params, extra_params),
             "headers": _sanitize_for_serialization(headers),
@@ -102,8 +107,8 @@ class WithSerializationSupport:
         self,
         response: Response,
         response_types_map=None,
-        select_path: str = '',
-        stream: bool = False
+        select_path: str = "",
+        stream: bool = False,
     ) -> Any:
         """Deserialize response into a model object.
 
@@ -114,7 +119,7 @@ class WithSerializationSupport:
         """
         if stream:
             warnings.warn(
-                'Using `stream=True` is currently only supported with `raw_response=True`.'
+                "Using `stream=True` is currently only supported with `raw_response=True`."
             )
             return response
         status_code = response.status_code
@@ -127,13 +132,13 @@ class WithSerializationSupport:
             and 100 <= response.status_code <= 599
         ):
             # if not found, look for '1XX', '2XX', etc.
-            response_type = response_types_map.get(
-                status_code_key[0] + "XX"
-            )
+            response_type = response_types_map.get(status_code_key[0] + "XX")
         if not response_type:
             # if still not found, look for default response type, otherwise use `Model`
             response_type = (
-                response_types_map.get("*") or response_types_map.get("default") or Model
+                response_types_map.get("*")
+                or response_types_map.get("default")
+                or Model
             )
 
         # deserialize response data
@@ -148,8 +153,14 @@ class WithSerializationSupport:
                     _data = response.json()
                     if select_path:
                         jsonpath_expr = jsonpath_parse(select_path)
-                        match_values = [match.value for match in jsonpath_expr.find(_data)]
-                        _data = match_values[0] if not re.search(r"\[.*\]", select_path) else match_values
+                        match_values = [
+                            match.value for match in jsonpath_expr.find(_data)
+                        ]
+                        _data = (
+                            match_values[0]
+                            if not re.search(r"\[.*\]", select_path)
+                            else match_values
+                        )
                 except ValueError:
                     _data = response.text
                 if _data is not None:
@@ -169,8 +180,7 @@ _CHUNK_SIZE = 65_536
 
 
 def build_params(
-    api_params: Optional[Mapping[str, Any]],
-    extra_params: Optional[QueryParamTypes]
+    api_params: Optional[Mapping[str, Any]], extra_params: Optional[QueryParamTypes]
 ) -> Optional[QueryParamTypes]:
     """Sanitize and merge parameters."""
     api_params = cast(dict, _sanitize_for_serialization(api_params))
@@ -284,8 +294,11 @@ def _deserialize(data: Any, klass: Any):
         elif klass.startswith("Dict["):
             match = re.match(r"Dict\[([^,]*), (.*)]", klass)
             (key_kls, val_kls) = (match.group(1), match.group(2))  # type: ignore[union-attr]
-            return {_deserialize(k, key_kls): _deserialize(v, val_kls) for k, v in data.items()}
-        elif '.' in klass:
+            return {
+                _deserialize(k, key_kls): _deserialize(v, val_kls)
+                for k, v in data.items()
+            }
+        elif "." in klass:
             try:
                 # get the actual class from the class name
                 [types_module_name, class_name] = klass.rsplit(".", 1)
@@ -294,13 +307,22 @@ def _deserialize(data: Any, klass: Any):
             except (AttributeError, ValueError, TypeError, ImportError):
                 return _MODEL_TYPE_ADAPTER.validate_python(data)
 
-    config = ConfigDict(arbitrary_types_allowed=True) if isclass(klass) and not issubclass(klass, BaseModel) else None
+    config = (
+        ConfigDict(arbitrary_types_allowed=True)
+        if isclass(klass) and not issubclass(klass, BaseModel)
+        else None
+    )
     klassTypeAdapter = TypeAdapter(klass, config=config)
     try:
         return klassTypeAdapter.validate_python(data)
     except ValidationError as exc:
-        log.warning('Failed to deserialize response into klass {0}, using backup deserializer instead.'.format(klass),
-                    exc_info=exc, extra={'data': data, 'class': klass})
+        log.warning(
+            "Failed to deserialize response into klass {0}, using backup deserializer instead.".format(
+                klass
+            ),
+            exc_info=exc,
+            extra={"data": data, "class": klass},
+        )
         return _MODEL_TYPE_ADAPTER.validate_python(data)
 
 

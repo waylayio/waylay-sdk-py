@@ -6,5 +6,5 @@ from .model import (
     DEFAULT_PROFILE,
     SERVICE_KEY_GATEWAY,
     SERVICE_KEY_ACCOUNTS,
-    SERVICE_KEY_API
+    SERVICE_KEY_API,
 )

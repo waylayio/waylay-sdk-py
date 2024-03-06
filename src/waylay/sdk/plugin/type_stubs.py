@@ -21,9 +21,11 @@ if TYPE_CHECKING:
     try:
         from waylay.services.registry.service import RegistryService  # type: ignore
     except ImportError:
+
         class _RegistryServiceStub(_WaylayServiceStub):
-            name = 'registry'
-            title = 'Function Registry (stub)'
+            name = "registry"
+            title = "Function Registry (stub)"
+
         if not TYPE_CHECKING:
             RegistryService = _RegistryServiceStub
 
@@ -31,8 +33,10 @@ if TYPE_CHECKING:
     try:
         from waylay.services.broker.service import BrokerService  # type: ignore
     except ImportError:
+
         class _BrokerServiceStub(_WaylayServiceStub):
-            name = 'broker'
-            title = 'Data Broker (stub)'
+            name = "broker"
+            title = "Data Broker (stub)"
+
         if not TYPE_CHECKING:
             BrokerService = _BrokerServiceStub

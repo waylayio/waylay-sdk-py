@@ -1,7 +1,16 @@
 """Aliases for the http client."""
+
 from typing import (
-    TypedDict, Mapping, Optional, Callable, Any,
-    Union, Sequence, Tuple, List, Required
+    TypedDict,
+    Mapping,
+    Optional,
+    Callable,
+    Any,
+    Union,
+    Sequence,
+    Tuple,
+    List,
+    Required,
 )
 
 import httpx._client as httpx_types
