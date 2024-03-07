@@ -11,6 +11,7 @@ from typing import (
     Tuple,
     List,
     Required,
+    IO,
 )
 
 import httpx._client as httpx_types
@@ -37,6 +38,8 @@ QueryParamTypes = Union[
 ]
 
 RequestFiles = httpx_types.RequestFiles
+RequestContent = httpx_types.RequestContent | IO[bytes]
+RequestData = httpx_types.RequestData
 
 
 class HttpRequestArguments(TypedDict, total=False):

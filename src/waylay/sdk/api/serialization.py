@@ -16,12 +16,14 @@ from jsonpath_ng import parse as jsonpath_parse  # type: ignore[import-untyped]
 from httpx import QueryParams
 
 from .http import (
+    AsyncClient,
+    Request,
     Response,
+    QueryParamTypes,
     HeaderTypes,
     RequestFiles,
-    Request,
-    AsyncClient,
-    QueryParamTypes,
+    RequestContent,
+    RequestData,
 )
 from .exceptions import ApiValueError, ApiError
 from ._models import Model
@@ -52,6 +54,38 @@ class WithSerializationSupport:
     @abstractmethod
     def http_client(self) -> AsyncClient:
         """Get (or open) a http client."""
+
+    def build_request(
+        self,
+        method: str,
+        resource_path: str,
+        path_params: Optional[Mapping[str, str]] = None,
+        params: Optional[QueryParamTypes] = None,
+        json: Optional[Any] = None,
+        content: Optional[RequestContent] = None,
+        files: Optional[RequestFiles] = None,
+        data: Optional[RequestData] = None,
+        headers: Optional[HeaderTypes] = None,
+        **kwargs,
+    ) -> Request:
+        """Build the HTTP request params needed by the request."""
+        method = _validate_method(method)
+        url = _interpolate_resource_path(resource_path, path_params)
+        params = _sanitize_for_serialization(params)
+        headers = _sanitize_for_serialization(headers)
+        files = _sanitize_files_parameters(files)
+        json = _sanitize_for_serialization(json)
+        return self.http_client.build_request(
+            method,
+            url,
+            params=params,
+            json=json,
+            content=content,
+            files=files,
+            data=data,
+            headers=headers,
+            **kwargs,
+        )
 
     def build_api_request(
         self,
@@ -312,14 +346,13 @@ def _deserialize(data: Any, klass: Any):
         if isclass(klass) and not issubclass(klass, BaseModel)
         else None
     )
-    klassTypeAdapter = TypeAdapter(klass, config=config)
+    klass_type_adapter = TypeAdapter(klass, config=config)
     try:
-        return klassTypeAdapter.validate_python(data)
+        return klass_type_adapter.validate_python(data)
     except ValidationError as exc:
         log.warning(
-            "Failed to deserialize response into klass {0}, using backup deserializer instead.".format(
-                klass
-            ),
+            "Failed to deserialize response into class %s, using backup deserializer instead.",
+            klass,
             exc_info=exc,
             extra={"data": data, "class": klass},
         )
@@ -333,5 +366,4 @@ def _sanitize_files_parameters(files=Optional[RequestFiles]):
     :return: Form parameters with files.
 
     """
-
     return files
