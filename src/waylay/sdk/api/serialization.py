@@ -6,7 +6,7 @@ import datetime
 from urllib.parse import quote
 from importlib import import_module
 from inspect import isclass
-from typing import Any, Mapping, Optional, cast, AsyncIterable
+from typing import Any, Mapping, Optional, cast, AsyncIterable, Union
 from io import BufferedReader
 from abc import abstractmethod
 import warnings
@@ -60,7 +60,7 @@ class WithSerializationSupport:
         method: str,
         resource_path: str,
         path_params: Optional[Mapping[str, str]] = None,
-        params: Optional[QueryParamTypes] = None,
+        params: Optional[Union[QueryParamTypes, Mapping]] = None,
         json: Optional[Any] = None,
         content: Optional[RequestContent] = None,
         files: Optional[RequestFiles] = None,
