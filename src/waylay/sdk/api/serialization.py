@@ -346,9 +346,9 @@ def _deserialize(data: Any, klass: Any):
         if isclass(klass) and not issubclass(klass, BaseModel)
         else None
     )
-    klass_type_adapter = TypeAdapter(klass, config=config)
+    ClassTypeAdapter = TypeAdapter(klass, config=config)  # pylint: disable=C0103
     try:
-        return klass_type_adapter.validate_python(data)
+        return ClassTypeAdapter.validate_python(data)
     except ValidationError as exc:
         log.warning(
             "Failed to deserialize response into class %s, using backup deserializer instead.",
