@@ -100,23 +100,11 @@ class WithSerializationSupport:
     ) -> Request:
         """Build the HTTP request params needed by the request.
 
-        :param method: Method to call.
-        :param resource_path: Path to method endpoint.
-        :param path_params: Path parameters in the url.
-        :param query_params: Query parameters in the url.
-
-        :param body: Request body.
-        :param files dict: key -> filename, value -> filepath, for
-            `multipart/form-data`.
-        :param headers: Header parameters to be placed in the
-            request header.
-        :param kwargs: Other options passed to the http client.
-            See waylay.sdk.api.HttpClientOptions
-        :return: Sanitized http call arguments of form {
-            path, method, url, params, headers, body, files, *kwargs
-            }
-
+        Deprecated in favor of `build_request`
         """
+        warnings.warn(
+            "build_api_request call will be removed soon (use `build_request`)"
+        )
         method = _validate_method(method)
         url = _interpolate_resource_path(resource_path, path_params)
         extra_params: Optional[QueryParamTypes] = kwargs.pop("params", None)
