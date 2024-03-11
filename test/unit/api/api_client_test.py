@@ -39,22 +39,19 @@ def _fixture_waylay_api_client(waylay_config: WaylayConfig) -> ApiClient:
 
 
 SERIALIZE_CASES = {
-    "params_and_query": {
+    "path_and_query_params": {
         "method": "GET",
         "resource_path": "/service/v1/{param1}/foo/{param2}",
         "path_params": {"param1": "A", "param2": "B"},
-        "query_params": {"key1": "value1", "key2": "value2"},
+        "params": {"key1": "value1", "key2": "value2"},
         "headers": {"x-my-header": "header_value"},
-        "body": None,
-        "files": None,
     },
     "params_and_body": {
         "method": "PATCH",
         "resource_path": "/service/v1/{param1}/bar/{missing_param}",
         "path_params": {"param1": "A", "param_not_in_resource_path": "B"},
-        "query_params": None,
         "headers": {"x-my-header": "header_value"},
-        "body": {
+        "json": {
             "array_key": ["val1", "val2"],
             "tuple_key": ("val3", 123, {"key": "value"}, None),
             "timestamp": datetime(1999, 9, 28, hour=12, minute=30, second=59),
@@ -63,8 +60,7 @@ SERIALIZE_CASES = {
     "files": {
         "method": "POST",
         "resource_path": "/service/v1/cruz/",
-        "path_params": None,
-        "query_params": {"key1": 15},
+        "params": {"key1": 15},
         "files": {
             "file1": b"<... binary content ...>",
             "file2": "<... other binary content ...>",
@@ -74,36 +70,34 @@ SERIALIZE_CASES = {
         "method": "PUT",
         "resource_path": "/service/v1/{param1}/foo",
         "path_params": {"param1": "C"},
-        "body": pet_instance,
+        "json": pet_instance,
     },
     "pet_dict_body": {
         "method": "PUT",
         "resource_path": "/service/v1/{param1}/foo",
         "path_params": {"param1": "C"},
-        "body": pet_instance_dict,
+        "json": pet_instance_dict,
     },
     "pet_json_body": {
         "method": "PUT",
         "resource_path": "/service/v1/{param1}/foo",
         "path_params": {"param1": "C"},
-        "body": pet_instance_json,
+        "json": pet_instance_json,
     },
     "binary_body": {
         "method": "POST",
         "resource_path": "/service/v1/bar/foo",
-        "body": b"..some binary content..",
+        "content": b"..some binary content..",
     },
     "form": {
         "method": "POST",
         "resource_path": "/service/v1/bar/foo",
-        "headers": {"Content-Type": "application/x-www-form-urlencoded"},
-        "body": {"key": "value"},
+        "data": {"key": "value"},
     },
-    "body_and_files": {
+    "data_and_files": {
         "method": "POST",
         "resource_path": "/service/v1/bar/foo",
-        "headers": {"Content-Type": "application/x-www-form-urlencoded"},
-        "body": {"key": "value"},
+        "data": {"key": "value"},
         "files": {"file1": b"<binary>"},
     },
 }
@@ -126,7 +120,7 @@ async def test_serialize_and_call(
         "httpx._models.get_multipart_boundary_from_content_type",
         lambda content_type: b"---boundary---",
     )
-    request = waylay_api_client.build_api_request(**test_input)
+    request = waylay_api_client.build_request(**test_input)
     assert request.__dict__ == snapshot
     httpx_mock.add_response()
     await waylay_api_client.send(request)
@@ -140,7 +134,7 @@ async def test_serialize_and_call(
 async def test_call_invalid_method(waylay_api_client: ApiClient):
     """REST client should throw on invalid http method."""
     with pytest.raises(ApiValueError):
-        waylay_api_client.build_api_request(method="invalid", resource_path="/")
+        waylay_api_client.build_request(method="invalid", resource_path="/")
 
 
 DESERIALIZE_CASES = [
@@ -396,7 +390,7 @@ DESERIALIZE_CASES = [
     ),
     # enum response types
     ("text_str_Enum", {"status_code": 200, "text": "dog"}, {"*": PetType}, None),
-    # namespace responses
+    # fallback model responses
     (
         "json_dict_any_model",
         {"status_code": 200, "json": pet_instance_dict},
@@ -406,6 +400,12 @@ DESERIALIZE_CASES = [
     (
         "json_list_any_model",
         {"status_code": 200, "json": pet_list_instance_dict},
+        {"*": Model},
+        None,
+    ),
+    (
+        "dict_with_self_model",
+        {"status_code": 200, "json": {"self": "me"}},
         {"*": Model},
         None,
     ),
@@ -674,5 +674,5 @@ async def test_request_timeout(
     waylay_api_client: ApiClient,
 ):
     """Test request timeout."""
-    request = waylay_api_client.build_api_request(method, url, timeout=timeout)
+    request = waylay_api_client.build_request(method, url, timeout=timeout)
     assert request.extensions.get("timeout", None) == expected_timeout

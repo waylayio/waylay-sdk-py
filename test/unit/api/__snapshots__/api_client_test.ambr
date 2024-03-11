@@ -70,6 +70,18 @@
     Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'),
   )
 # ---
+# name: test_deserialize[dict_with_self_model]
+  tuple(
+    b'{"self": "me"}',
+    200,
+    dict({
+      '*': Model,
+    }),
+    None,
+    '_Model',
+    _Model(self='me'),
+  )
+# ---
 # name: test_deserialize[json_bool]
   tuple(
     b'true',
@@ -853,7 +865,7 @@
         'write': 5.0,
       }),
     }),
-    'headers': Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.3', 'content-type': 'application/octet-stream', 'content-length': '23'}),
+    'headers': Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.3', 'content-length': '23'}),
     'method': 'POST',
     'stream': ByteStream(
     ),
@@ -867,13 +879,13 @@
     ]),
     list([
       tuple(
-        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.3', 'content-type': 'application/octet-stream', 'content-length': '23'}),
+        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.3', 'content-length': '23'}),
         b'..some binary content..',
       ),
     ]),
   )
 # ---
-# name: test_serialize_and_call[body_and_files]
+# name: test_serialize_and_call[data_and_files]
   dict({
     'extensions': dict({
       'timeout': dict({
@@ -883,12 +895,16 @@
         'write': 5.0,
       }),
     }),
-    'headers': Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.3', 'content-type': 'application/x-www-form-urlencoded', 'content-length': '155'}),
+    'headers': Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.3', 'content-length': '226', 'content-type': 'multipart/form-data; boundary=---boundary---'}),
     'method': 'POST',
     'stream': MultipartStream(
       boundary=b'---boundary---',
       content_type='multipart/form-data; boundary=---boundary---',
       fields=list([
+        DataField(
+          name='key',
+          value='value',
+        ),
         FileField(
           CHUNK_SIZE=65536,
           file=b'<binary>',
@@ -903,15 +919,15 @@
     'url': URL('https://api-example.io/service/v1/bar/foo'),
   })
 # ---
-# name: test_serialize_and_call[body_and_files].1
+# name: test_serialize_and_call[data_and_files].1
   tuple(
     list([
       <Request('POST', 'https://api-example.io/service/v1/bar/foo')>,
     ]),
     list([
       tuple(
-        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.3', 'content-type': 'application/x-www-form-urlencoded', 'content-length': '155'}),
-        b'-----boundary---\r\nContent-Disposition: form-data; name="file1"; filename="upload"\r\nContent-Type: application/octet-stream\r\n\r\n<binary>\r\n-----boundary-----\r\n',
+        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.3', 'content-length': '226', 'content-type': 'multipart/form-data; boundary=---boundary---'}),
+        b'-----boundary---\r\nContent-Disposition: form-data; name="key"\r\n\r\nvalue\r\n-----boundary---\r\nContent-Disposition: form-data; name="file1"; filename="upload"\r\nContent-Type: application/octet-stream\r\n\r\n<binary>\r\n-----boundary-----\r\n',
       ),
     ]),
   )
@@ -970,7 +986,7 @@
 # ---
 # name: test_serialize_and_call[form]
   dict({
-    '_content': b'{"key": "value"}',
+    '_content': b'key=value',
     'extensions': dict({
       'timeout': dict({
         'connect': 5.0,
@@ -979,7 +995,7 @@
         'write': 5.0,
       }),
     }),
-    'headers': Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.3', 'content-type': 'application/x-www-form-urlencoded', 'content-length': '16'}),
+    'headers': Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.3', 'content-length': '9', 'content-type': 'application/x-www-form-urlencoded'}),
     'method': 'POST',
     'stream': ByteStream(
     ),
@@ -993,8 +1009,8 @@
     ]),
     list([
       tuple(
-        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.3', 'content-type': 'application/x-www-form-urlencoded', 'content-length': '16'}),
-        b'{"key": "value"}',
+        Headers({'host': 'api-example.io', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'waylay-sdk/python/0.0.3', 'content-length': '9', 'content-type': 'application/x-www-form-urlencoded'}),
+        b'key=value',
       ),
     ]),
   )
@@ -1030,7 +1046,7 @@
     ]),
   )
 # ---
-# name: test_serialize_and_call[params_and_query]
+# name: test_serialize_and_call[path_and_query_params]
   dict({
     '_content': b'',
     'extensions': dict({
@@ -1048,7 +1064,7 @@
     'url': URL('https://api-example.io/service/v1/A/foo/B?key1=value1&key2=value2'),
   })
 # ---
-# name: test_serialize_and_call[params_and_query].1
+# name: test_serialize_and_call[path_and_query_params].1
   tuple(
     list([
       <Request('GET', 'https://api-example.io/service/v1/A/foo/B?key1=value1&key2=value2')>,
