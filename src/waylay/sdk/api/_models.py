@@ -21,7 +21,7 @@ class _Model(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    def __init__(self, **kwargs):
+    def __init__(self, /, **kwargs):
         super().__init__(**kwargs)
         for field in self.model_fields_set:  # pylint: disable=not-an-iterable
             setattr(

@@ -13,7 +13,8 @@ import warnings
 
 from pydantic import BaseModel, ConfigDict, TypeAdapter, ValidationError
 from jsonpath_ng import parse as jsonpath_parse  # type: ignore[import-untyped]
-from httpx import QueryParams
+from httpx import QueryParams, USE_CLIENT_DEFAULT
+import httpx._client as httpxc
 
 from .http import (
     AsyncClient,
@@ -37,8 +38,6 @@ _CLASS_MAPPING = {
     "Any": Any,
 }
 _ALLOWED_METHODS = ["GET", "HEAD", "DELETE", "POST", "PUT", "PATCH", "OPTIONS"]
-_REMOVE_NONE_DEFAULT = ["timeout"]
-_REMOVE_FALSY_DEFAULT = ["params", "headers", "files"]
 
 _MODEL_TYPE_ADAPTER = TypeAdapter(Model)
 
@@ -60,13 +59,16 @@ class WithSerializationSupport:
         method: str,
         resource_path: str,
         path_params: Optional[Mapping[str, str]] = None,
+        *,
         params: Optional[Union[QueryParamTypes, Mapping]] = None,
         json: Optional[Any] = None,
         content: Optional[RequestContent] = None,
         files: Optional[RequestFiles] = None,
         data: Optional[RequestData] = None,
         headers: Optional[HeaderTypes] = None,
-        **kwargs,
+        cookies: httpxc.CookieTypes | None = None,
+        timeout: httpxc.TimeoutTypes | None = None,
+        extensions: httpxc.RequestExtensions | None = None,
     ) -> Request:
         """Build the HTTP request params needed by the request."""
         method = _validate_method(method)
@@ -79,52 +81,16 @@ class WithSerializationSupport:
         return self.http_client.build_request(
             method,
             url,
-            params=params,
-            json=json,
             content=content,
-            files=files,
             data=data,
+            files=files,
+            json=json,
+            params=params,
             headers=headers,
-            **kwargs,
+            cookies=cookies,
+            timeout=USE_CLIENT_DEFAULT if timeout is None else timeout,
+            extensions=extensions,
         )
-
-    def build_api_request(
-        self,
-        method: str,
-        resource_path: str,
-        path_params: Optional[Mapping[str, str]] = None,
-        query_params: Optional[Mapping[str, Any]] = None,
-        body: Optional[Any] = None,
-        files: Optional[RequestFiles] = None,
-        headers: Optional[HeaderTypes] = None,
-        **kwargs,
-    ) -> Request:
-        """Build the HTTP request params needed by the request.
-
-        Deprecated in favor of `build_request`
-        """
-        warnings.warn(
-            "build_api_request call will be removed soon (use `build_request`)"
-        )
-        method = _validate_method(method)
-        url = _interpolate_resource_path(resource_path, path_params)
-        extra_params: Optional[QueryParamTypes] = kwargs.pop("params", None)
-        request = {
-            "params": build_params(query_params, extra_params),
-            "headers": _sanitize_for_serialization(headers),
-            "files": _sanitize_files_parameters(files),
-            **kwargs,
-        }
-        for key in _REMOVE_NONE_DEFAULT:
-            if key in request and request[key] is None:
-                request.pop(key)
-        for key in _REMOVE_FALSY_DEFAULT:
-            if key in request and not request[key]:
-                request.pop(key)
-        if body:
-            body = _sanitize_for_serialization(body)
-            request.update(convert_body(body, request))
-        return self.http_client.build_request(method, url, **request)
 
     def response_deserialize(
         self,

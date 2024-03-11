@@ -21,7 +21,7 @@ class MyService(WaylayService):
 
     async def echo(self, message, with_http_info=False, select_path=""):
         """Echo."""
-        req = self.api_client.build_api_request("POST", "/", body=message)
+        req = self.api_client.build_request("POST", "/", json=message)
         resp = await self.api_client.send(req)
         if with_http_info:
             return resp
@@ -100,12 +100,12 @@ async def test_direct_request(my_client: WaylayClient):
 
 async def test_async_request(my_client: WaylayClient):
     """Test the native httpx async mode."""
-    request = my_client.tst.api_client.build_api_request(
+    request = my_client.tst.api_client.build_request(
         "POST",
         "/{target}",
         {"target": "world"},
-        {"polite": True},
-        body={"message": "hello"},
+        params={"polite": True},
+        json={"message": "hello"},
     )
     response = await my_client.tst.api_client.send(request, stream=True)
     assert response.status_code == 200
