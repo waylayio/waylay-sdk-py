@@ -6,8 +6,11 @@ from .http import (
     AsyncClient,
     HttpClientOptions,
     HeaderTypes,
+    QueryParamTypes,
     Request,
     Response,
     RequestFiles,
+    RequestContent,
+    RequestData,
 )
 from .exceptions import ApiError, ApiValueError

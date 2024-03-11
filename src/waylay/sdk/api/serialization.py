@@ -6,22 +6,25 @@ import datetime
 from urllib.parse import quote
 from importlib import import_module
 from inspect import isclass
-from typing import Any, Mapping, Optional, cast, AsyncIterable
+from typing import Any, Mapping, Optional, cast, AsyncIterable, Union
 from io import BufferedReader
 from abc import abstractmethod
 import warnings
 
 from pydantic import BaseModel, ConfigDict, TypeAdapter, ValidationError
 from jsonpath_ng import parse as jsonpath_parse  # type: ignore[import-untyped]
-from httpx import QueryParams
+from httpx import QueryParams, USE_CLIENT_DEFAULT
+import httpx._client as httpxc
 
 from .http import (
+    AsyncClient,
+    Request,
     Response,
+    QueryParamTypes,
     HeaderTypes,
     RequestFiles,
-    Request,
-    AsyncClient,
-    QueryParamTypes,
+    RequestContent,
+    RequestData,
 )
 from .exceptions import ApiValueError, ApiError
 from ._models import Model
@@ -35,8 +38,6 @@ _CLASS_MAPPING = {
     "Any": Any,
 }
 _ALLOWED_METHODS = ["GET", "HEAD", "DELETE", "POST", "PUT", "PATCH", "OPTIONS"]
-_REMOVE_NONE_DEFAULT = ["timeout"]
-_REMOVE_FALSY_DEFAULT = ["params", "headers", "files"]
 
 _MODEL_TYPE_ADAPTER = TypeAdapter(Model)
 
@@ -53,55 +54,43 @@ class WithSerializationSupport:
     def http_client(self) -> AsyncClient:
         """Get (or open) a http client."""
 
-    def build_api_request(
+    def build_request(
         self,
         method: str,
         resource_path: str,
         path_params: Optional[Mapping[str, str]] = None,
-        query_params: Optional[Mapping[str, Any]] = None,
-        body: Optional[Any] = None,
+        *,
+        params: Optional[Union[QueryParamTypes, Mapping]] = None,
+        json: Optional[Any] = None,
+        content: Optional[RequestContent] = None,
         files: Optional[RequestFiles] = None,
+        data: Optional[RequestData] = None,
         headers: Optional[HeaderTypes] = None,
-        **kwargs,
+        cookies: httpxc.CookieTypes | None = None,
+        timeout: httpxc.TimeoutTypes | None = None,
+        extensions: httpxc.RequestExtensions | None = None,
     ) -> Request:
-        """Build the HTTP request params needed by the request.
-
-        :param method: Method to call.
-        :param resource_path: Path to method endpoint.
-        :param path_params: Path parameters in the url.
-        :param query_params: Query parameters in the url.
-
-        :param body: Request body.
-        :param files dict: key -> filename, value -> filepath, for
-            `multipart/form-data`.
-        :param headers: Header parameters to be placed in the
-            request header.
-        :param kwargs: Other options passed to the http client.
-            See waylay.sdk.api.HttpClientOptions
-        :return: Sanitized http call arguments of form {
-            path, method, url, params, headers, body, files, *kwargs
-            }
-
-        """
+        """Build the HTTP request params needed by the request."""
         method = _validate_method(method)
         url = _interpolate_resource_path(resource_path, path_params)
-        extra_params: Optional[QueryParamTypes] = kwargs.pop("params", None)
-        request = {
-            "params": build_params(query_params, extra_params),
-            "headers": _sanitize_for_serialization(headers),
-            "files": _sanitize_files_parameters(files),
-            **kwargs,
-        }
-        for key in _REMOVE_NONE_DEFAULT:
-            if key in request and request[key] is None:
-                request.pop(key)
-        for key in _REMOVE_FALSY_DEFAULT:
-            if key in request and not request[key]:
-                request.pop(key)
-        if body:
-            body = _sanitize_for_serialization(body)
-            request.update(convert_body(body, request))
-        return self.http_client.build_request(method, url, **request)
+        params = _sanitize_for_serialization(params)
+        headers = _sanitize_for_serialization(headers)
+        files = _sanitize_files_parameters(files)
+        json = _sanitize_for_serialization(json)
+        data = _sanitize_for_serialization(data)
+        return self.http_client.build_request(
+            method,
+            url,
+            content=content,
+            data=data,
+            files=files,
+            json=json,
+            params=params,
+            headers=headers,
+            cookies=cookies,
+            timeout=USE_CLIENT_DEFAULT if timeout is None else timeout,
+            extensions=extensions,
+        )
 
     def response_deserialize(
         self,
@@ -312,18 +301,25 @@ def _deserialize(data: Any, klass: Any):
         if isclass(klass) and not issubclass(klass, BaseModel)
         else None
     )
-    klassTypeAdapter = TypeAdapter(klass, config=config)
+    type_adapter = TypeAdapter(klass, config=config)
     try:
-        return klassTypeAdapter.validate_python(data)
-    except ValidationError as exc:
-        log.warning(
-            "Failed to deserialize response into klass {0}, using backup deserializer instead.".format(
-                klass
-            ),
-            exc_info=exc,
-            extra={"data": data, "class": klass},
-        )
-        return _MODEL_TYPE_ADAPTER.validate_python(data)
+        return type_adapter.validate_python(data)
+    except (TypeError, ValidationError) as exc:
+        try:
+            _deserialized = _MODEL_TYPE_ADAPTER.validate_python(data)
+            log.warning(
+                "Failed to deserialize response into class %s, using backup deserializer instead.",
+                klass,
+                exc_info=exc,
+                extra={"data": data, "class": klass},
+            )
+            return _deserialized
+        except (TypeError, ValidationError) as exc2:
+            log.warning(
+                "Failed to deserialize response as a generic Model, returning original data.",
+                exc_info=exc2,
+            )
+            return data
 
 
 def _sanitize_files_parameters(files=Optional[RequestFiles]):
@@ -333,5 +329,4 @@ def _sanitize_files_parameters(files=Optional[RequestFiles]):
     :return: Form parameters with files.
 
     """
-
     return files
