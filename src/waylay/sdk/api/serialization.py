@@ -75,6 +75,7 @@ class WithSerializationSupport:
         headers = _sanitize_for_serialization(headers)
         files = _sanitize_files_parameters(files)
         json = _sanitize_for_serialization(json)
+        data = _sanitize_for_serialization(data)
         return self.http_client.build_request(
             method,
             url,
