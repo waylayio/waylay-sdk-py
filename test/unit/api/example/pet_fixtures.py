@@ -13,15 +13,20 @@ def pet_instance() -> Pet:
 
 
 @pytest.fixture
-def pet_instance_json(pet_instance) -> str:
-    return pet_instance.to_json()
+def pet_instance_json(pet_instance: Pet) -> str:
+    return pet_instance.model_dump_json(by_alias=True, exclude_unset=True)
 
 
 @pytest.fixture
-def pet_instance_dict(pet_instance) -> dict:
-    return pet_instance.to_dict()
+def pet_instance_dict(pet_instance: Pet) -> dict:
+    return pet_instance.model_dump(by_alias=True, exclude_unset=True)
 
 
 @pytest.fixture
-def pet_list_instance_dict(pet_instance) -> dict:
-    return {"pets": [pet_instance.to_dict(), pet_instance.to_dict()]}
+def pet_list_instance_dict(pet_instance: Pet) -> dict:
+    return {
+        "pets": [
+            pet_instance.model_dump(by_alias=True),
+            pet_instance.model_dump(by_alias=True, exclude_unset=True),
+        ]
+    }

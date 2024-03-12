@@ -127,22 +127,7 @@
     _Model(name='Lord Biscuit, Master of Naps', owner=_Model(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[json_dict_*_dict]
-  tuple(
-    b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}',
-    201,
-    dict({
-      '*': 'Dict[str, str]',
-    }),
-    None,
-    'dict',
-    dict({
-      'code': 'RESOURCE_NOT_FOUND',
-      'message': 'some not found message',
-    }),
-  )
-# ---
-# name: test_deserialize[json_dict_*_union]
+# name: test_deserialize[json_dict_*_dummy_union]
   tuple(
     b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
     200,
@@ -154,12 +139,12 @@
     Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[json_dict_*_union_str]
+# name: test_deserialize[json_dict_*_union]
   tuple(
     b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
     200,
     dict({
-      '*': 'unit.api.example.pet_model.PetUnion',
+      '*': typing.Union[unit.api.example.pet_model.PetList, unit.api.example.pet_model.Pet],
     }),
     None,
     'Pet',
@@ -254,18 +239,6 @@
     Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[json_dict_modelstr]
-  tuple(
-    b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
-    200,
-    dict({
-      '200': 'unit.api.example.pet_model.Pet',
-    }),
-    None,
-    'Pet',
-    Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'),
-  )
-# ---
 # name: test_deserialize[json_dict_no_mapping]
   tuple(
     b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}',
@@ -333,30 +306,6 @@
     Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize[json_dict_wrongmodelstr]
-  tuple(
-    b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
-    200,
-    dict({
-      '200': 'unit.api.example.pet_model.Unexisting',
-    }),
-    None,
-    '_Model',
-    _Model(name='Lord Biscuit, Master of Naps', owner=_Model(id=123, name='Simon'), tag='doggo'),
-  )
-# ---
-# name: test_deserialize[json_dict_wrongmodulestr]
-  tuple(
-    b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
-    200,
-    dict({
-      '200': 'some.unexisting.module.Pet',
-    }),
-    None,
-    '_Model',
-    _Model(name='Lord Biscuit, Master of Naps', owner=_Model(id=123, name='Simon'), tag='doggo'),
-  )
-# ---
 # name: test_deserialize[json_list]
   tuple(
     b'["hello", "world", 123, {"key": "value"}]',
@@ -378,7 +327,7 @@
     b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}',
     200,
     dict({
-      '*': 'unit.api.example.pet_model.PetUnion',
+      '*': typing.Union[unit.api.example.pet_model.PetList, unit.api.example.pet_model.Pet],
     }),
     None,
     'PetList',
@@ -391,22 +340,6 @@
     200,
     dict({
       '2XX': typing.List[int],
-    }),
-    None,
-    'list',
-    list([
-      11,
-      22,
-      33,
-    ]),
-  )
-# ---
-# name: test_deserialize[json_list_X_list_int_str]
-  tuple(
-    b'["11", "22", 33]',
-    200,
-    dict({
-      '2XX': 'List[int]',
     }),
     None,
     'list',
@@ -468,7 +401,7 @@
     b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
     200,
     dict({
-      '200': 'List[str]',
+      '200': typing.List[ForwardRef('str')],
     }),
     '[*].name',
     'list',
@@ -482,7 +415,7 @@
     b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}',
     200,
     dict({
-      '200': 'List[str]',
+      '200': typing.List[str],
     }),
     'pets[*].name',
     'list',

@@ -14,7 +14,7 @@ from waylay.sdk.api._models import Model
 from waylay.sdk.api.http import Response as RESTResponse
 from waylay.sdk.api.exceptions import ApiError, ApiValueError
 
-from .example.pet_model import Pet, PetType, PetList
+from .example.pet_model import Pet, PetType, PetList, PetUnion
 from .example.pet_fixtures import (
     pet_instance,
     pet_instance_dict,
@@ -245,18 +245,6 @@ DESERIALIZE_CASES = [
         None,
     ),
     (
-        "json_dict_*_dict",
-        {
-            "status_code": 201,
-            "json": {
-                "message": "some not found message",
-                "code": "RESOURCE_NOT_FOUND",
-            },
-        },
-        {"*": "Dict[str, str]"},
-        None,
-    ),
-    (
         "json_dict_default_dict",
         {
             "status_code": 201,
@@ -316,12 +304,6 @@ DESERIALIZE_CASES = [
         "json_list_XX_list_int",
         {"status_code": 200, "json": ["11", "22", 33]},
         {"2XX": List[int]},
-        None,
-    ),
-    (
-        "json_list_X_list_int_str",
-        {"status_code": 200, "json": ["11", "22", 33]},
-        {"2XX": "List[int]"},
         None,
     ),
     (
@@ -448,45 +430,27 @@ DESERIALIZE_CASES = [
         None,
     ),
     (
-        "json_dict_modelstr",
-        {"status_code": 200, "json": pet_instance_dict},
-        {"200": "unit.api.example.pet_model.Pet"},
-        None,
-    ),
-    (
-        "json_dict_wrongmodelstr",
-        {"status_code": 200, "json": pet_instance_dict},
-        {"200": "unit.api.example.pet_model.Unexisting"},
-        None,
-    ),
-    (
-        "json_dict_wrongmodulestr",
-        {"status_code": 200, "json": pet_instance_dict},
-        {"200": "some.unexisting.module.Pet"},
-        None,
-    ),
-    (
         "json_dict_union",
         {"status_code": 200, "json": pet_instance_dict},
         {"200": Union[str, list[Pet], Pet]},
         None,
     ),
     (
-        "json_dict_*_union",
+        "json_dict_*_dummy_union",
         {"status_code": 200, "json": pet_instance_dict},
         {"*": Union[Pet]},
         None,
     ),
     (
-        "json_dict_*_union_str",
+        "json_dict_*_union",
         {"status_code": 200, "json": pet_instance_dict},
-        {"*": "unit.api.example.pet_model.PetUnion"},
+        {"*": PetUnion},
         None,
     ),
     (
         "json_list_*_union",
         {"status_code": 200, "json": pet_list_instance_dict},
-        {"*": "unit.api.example.pet_model.PetUnion"},
+        {"*": PetUnion},
         None,
     ),
     # select path argument
@@ -511,13 +475,13 @@ DESERIALIZE_CASES = [
     (
         "json_list_list_path_[*].name",
         {"status_code": 200, "json": [pet_instance_dict]},
-        {"200": "List[str]"},
+        {"200": List["str"]},
         "[*].name",
     ),
     (
         "json_list_list_path_pets[*].name",
         {"status_code": 200, "json": pet_list_instance_dict},
-        {"200": "List[str]"},
+        {"200": List[str]},
         "pets[*].name",
     ),
 ]

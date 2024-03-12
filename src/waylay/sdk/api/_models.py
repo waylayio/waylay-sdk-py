@@ -1,6 +1,13 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any, List, Union
+from datetime import date, datetime
+from decimal import Decimal
+from typing import TYPE_CHECKING, Any, Dict, List, Self, Union
 from typing_extensions import TypeAliasType
+
+try:
+    from typing import Self
+except ImportError:
+    from typing_extensions import Self  # <3.11
 
 try:
     from typing import Annotated
@@ -38,15 +45,32 @@ class _Model(BaseModel):
         else:
             return obj
 
-    def to_dict(self):
-        """Convert model instance to dict."""
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert the model instance to dict."""
         return self.model_dump()
 
+    def to_json(self) -> str:
+        """Convert the model instance to a JSON-encoded string."""
+        return self.model_dump_json()
 
+    @classmethod
+    def from_dict(cls, obj: dict) -> Self:
+        """Create a model instance from a dict."""
+        return cls.model_validate(obj)
+
+    @classmethod
+    def from_json(cls, json_data: str | bytes | bytearray) -> Self:
+        """Create a model instance from a JSON-encoded string."""
+        return cls.model_validate_json(json_data)
+
+
+Primitive: TypeAlias = Union[
+    str, bool, int, float, Decimal, bytes, datetime, date, object, None
+]
 Model: TypeAlias = TypeAliasType(  # type: ignore[valid-type]  #(https://github.com/python/mypy/issues/16614)
     "Model",
     Annotated[
-        Union[List["Model"], "_Model", Any],  # type: ignore[misc,possible cyclic definition]
+        Union[List["Model"], "_Model", Primitive],  # type: ignore[misc,possible cyclic definition]
         "A basic model that acts like a `simpleNamespace`, or a collection over such models.",
     ],
 )
