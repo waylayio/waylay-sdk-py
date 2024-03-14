@@ -4,7 +4,6 @@ import logging
 import re
 import datetime
 from urllib.parse import quote
-from importlib import import_module
 from inspect import isclass
 from typing import Any, Mapping, Optional, cast, AsyncIterable, Union
 from io import BufferedReader
@@ -12,6 +11,7 @@ from abc import abstractmethod
 import warnings
 
 from pydantic import BaseModel, ConfigDict, TypeAdapter, ValidationError
+from pydantic_core import to_jsonable_python
 from jsonpath_ng import parse as jsonpath_parse  # type: ignore[import-untyped]
 from httpx import QueryParams, USE_CLIENT_DEFAULT
 import httpx._client as httpxc
@@ -73,11 +73,9 @@ class WithSerializationSupport:
         """Build the HTTP request params needed by the request."""
         method = _validate_method(method)
         url = _interpolate_resource_path(resource_path, path_params)
-        params = _sanitize_for_serialization(params)
-        headers = _sanitize_for_serialization(headers)
-        files = _sanitize_files_parameters(files)
-        json = _sanitize_for_serialization(json)
-        data = _sanitize_for_serialization(data)
+        params = to_jsonable_python(params, by_alias=True)
+        json = to_jsonable_python(json, by_alias=True)
+        data = to_jsonable_python(data, by_alias=True)
         return self.http_client.build_request(
             method,
             url,
@@ -172,7 +170,7 @@ def build_params(
     api_params: Optional[Mapping[str, Any]], extra_params: Optional[QueryParamTypes]
 ) -> Optional[QueryParamTypes]:
     """Sanitize and merge parameters."""
-    api_params = cast(dict, _sanitize_for_serialization(api_params))
+    api_params = cast(dict, to_jsonable_python(api_params, by_alias=True))
     if not api_params:
         return extra_params
     if not extra_params:
@@ -232,70 +230,10 @@ def _interpolate_resource_path(
     return resource_path
 
 
-def _sanitize_for_serialization(obj):
-    """Build a JSON POST object.
-
-    If obj is None, return None.
-    If obj is str, int, long, float, bool, return directly.
-    If obj is datetime.datetime, datetime.date convert to string in iso8601 format.
-    If obj is list, sanitize each element in the list.
-    If obj is dict, return the dict.
-    If obj is OpenAPI model, return the properties dict.
-
-    :param obj: The data to serialize.
-    :return: The serialized form of data.
-    """
-    if obj is None:
-        return None
-    elif isinstance(obj, _PRIMITIVE_TYPES + _PRIMITIVE_BYTE_TYPES):
-        return obj
-    elif isinstance(obj, list):
-        return [_sanitize_for_serialization(sub_obj) for sub_obj in obj]
-    elif isinstance(obj, tuple):
-        return tuple(_sanitize_for_serialization(sub_obj) for sub_obj in obj)
-    elif isinstance(obj, (datetime.datetime, datetime.date)):
-        return obj.isoformat()
-
-    elif isinstance(obj, dict):
-        obj_dict = obj
-    else:
-        # Convert model obj to dict except
-        # attributes `openapi_types`, `attribute_map`
-        # and attributes which value is not None.
-        # Convert attribute name to json key in
-        # model definition for request.
-        try:
-            obj_dict = obj.to_dict()
-        except AttributeError:
-            return obj
-
-    return {key: _sanitize_for_serialization(val) for key, val in obj_dict.items()}
-
-
 def _deserialize(data: Any, klass: Any):
     """Deserializes response content into a `klass` instance."""
     if isinstance(klass, str) and klass in _CLASS_MAPPING:
         klass = _CLASS_MAPPING[klass]
-    elif isinstance(klass, str):
-        if klass.startswith("List["):
-            inner_kls = re.match(r"List\[(.*)]", klass).group(1)  # type: ignore[union-attr]
-            return [_deserialize(sub_data, inner_kls) for sub_data in data]
-        elif klass.startswith("Dict["):
-            match = re.match(r"Dict\[([^,]*), (.*)]", klass)
-            (key_kls, val_kls) = (match.group(1), match.group(2))  # type: ignore[union-attr]
-            return {
-                _deserialize(k, key_kls): _deserialize(v, val_kls)
-                for k, v in data.items()
-            }
-        elif "." in klass:
-            try:
-                # get the actual class from the class name
-                [types_module_name, class_name] = klass.rsplit(".", 1)
-                types_module = import_module(types_module_name)
-                klass = getattr(types_module, class_name)
-            except (AttributeError, ValueError, TypeError, ImportError):
-                return _MODEL_TYPE_ADAPTER.validate_python(data)
-
     config = (
         ConfigDict(arbitrary_types_allowed=True)
         if isclass(klass) and not issubclass(klass, BaseModel)
@@ -320,13 +258,3 @@ def _deserialize(data: Any, klass: Any):
                 exc_info=exc2,
             )
             return data
-
-
-def _sanitize_files_parameters(files=Optional[RequestFiles]):
-    """Build form parameters.
-
-    :param files: File parameters.
-    :return: Form parameters with files.
-
-    """
-    return files
