@@ -5,15 +5,23 @@ import re
 import datetime
 from urllib.parse import quote
 from inspect import isclass
-from typing import Any, Mapping, Optional, cast, AsyncIterable, Union
-from io import BufferedReader
+from typing import (
+    Any,
+    Mapping,
+    Optional,
+    AsyncIterable,
+    Union,
+    Iterable,
+    Protocol,
+    runtime_checkable,
+)
 from abc import abstractmethod
 import warnings
 
 from pydantic import BaseModel, ConfigDict, TypeAdapter, ValidationError
 from pydantic_core import to_jsonable_python
 from jsonpath_ng import parse as jsonpath_parse  # type: ignore[import-untyped]
-from httpx import QueryParams, USE_CLIENT_DEFAULT
+from httpx import USE_CLIENT_DEFAULT
 import httpx._client as httpxc
 
 from .http import (
@@ -31,7 +39,6 @@ from ._models import Model
 
 
 _PRIMITIVE_BYTE_TYPES = (bytes, bytearray)
-_PRIMITIVE_TYPES = (float, bool, str, int)
 _CLASS_MAPPING = {
     "date": datetime.date,
     "datetime": datetime.datetime,
@@ -43,11 +50,14 @@ _MODEL_TYPE_ADAPTER = TypeAdapter(Model)
 
 log = logging.getLogger(__name__)
 
+DEFAULT_SERIALIZATION_ARGS = {"by_alias": True, "exclude_none": True}
+
 
 class WithSerializationSupport:
     """Serialization support for the SDK client."""
 
     base_url: str
+    serialization_args = DEFAULT_SERIALIZATION_ARGS
 
     @property
     @abstractmethod
@@ -73,22 +83,23 @@ class WithSerializationSupport:
         """Build the HTTP request params needed by the request."""
         method = _validate_method(method)
         url = _interpolate_resource_path(resource_path, path_params)
-        params = to_jsonable_python(params, by_alias=True)
-        json = to_jsonable_python(json, by_alias=True)
-        data = to_jsonable_python(data, by_alias=True)
         return self.http_client.build_request(
             method,
             url,
-            content=content,
-            data=data,
+            content=_convert_content(content),
+            data=self.serialize(data),
             files=files,
-            json=json,
-            params=params,
+            json=self.serialize(json),
+            params=self.serialize(params),
             headers=headers,
             cookies=cookies,
             timeout=USE_CLIENT_DEFAULT if timeout is None else timeout,
             extensions=extensions,
         )
+
+    def serialize(self, data):
+        """Serialize to a jsonable python data structure."""
+        return to_jsonable_python(data, **self.serialization_args)
 
     def response_deserialize(
         self,
@@ -166,49 +177,36 @@ class WithSerializationSupport:
 _CHUNK_SIZE = 65_536
 
 
-def build_params(
-    api_params: Optional[Mapping[str, Any]], extra_params: Optional[QueryParamTypes]
-) -> Optional[QueryParamTypes]:
-    """Sanitize and merge parameters."""
-    api_params = cast(dict, to_jsonable_python(api_params, by_alias=True))
-    if not api_params:
-        return extra_params
-    if not extra_params:
-        return api_params
-    # merge parameters
-    return QueryParams(api_params).merge(extra_params)
+@runtime_checkable
+class Readable(Protocol):
+    """Anything with a binary read method."""
+
+    def read(self, n: int = -1) -> bytes:
+        """Read a binary chunk"""
 
 
-def convert_body(
-    body: Any,
-    kwargs,
-) -> Mapping[str, Any]:
-    """SDK invocation request with untyped body."""
-    headers = kwargs.pop("headers", None) or {}
-    content_type = headers.get("content-type", "").lower()
-    if isinstance(body, BufferedReader):
+def _convert_content(content: Any):
+    """Convert Iterable and Readable to AsyncIterable."""
+    # do not handle cases httpx handles
+    if isinstance(content, (bytes, str, AsyncIterable)):
+        return content
+    # non-dict Iterables fail when using async client, convert to async iterable.
+    if isinstance(content, Iterable) and not isinstance(content, dict):
 
-        async def read_buffer():
-            while chunk := body.read(_CHUNK_SIZE):
+        async def _read_iterable_async():
+            for chunk in content:
                 yield chunk
 
-        kwargs["content"] = read_buffer()
-    elif isinstance(body, (bytes, AsyncIterable)):
-        kwargs["content"] = body
-    elif content_type.startswith("application/x-www-form-urlencoded"):
-        kwargs["data"] = body
-    elif not content_type:
-        # TBD: check string case
-        # body='"abc"', content-type:'application/json' => content='"abc"'
-        # body='abc' => json='abc' (encoded '"abc"')
-        # body='abc', content-type:'application/json' => content='abc' (invalid)
-        kwargs["json"] = body
-    else:
-        kwargs["content"] = body
-    if "content" in kwargs and not content_type:
-        headers["content-type"] = "application/octet-stream"
-    kwargs["headers"] = headers
-    return kwargs
+        return _read_iterable_async()
+
+    if isinstance(content, Readable):
+
+        async def _read_reader_async():
+            while chunk := content.read(_CHUNK_SIZE):
+                yield chunk
+
+        return _read_reader_async()
+    return content
 
 
 def _validate_method(method: str):
