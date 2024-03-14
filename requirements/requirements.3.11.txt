@@ -10,7 +10,7 @@ idna==3.6
 jsonpath-ng==1.6.1
 ply==3.11
 pyasn1==0.5.1
-pydantic==2.6.3
+pydantic==2.6.4
 pydantic_core==2.16.3
 python-dateutil==2.9.0.post0
 python-jose==3.3.0
