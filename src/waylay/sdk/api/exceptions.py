@@ -2,9 +2,9 @@
 
 from typing import Any, Optional
 
-from .http import Response as RESTResponse
+from .http import Response
 
-from ..exceptions import RequestError, RestResponseError
+from ..exceptions import WaylayError, RequestError, RestResponseError
 
 
 class ApiValueError(RequestError, ValueError):
@@ -32,22 +32,21 @@ class ApiValueError(RequestError, ValueError):
 class ApiError(RestResponseError):
     """Exception class wrapping the response data of a REST call."""
 
-    response: RESTResponse
     data: Optional[Any]
 
     def __init__(
         self,
-        response: RESTResponse,
+        response: Response,
         data: Optional[Any],
     ) -> None:
         """Create an instance."""
-        self.response = response
+        super().__init__(response)
         self.data = data
 
     @classmethod
     def from_response(
         cls,
-        response: RESTResponse,
+        response: Response,
         data: Optional[Any],
     ):
         """Create an instance from a REST exception response."""
@@ -55,31 +54,13 @@ class ApiError(RestResponseError):
 
     def __str__(self):
         """Get the string representation of the exception."""
-        resp = self.response
-        error_message = (
-            f"{self.__class__.__name__}({resp.status_code})\n"
-            f"Reason: {self.response.reason_phrase}\n"
-        )
-        if resp._request:
-            error_message += f"{resp.request.method} {resp.url}\n"
-
-        if resp.headers:
-            error_message += f"HTTP response headers: {resp.headers}\n"
-
-        if self.data:
-            error_message += f"HTTP response content: {self.data}\n"
-        elif resp._content:
-            error_message += (
-                f"HTTP response content: <bytes: len={len(resp._content)}>\n"
-            )
-        else:
-            error_message += (
-                f"HTTP response content: <streaming: len={resp.num_bytes_downloaded}>\n"
-            )
-        return error_message + "\n)"
+        error_message = super().__str__()
+        if self.data and self.data != self.response.content:
+            error_message += f"\nResponse data: {self.data}"
+        return error_message
 
 
-class SyncCtxMgtNotSupportedError(TypeError):
+class SyncCtxMgtNotSupportedError(WaylayError, TypeError):
     """Warn the user to use async context management."""
 
     def __init__(self, target):

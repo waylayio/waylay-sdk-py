@@ -1,5 +1,8 @@
 """Base exception class hierarchy for errors in the waylay client."""
 
+from typing import Optional
+from .api.http import Request, Response
+
 
 class WaylayError(Exception):
     """Root class for all exceptions raised by this module."""
@@ -28,10 +31,60 @@ class RestError(WaylayError):
 class RestRequestError(RestError):
     """Exception class for failures to prepare a REST call."""
 
+    request: Optional[Request]
 
-class RestResponseError(RestError):
+    def __init__(
+        self,
+        request: Optional[Request],
+    ):
+        """Create an instance."""
+        self.request = request
+
+    def __str__(self):
+        """Get the string representation of the exception."""
+        error_message = f"{self.__class__.__name__}"
+        if self.request is None:
+            return error_message
+        req = self.request
+        error_message += f"\nRequest: {req.method} {req.url}"
+        if req.headers:
+            error_message += f"\nRequest headers: {req.headers}"
+        if hasattr(req, "_content"):
+            error_message += f"\nRequest content: <bytes: len={len(req._content)}>"
+        else:
+            error_message += f"\nRequest content: <streaming: {req.stream}>"
+        return error_message
+
+
+class RestResponseError(RestRequestError):
     """Exception class wrapping the response data of a REST call."""
+
+    response: Response
+
+    def __init__(
+        self,
+        response: Response,
+    ) -> None:
+        """Create an instance."""
+        super().__init__(response._request)
+        self.response = response
+
+    def __str__(self):
+        """Get the string representation of the exception."""
+        error_message = super().__str__()
+        resp = self.response
+        error_message += f"\nStatus: {resp.status_code}"
+        error_message += f"\nReason: {resp.reason_phrase}"
+        if resp.headers:
+            error_message += f"\nResponse headers: {resp.headers}"
+        if hasattr(self.response, "_content"):
+            error_message += f"\nResponse content: <bytes: len={len(resp._content)}>"
+        else:
+            error_message += (
+                f"\nResponse content: <streaming: len={resp.num_bytes_downloaded}>"
+            )
+        return error_message
 
 
 class RestResponseParseError(RestResponseError):
-    """Exception raised when a successfull http request (200) could not be parsed succesfully."""
+    """Exception raised when a successfull http request (2XX) could not be parsed succesfully."""
