@@ -90,13 +90,16 @@ exec-typecheck:
 	@mypy test/*/*.py
 	@${printMsg} typecheck OK
 
-exec-format: 
+exec-format:
 	@ruff format
+
+format:
+	${VENV_ACTIVATE} && make exec-format exec-lint-fix
 
 code-qa: install ### perform code quality checks
 	${VENV_ACTIVATE} && make exec-code-qa
-exec-code-qa: exec-lint-fix exec-format exec-typecheck
 
+exec-code-qa: exec-lint exec-typecheck
 
 test-unit: install
 	${VENV_ACTIVATE} && pytest test/unit
@@ -116,7 +119,7 @@ test-integration: install
 test-integration-coverage-report: install ### generate html coverage report for the integration tests
 	${VENV_ACTIVATE} && pytest --cov-report html:cov_report/integration --cov=src test/integration
 
-test: code-qa test-unit ### perform all quality checks and tests, except for integration tests
+test: format test-unit ### perform all quality checks and tests, except for integration tests
 
 upgrade-buildtools:
 	pip install --upgrade pip
