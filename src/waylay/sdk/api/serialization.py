@@ -70,7 +70,7 @@ class WithSerializationSupport:
         resource_path: str,
         path_params: Optional[Mapping[str, str]] = None,
         *,
-        params: Optional[Union[QueryParamTypes, Mapping]] = None,
+        params: Optional[Union[QueryParamTypes, Mapping, BaseModel]] = None,
         json: Optional[Any] = None,
         content: Optional[RequestContent] = None,
         files: Optional[RequestFiles] = None,
