@@ -2,6 +2,7 @@
 
 from typing import Any, Dict, List, Union, AsyncIterator
 from datetime import datetime, date
+from pathlib import Path
 
 import pytest
 import httpx
@@ -37,6 +38,29 @@ def _fixture_waylay_config(waylay_credentials) -> WaylayConfig:
 @pytest.fixture(name="waylay_api_client")
 def _fixture_waylay_api_client(waylay_config: WaylayConfig) -> ApiClient:
     return ApiClient(waylay_config, {"auth": None})
+
+
+async def _iter_some_binary_content():
+    yield b"iter"
+    yield b"some"
+    yield b"binary"
+    yield b"content"
+
+
+class BinaryReader:
+    """Custom binary reader."""
+
+    pos = 0
+    data = b"some binary content"
+
+    def read(self, b_len=2):
+        """Read binary data."""
+        pos = self.pos
+        size = min(len(self.data) - pos, b_len)
+        if size <= 0:
+            return b""
+        self.pos = pos + size
+        return self.data[pos : pos + size]
 
 
 SERIALIZE_CASES = {
@@ -90,6 +114,26 @@ SERIALIZE_CASES = {
         "resource_path": "/service/v1/bar/foo",
         "content": b"..some binary content..",
     },
+    "binary_iterable": {
+        "method": "POST",
+        "resource_path": "/service/v1/bar/foo",
+        "content": [b"some", b"binary", b"content"],
+    },
+    "binary_async_iterable": {
+        "method": "POST",
+        "resource_path": "/service/v1/bar/foo",
+        "content": _iter_some_binary_content(),
+    },
+    "binary_io_buffer": {
+        "method": "POST",
+        "resource_path": "/service/v1/bar/foo",
+        "content": (Path(__file__).parent / "__init__.py").open(mode="rb"),
+    },
+    "binary_io": {
+        "method": "POST",
+        "resource_path": "/service/v1/bar/foo",
+        "content": BinaryReader(),
+    },
     "form": {
         "method": "POST",
         "resource_path": "/service/v1/bar/foo",
@@ -126,9 +170,13 @@ async def test_serialize_and_call(
     httpx_mock.add_response()
     await waylay_api_client.send(request)
     requests = httpx_mock.get_requests()
+    assert len(requests) == 1
+    request = requests[0]
+    request_data = await request.aread()
     assert (
-        requests,
-        [(r.headers, r.read()) for r in requests],
+        request,
+        request.headers,
+        request_data,
     ) == snapshot
 
 
@@ -136,6 +184,12 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
     """REST client should throw on invalid http method."""
     with pytest.raises(ApiValueError):
         waylay_api_client.build_request(method="invalid", resource_path="/")
+
+
+async def test_call_invalid_content(waylay_api_client: ApiClient):
+    """Cannot use a dict as `content` argument."""
+    with pytest.raises(TypeError, match="Unexpected type"):
+        waylay_api_client.build_request("POST", "", content={"should": "not work"})
 
 
 DESERIALIZE_CASES = [
