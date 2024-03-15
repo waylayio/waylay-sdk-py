@@ -1,9 +1,10 @@
 """Test suite for package `waylay.api`."""
 
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, AsyncIterator
 from datetime import datetime, date
 
 import pytest
+import httpx
 from pytest_httpx import HTTPXMock
 
 from waylay.sdk.auth import TokenCredentials
@@ -11,7 +12,7 @@ from waylay.sdk.config import WaylayConfig
 from waylay.sdk.api import ApiClient
 from waylay.sdk.api._models import Model
 
-from waylay.sdk.api.http import Response as RESTResponse
+from waylay.sdk.api.http import Response, Request
 from waylay.sdk.api.exceptions import ApiError, ApiValueError
 
 from .example.pet_model import Pet, PetType, PetList, PetUnion
@@ -502,7 +503,7 @@ def test_deserialize(
 ):
     """Test REST param deserializer."""
     response_kwargs = _retrieve_fixture_values(request, response_kwargs)
-    response = RESTResponse(**response_kwargs)
+    response = Response(**response_kwargs)
     deserialized = waylay_api_client.response_deserialize(
         response, response_type_map, select_path
     )
@@ -514,6 +515,18 @@ def test_deserialize(
         type(deserialized).__name__,
         deserialized,
     ) == snapshot()
+
+
+class TestResponseStream(httpx.AsyncByteStream):
+    def __init__(self, chunks: List[bytes]):
+        self.chunks_iter = iter(chunks)
+
+    async def __aiter__(self) -> AsyncIterator[bytes]:
+        for b in self.chunks_iter:
+            yield b
+
+    async def aclose(self) -> None:
+        self.chunks_iter = iter([])
 
 
 ERROR_RESP_CASES = [
@@ -561,6 +574,20 @@ ERROR_RESP_CASES = [
     ({"status_code": 400, "json": pet_instance_dict}, {"400": Pet}),
     ({"status_code": 400, "content": pet_instance_json}, {"default": Any}),
     ({"status_code": 400, "json": pet_instance_dict}, {}),
+    (
+        {
+            "status_code": 400,
+            "headers": {"content-length": "3"},
+            "request": Request(
+                "GET",
+                "http://all",
+                params={"debug": "true"},
+                headers={"x-feature": "flagged"},
+            ),
+            "stream": TestResponseStream([b"a", b"b", b"c"]),
+        },
+        {},
+    ),
 ]
 
 
@@ -576,13 +603,31 @@ def test_deserialize_error_responses(
     response_kwargs = _retrieve_fixture_values(request, response_kwargs)
     with pytest.raises(ApiError) as excinfo:
         waylay_api_client.response_deserialize(
-            RESTResponse(**response_kwargs), response_type_map
+            Response(**response_kwargs), response_type_map
         )
     assert (
         str(excinfo.value),
         type(excinfo.value.data).__name__,
         excinfo.value.data,
     ) == snapshot(name=str(response_type_map))
+
+
+async def test_deserialize_partially_fetched_error_stream(
+    waylay_api_client: ApiClient, snapshot
+):
+    resp = Response(
+        status_code=400,
+        stream=TestResponseStream([b"a", b"b", b"c"]),
+        headers={"content-length": "3"},
+    )
+    await anext(resp.aiter_raw(chunk_size=1))
+    with pytest.raises(ApiError) as excinfo:
+        waylay_api_client.response_deserialize(resp, {})
+    assert (
+        str(excinfo.value),
+        type(excinfo.value.data).__name__,
+        excinfo.value.data,
+    ) == snapshot()
 
 
 def _retrieve_fixture_values(request, kwargs: Dict[str, Any]) -> Dict[str, Any]:

@@ -662,12 +662,12 @@
 # name: test_deserialize_error_responses[response_kwargs0-response_type_map0][{'404': typing.Dict[str, str]}]
   tuple(
     '''
-      ApiError(404)
+      ApiError
+      Status: 404
       Reason: Not Found
-      HTTP response headers: Headers({'content-length': '67', 'content-type': 'application/json'})
-      HTTP response content: {'message': 'some not found message', 'code': 'RESOURCE_NOT_FOUND'}
-      
-      )
+      Response headers: Headers({'content-length': '67', 'content-type': 'application/json'})
+      Response content: <bytes: len=67>
+      Response data: {'message': 'some not found message', 'code': 'RESOURCE_NOT_FOUND'}
     ''',
     'dict',
     dict({
@@ -679,12 +679,12 @@
 # name: test_deserialize_error_responses[response_kwargs1-response_type_map1][{'4XX': <class 'dict'>}]
   tuple(
     '''
-      ApiError(404)
+      ApiError
+      Status: 404
       Reason: Not Found
-      HTTP response headers: Headers({'content-length': '67', 'content-type': 'application/json'})
-      HTTP response content: {'message': 'some not found message', 'code': 'RESOURCE_NOT_FOUND'}
-      
-      )
+      Response headers: Headers({'content-length': '67', 'content-type': 'application/json'})
+      Response content: <bytes: len=67>
+      Response data: {'message': 'some not found message', 'code': 'RESOURCE_NOT_FOUND'}
     ''',
     'dict',
     dict({
@@ -696,12 +696,12 @@
 # name: test_deserialize_error_responses[response_kwargs2-response_type_map2][{'4XX': typing.Any}]
   tuple(
     '''
-      ApiError(404)
+      ApiError
+      Status: 404
       Reason: Not Found
-      HTTP response headers: Headers({'content-length': '67', 'content-type': 'application/json'})
-      HTTP response content: {'message': 'some not found message', 'code': 'RESOURCE_NOT_FOUND'}
-      
-      )
+      Response headers: Headers({'content-length': '67', 'content-type': 'application/json'})
+      Response content: <bytes: len=67>
+      Response data: {'message': 'some not found message', 'code': 'RESOURCE_NOT_FOUND'}
     ''',
     'dict',
     dict({
@@ -713,12 +713,12 @@
 # name: test_deserialize_error_responses[response_kwargs3-response_type_map3][{'4XX': typing.Any}]
   tuple(
     '''
-      ApiError(404)
+      ApiError
+      Status: 404
       Reason: Not Found
-      HTTP response headers: Headers({'content-length': '22', 'content-type': 'text/plain; charset=utf-8'})
-      HTTP response content: some not found message
-      
-      )
+      Response headers: Headers({'content-length': '22', 'content-type': 'text/plain; charset=utf-8'})
+      Response content: <bytes: len=22>
+      Response data: some not found message
     ''',
     'str',
     'some not found message',
@@ -727,12 +727,12 @@
 # name: test_deserialize_error_responses[response_kwargs4-response_type_map4][{}]
   tuple(
     '''
-      ApiError(404)
+      ApiError
+      Status: 404
       Reason: Not Found
-      HTTP response headers: Headers({'content-length': '67', 'content-type': 'application/json'})
-      HTTP response content: message='some not found message' code='RESOURCE_NOT_FOUND'
-      
-      )
+      Response headers: Headers({'content-length': '67', 'content-type': 'application/json'})
+      Response content: <bytes: len=67>
+      Response data: message='some not found message' code='RESOURCE_NOT_FOUND'
     ''',
     '_Model',
     _Model(message='some not found message', code='RESOURCE_NOT_FOUND'),
@@ -741,12 +741,12 @@
 # name: test_deserialize_error_responses[response_kwargs5-response_type_map5][{'400': <class 'unit.api.example.pet_model.Pet'>}]
   tuple(
     '''
-      ApiError(400)
+      ApiError
+      Status: 400
       Reason: Bad Request
-      HTTP response headers: Headers({'content-length': '95', 'content-type': 'application/json'})
-      HTTP response content: name='Lord Biscuit, Master of Naps' owner=PetOwner(id=123, name='Simon') tag='doggo'
-      
-      )
+      Response headers: Headers({'content-length': '95', 'content-type': 'application/json'})
+      Response content: <bytes: len=95>
+      Response data: name='Lord Biscuit, Master of Naps' owner=PetOwner(id=123, name='Simon') tag='doggo'
     ''',
     'Pet',
     Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'),
@@ -755,12 +755,12 @@
 # name: test_deserialize_error_responses[response_kwargs6-response_type_map6][{'default': typing.Any}]
   tuple(
     '''
-      ApiError(400)
+      ApiError
+      Status: 400
       Reason: Bad Request
-      HTTP response headers: Headers({'content-length': '87'})
-      HTTP response content: {'name': 'Lord Biscuit, Master of Naps', 'owner': {'id': 123, 'name': 'Simon'}, 'tag': 'doggo'}
-      
-      )
+      Response headers: Headers({'content-length': '87'})
+      Response content: <bytes: len=87>
+      Response data: {'name': 'Lord Biscuit, Master of Naps', 'owner': {'id': 123, 'name': 'Simon'}, 'tag': 'doggo'}
     ''',
     'dict',
     dict({
@@ -776,15 +776,44 @@
 # name: test_deserialize_error_responses[response_kwargs7-response_type_map7][{}]
   tuple(
     '''
-      ApiError(400)
+      ApiError
+      Status: 400
       Reason: Bad Request
-      HTTP response headers: Headers({'content-length': '95', 'content-type': 'application/json'})
-      HTTP response content: name='Lord Biscuit, Master of Naps' owner=_Model(id=123, name='Simon') tag='doggo'
-      
-      )
+      Response headers: Headers({'content-length': '95', 'content-type': 'application/json'})
+      Response content: <bytes: len=95>
+      Response data: name='Lord Biscuit, Master of Naps' owner=_Model(id=123, name='Simon') tag='doggo'
     ''',
     '_Model',
     _Model(name='Lord Biscuit, Master of Naps', owner=_Model(id=123, name='Simon'), tag='doggo'),
+  )
+# ---
+# name: test_deserialize_error_responses[response_kwargs8-response_type_map8][{}]
+  tuple(
+    '''
+      ApiError
+      Request: GET http://all?debug=true
+      Request headers: Headers({'host': 'all', 'x-feature': 'flagged'})
+      Request content: <bytes: len=0>
+      Status: 400
+      Reason: Bad Request
+      Response headers: Headers({'content-length': '3'})
+      Response content: <streaming: len=0>
+    ''',
+    'NoneType',
+    None,
+  )
+# ---
+# name: test_deserialize_partially_fetched_error_stream
+  tuple(
+    '''
+      ApiError
+      Status: 400
+      Reason: Bad Request
+      Response headers: Headers({'content-length': '3'})
+      Response content: <streaming: len=1>
+    ''',
+    'NoneType',
+    None,
   )
 # ---
 # name: test_serialize_and_call[binary_body]
