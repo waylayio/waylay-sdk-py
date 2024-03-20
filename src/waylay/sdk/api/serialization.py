@@ -105,7 +105,7 @@ class WithSerializationSupport:
     def deserialize(
         self,
         response: Response,
-        response_types_map: Mapping[str, Type] | None = None,
+        response_types_map: Mapping[str, Type | None] | None = None,
         select_path: str = "",
         stream: bool = False,
     ) -> Any:

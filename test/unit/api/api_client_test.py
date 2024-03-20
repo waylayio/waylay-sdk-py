@@ -539,6 +539,18 @@ DESERIALIZE_CASES = [
         {"200": List[str]},
         "pets[*].name",
     ),
+    (
+        "json_list_list_path_pets[0].name",
+        {"status_code": 200, "json": pet_list_instance_dict},
+        {"200": str},
+        "pets[0].name",
+    ),
+    (
+        "json_list_list_path_pets[1:].name",
+        {"status_code": 200, "json": pet_list_instance_dict},
+        {"200": List[str]},
+        "pets[1:].name",
+    ),
 ]
 
 

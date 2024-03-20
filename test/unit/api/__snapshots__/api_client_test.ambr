@@ -451,6 +451,32 @@
     ]),
   )
 # ---
+# name: test_deserialize[json_list_list_path_pets[0].name]
+  tuple(
+    b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}',
+    200,
+    dict({
+      '200': <class 'str'>,
+    }),
+    'pets[0].name',
+    'str',
+    'Lord Biscuit, Master of Naps',
+  )
+# ---
+# name: test_deserialize[json_list_list_path_pets[1:].name]
+  tuple(
+    b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}',
+    200,
+    dict({
+      '200': typing.List[str],
+    }),
+    'pets[1:].name',
+    'list',
+    list([
+      'Lord Biscuit, Master of Naps',
+    ]),
+  )
+# ---
 # name: test_deserialize[json_list_model]
   tuple(
     b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}',
