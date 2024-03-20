@@ -117,7 +117,7 @@ class ApiClient(WithSerializationSupport):
             await self._http_client.aclose()
             self._http_client = None
 
-    async def request(self, *args, **kwargs) -> Response:
+    async def _request(self, *args, **kwargs) -> Response:
         """Invoke a http request."""
         return await self.http_client.request(*args, **kwargs)
 

@@ -65,6 +65,61 @@ class WithSerializationSupport:
     def http_client(self) -> AsyncClient:
         """Get (or open) a http client."""
 
+    async def request(
+        self,
+        method: str,
+        resource_path: str,
+        path_params: Optional[Mapping[str, str]] = None,
+        *,
+        params: Optional[Union[QueryParamTypes, Mapping, BaseModel]] = None,
+        json: Optional[Any] = None,
+        content: Optional[RequestContent] = None,
+        files: Optional[RequestFiles] = None,
+        data: Optional[RequestData] = None,
+        headers: Optional[HeaderTypes] = None,
+        cookies: httpxc.CookieTypes | None = None,
+        timeout: httpxc.TimeoutTypes | None = None,
+        extensions: httpxc.RequestExtensions | None = None,
+        # Deserialization arguments
+        response_types_map: Mapping[str, Type | None] | None = None,
+        select_path: str = "",
+        raw_response: bool = False,
+        # Additional parameters passed on to the http client
+        **kwargs,
+    ) -> Response | Any:
+        """Perform a request with serialization and deserialization support."""
+
+        # set aside send args
+        send_args = {}
+        for key in ["stream", "follow_redirects", "auth"]:
+            if key in kwargs:
+                send_args[key] = kwargs.pop(key)
+
+        api_request = self.build_request(
+            method,
+            resource_path,
+            path_params,
+            params=params,
+            json=json,
+            content=content,
+            files=files,
+            data=data,
+            headers=headers,
+            cookies=cookies,
+            timeout=timeout,
+            extensions=extensions,
+            **kwargs,
+        )
+        response = await self.http_client.send(api_request, **send_args)
+        if raw_response:
+            return response
+        return self.deserialize(
+            response,
+            response_types_map,
+            select_path,
+            stream=send_args.get("stream", False),
+        )
+
     def build_request(
         self,
         method: str,

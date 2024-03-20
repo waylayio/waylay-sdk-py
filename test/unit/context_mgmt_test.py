@@ -91,7 +91,7 @@ async def assert_call_echo(srv: MyService):
 
 async def test_direct_request(my_client: WaylayClient):
     """Test the native httpx.request method."""
-    response = await my_client.tst.api_client.request(
+    response = await my_client.tst.api_client._request(
         "post", url="/", json={"message": "hello"}
     )
     assert response.status_code == 200
