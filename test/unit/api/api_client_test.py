@@ -508,6 +508,13 @@ DESERIALIZE_CASES = [
         {"*": PetUnion},
         None,
     ),
+    # Any response type (i.e. surpress deserialization)
+    (
+        "json_dict_model_any",
+        {"status_code": 200, "json": pet_instance_dict},
+        {"200": Any},
+        None,
+    ),
     # select path argument
     (
         "json_dict_str_path_name",

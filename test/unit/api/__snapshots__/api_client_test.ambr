@@ -253,6 +253,25 @@
     Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'),
   )
 # ---
+# name: test_deserialize[json_dict_model_any]
+  tuple(
+    b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
+    200,
+    dict({
+      '200': typing.Any,
+    }),
+    None,
+    'dict',
+    dict({
+      'name': 'Lord Biscuit, Master of Naps',
+      'owner': dict({
+        'id': 123,
+        'name': 'Simon',
+      }),
+      'tag': 'doggo',
+    }),
+  )
+# ---
 # name: test_deserialize[json_dict_no_mapping]
   tuple(
     b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}',
