@@ -1,5 +1,6 @@
 """Test suite for package `waylay.api`."""
 
+from types import SimpleNamespace
 from typing import Any, Dict, List, Union, AsyncIterator
 from datetime import datetime, date
 from pathlib import Path
@@ -513,6 +514,19 @@ DESERIALIZE_CASES = [
         "json_dict_model_any",
         {"status_code": 200, "json": pet_instance_dict},
         {"200": Any},
+        None,
+    ),
+    # type constructors that are not recognized by pydantic
+    (
+        "json_dict_namespace",
+        {
+            "status_code": 201,
+            "json": {
+                "message": "some not found message",
+                "code": "RESOURCE_NOT_FOUND",
+            },
+        },
+        {"2XX": SimpleNamespace}, # TODO fix: should return SimpleNamespace
         None,
     ),
     # select path argument

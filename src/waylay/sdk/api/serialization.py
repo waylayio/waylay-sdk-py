@@ -288,7 +288,7 @@ def _deserialize(data: Any, klass: Any):
         klass = _CLASS_MAPPING[klass]
     config = (
         ConfigDict(arbitrary_types_allowed=True)
-        if isclass(klass) and not issubclass(klass, BaseModel)
+        if not isclass(klass) or not issubclass(klass, BaseModel)
         else None
     )
     type_adapter = TypeAdapter(klass, config=config)

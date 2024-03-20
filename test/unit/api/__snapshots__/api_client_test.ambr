@@ -272,6 +272,18 @@
     }),
   )
 # ---
+# name: test_deserialize[json_dict_namespace]
+  tuple(
+    b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}',
+    201,
+    dict({
+      '2XX': <class 'types.SimpleNamespace'>,
+    }),
+    None,
+    '_Model',
+    _Model(message='some not found message', code='RESOURCE_NOT_FOUND'),
+  )
+# ---
 # name: test_deserialize[json_dict_no_mapping]
   tuple(
     b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}',
