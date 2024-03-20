@@ -10,6 +10,7 @@ from typing import (
     Mapping,
     Optional,
     AsyncIterable,
+    Type,
     Union,
     Iterable,
     Protocol,
@@ -101,19 +102,19 @@ class WithSerializationSupport:
         """Serialize to a jsonable python data structure."""
         return to_jsonable_python(data, **self.serialization_args)
 
-    def response_deserialize(
+    def deserialize(
         self,
         response: Response,
-        response_types_map=None,
+        response_types_map: Mapping[str, Type] | None = None,
         select_path: str = "",
         stream: bool = False,
     ) -> Any:
-        """Deserialize response into a model object.
+        """Deserialize a http response into a python object.
 
         :param response_data: Response object to be deserialized.
-        :param response_types_map: dict of response types.
-        :param select_path: json path into the json payload.
-        :return: The response model
+        :param response_types_map: A mapping of response types per status code: examples [{"200": Model}, {"2XX": Model}, {"*": Model}]
+        :param select_path: json path to be extracted from the json payload.
+        :return: An instance of the type specified in the mapping.
         """
         if stream:
             warnings.warn(
@@ -132,11 +133,9 @@ class WithSerializationSupport:
             # if not found, look for '1XX', '2XX', etc.
             response_type = response_types_map.get(status_code_key[0] + "XX")
         if not response_type:
-            # if still not found, look for default response type, otherwise use `Model`
+            # if still not found, look for default response type, otherwise use `Any`
             response_type = (
-                response_types_map.get("*")
-                or response_types_map.get("default")
-                or Model
+                response_types_map.get("*") or response_types_map.get("default") or Any  # type: ignore
             )
 
         # deserialize response data
@@ -156,7 +155,7 @@ class WithSerializationSupport:
                         ]
                         _data = (
                             match_values[0]
-                            if not re.search(r"\[.*\]", select_path)
+                            if not re.search(r"\[(\*|.*:.*|.*,.*)\]", select_path)
                             else match_values
                         )
                 except ValueError:
