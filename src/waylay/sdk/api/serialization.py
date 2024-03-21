@@ -10,6 +10,7 @@ from typing import (
     Mapping,
     Optional,
     AsyncIterable,
+    Type,
     Union,
     Iterable,
     Protocol,
@@ -64,6 +65,61 @@ class WithSerializationSupport:
     def http_client(self) -> AsyncClient:
         """Get (or open) a http client."""
 
+    async def request(
+        self,
+        method: str,
+        resource_path: str,
+        path_params: Optional[Mapping[str, str]] = None,
+        *,
+        params: Optional[Union[QueryParamTypes, Mapping, BaseModel]] = None,
+        json: Optional[Any] = None,
+        content: Optional[RequestContent] = None,
+        files: Optional[RequestFiles] = None,
+        data: Optional[RequestData] = None,
+        headers: Optional[HeaderTypes] = None,
+        cookies: httpxc.CookieTypes | None = None,
+        timeout: httpxc.TimeoutTypes | None = None,
+        extensions: httpxc.RequestExtensions | None = None,
+        # Deserialization arguments
+        response_types_map: Mapping[str, Type | None] | None = None,
+        select_path: str = "",
+        raw_response: bool = False,
+        # Additional parameters passed on to the http client
+        **kwargs,
+    ) -> Response | Any:
+        """Perform a request with serialization and deserialization support."""
+
+        # set aside send args
+        send_args = {}
+        for key in ["stream", "follow_redirects", "auth"]:
+            if key in kwargs:
+                send_args[key] = kwargs.pop(key)
+
+        api_request = self.build_request(
+            method,
+            resource_path,
+            path_params,
+            params=params,
+            json=json,
+            content=content,
+            files=files,
+            data=data,
+            headers=headers,
+            cookies=cookies,
+            timeout=timeout,
+            extensions=extensions,
+            **kwargs,
+        )
+        response = await self.http_client.send(api_request, **send_args)
+        if raw_response:
+            return response
+        return self.deserialize(
+            response,
+            response_types_map,
+            select_path,
+            stream=send_args.get("stream", False),
+        )
+
     def build_request(
         self,
         method: str,
@@ -101,19 +157,19 @@ class WithSerializationSupport:
         """Serialize to a jsonable python data structure."""
         return to_jsonable_python(data, **self.serialization_args)
 
-    def response_deserialize(
+    def deserialize(
         self,
         response: Response,
-        response_types_map=None,
+        response_types_map: Mapping[str, Type | None] | None = None,
         select_path: str = "",
         stream: bool = False,
     ) -> Any:
-        """Deserialize response into a model object.
+        """Deserialize a http response into a python object.
 
         :param response_data: Response object to be deserialized.
-        :param response_types_map: dict of response types.
-        :param select_path: json path into the json payload.
-        :return: The response model
+        :param response_types_map: A mapping of response types per status code: examples [{"200": Model}, {"2XX": Model}, {"*": Model}]
+        :param select_path: json path to be extracted from the json payload.
+        :return: An instance of the type specified in the mapping.
         """
         if stream:
             warnings.warn(
@@ -132,11 +188,9 @@ class WithSerializationSupport:
             # if not found, look for '1XX', '2XX', etc.
             response_type = response_types_map.get(status_code_key[0] + "XX")
         if not response_type:
-            # if still not found, look for default response type, otherwise use `Model`
+            # if still not found, look for default response type, otherwise use `Any`
             response_type = (
-                response_types_map.get("*")
-                or response_types_map.get("default")
-                or Model
+                response_types_map.get("*") or response_types_map.get("default") or Any  # type: ignore
             )
 
         # deserialize response data
@@ -156,7 +210,7 @@ class WithSerializationSupport:
                         ]
                         _data = (
                             match_values[0]
-                            if not re.search(r"\[.*\]", select_path)
+                            if not re.search(r"\[(\*|.*:.*|.*,.*)\]", select_path)
                             else match_values
                         )
                 except ValueError:
@@ -234,7 +288,7 @@ def _deserialize(data: Any, klass: Any):
         klass = _CLASS_MAPPING[klass]
     config = (
         ConfigDict(arbitrary_types_allowed=True)
-        if isclass(klass) and not issubclass(klass, BaseModel)
+        if not isclass(klass) or not issubclass(klass, BaseModel)
         else None
     )
     type_adapter = TypeAdapter(klass, config=config)

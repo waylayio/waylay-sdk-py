@@ -1,5 +1,6 @@
 """Test suite for package `waylay.api`."""
 
+from types import SimpleNamespace
 from typing import Any, Dict, List, Union, AsyncIterator
 from datetime import datetime, date
 from pathlib import Path
@@ -508,6 +509,26 @@ DESERIALIZE_CASES = [
         {"*": PetUnion},
         None,
     ),
+    # Any response type (i.e. surpress deserialization)
+    (
+        "json_dict_model_any",
+        {"status_code": 200, "json": pet_instance_dict},
+        {"200": Any},
+        None,
+    ),
+    # type constructors that are not recognized by pydantic
+    (
+        "json_dict_namespace",
+        {
+            "status_code": 201,
+            "json": {
+                "message": "some not found message",
+                "code": "RESOURCE_NOT_FOUND",
+            },
+        },
+        {"2XX": SimpleNamespace}, # TODO fix: should return SimpleNamespace
+        None,
+    ),
     # select path argument
     (
         "json_dict_str_path_name",
@@ -539,6 +560,18 @@ DESERIALIZE_CASES = [
         {"200": List[str]},
         "pets[*].name",
     ),
+    (
+        "json_list_list_path_pets[0].name",
+        {"status_code": 200, "json": pet_list_instance_dict},
+        {"200": str},
+        "pets[0].name",
+    ),
+    (
+        "json_list_list_path_pets[1:].name",
+        {"status_code": 200, "json": pet_list_instance_dict},
+        {"200": List[str]},
+        "pets[1:].name",
+    ),
 ]
 
 
@@ -558,7 +591,7 @@ def test_deserialize(
     """Test REST param deserializer."""
     response_kwargs = _retrieve_fixture_values(request, response_kwargs)
     response = Response(**response_kwargs)
-    deserialized = waylay_api_client.response_deserialize(
+    deserialized = waylay_api_client.deserialize(
         response, response_type_map, select_path
     )
     assert (
@@ -656,9 +689,7 @@ def test_deserialize_error_responses(
     """Test REST param deserializer when error response."""
     response_kwargs = _retrieve_fixture_values(request, response_kwargs)
     with pytest.raises(ApiError) as excinfo:
-        waylay_api_client.response_deserialize(
-            Response(**response_kwargs), response_type_map
-        )
+        waylay_api_client.deserialize(Response(**response_kwargs), response_type_map)
     assert (
         str(excinfo.value),
         type(excinfo.value.data).__name__,
@@ -676,7 +707,7 @@ async def test_deserialize_partially_fetched_error_stream(
     )
     await anext(resp.aiter_raw(chunk_size=1))
     with pytest.raises(ApiError) as excinfo:
-        waylay_api_client.response_deserialize(resp, {})
+        waylay_api_client.deserialize(resp, {})
     assert (
         str(excinfo.value),
         type(excinfo.value.data).__name__,
