@@ -134,15 +134,14 @@ upgrade-buildtools-latest:
 ci-upgrade-buildtools:
 	make ci-upgrade-buildtools-$$(bin/pyversion)
 
-ci-upgrade-buildtools-3.7: upgrade-buildtools
-
-ci-upgrade-buildtools-3.8: upgrade-buildtools-latest
 
 ci-upgrade-buildtools-3.9: upgrade-buildtools-latest
 
 ci-upgrade-buildtools-3.10: upgrade-buildtools-latest
 
 ci-upgrade-buildtools-3.11: upgrade-buildtools-latest
+
+ci-upgrade-buildtools-3.12: upgrade-buildtools-latest
 
 ci-install:
 	make ci-upgrade-buildtools

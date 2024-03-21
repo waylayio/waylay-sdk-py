@@ -26,7 +26,7 @@ class WithServicesAndTools(WithApiClient):
         self._load_plugins()
 
     def _load_plugins(self):
-        for entry_point in entry_points()["dynamic"]:
+        for entry_point in entry_points().get("dynamic", []):
             if entry_point.name == "waylay_sdk_plugins":
                 for plugin_class in entry_point.load():
                     self.register(plugin_class)
