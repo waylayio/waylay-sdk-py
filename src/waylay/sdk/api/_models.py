@@ -10,10 +10,7 @@ from typing_extensions import (
 )
 
 if TYPE_CHECKING:
-    try:
-        from typing import TypeAlias
-    except ImportError:
-        from typing_extensions import TypeAlias  # < Python 3.10
+    from typing_extensions import TypeAlias  # >= Python 3.10
 
 from pydantic import BaseModel, ConfigDict
 
