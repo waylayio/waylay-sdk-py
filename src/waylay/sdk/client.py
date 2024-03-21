@@ -1,5 +1,6 @@
 """REST client for the Waylay Platform."""
 
+from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 
 from .plugin.client import WithServicesAndTools

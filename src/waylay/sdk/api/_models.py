@@ -1,18 +1,13 @@
 from __future__ import annotations
 from datetime import date, datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Dict, List, Self, Union
-from typing_extensions import TypeAliasType
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 
-try:
-    from typing import Self
-except ImportError:
-    from typing_extensions import Self  # <3.11
-
-try:
-    from typing import Annotated
-except ImportError:
-    from typing_extensions import Annotated  # type: ignore[assignment]  # < Python 3.9
+from typing_extensions import (
+    Annotated,  # >=3.9
+    Self,  # >=3.12
+    TypeAliasType,  # >=3.12
+)
 
 if TYPE_CHECKING:
     try:

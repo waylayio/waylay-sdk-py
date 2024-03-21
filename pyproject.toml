@@ -13,10 +13,11 @@ dependencies = [
     "appdirs",
     "python-jose",
     "python_dateutil",
-    "typing_extensions",
+    "typing_extensions >= 4.10.0",
     "typeguard",
     "jsonpath-ng",
-    "pydantic",
+    "pydantic >= 2.6.0",
+    "eval-type-backport ~= 0.1.3; python_version < '3.10'",
 ]
 
 [project.entry-points.dynamic]

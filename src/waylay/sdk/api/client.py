@@ -1,5 +1,6 @@
 """API client."""
 
+from __future__ import annotations
 from typing import Mapping, Optional, Tuple, Union
 
 from ..__version__ import __version__
