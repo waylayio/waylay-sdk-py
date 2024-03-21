@@ -1,5 +1,6 @@
 """Aliases for the http client."""
 
+from __future__ import annotations
 from typing import (
     TypedDict,
     Mapping,
@@ -10,9 +11,9 @@ from typing import (
     Sequence,
     Tuple,
     List,
-    Required,
     IO,
 )
+from typing_extensions import Required  # >=3.11
 
 import httpx._client as httpx_types
 import httpx
@@ -38,7 +39,7 @@ QueryParamTypes = Union[
 ]
 
 RequestFiles = httpx_types.RequestFiles
-RequestContent = httpx_types.RequestContent | IO[bytes]
+RequestContent = Union[httpx_types.RequestContent, IO[bytes]]
 RequestData = httpx_types.RequestData
 
 

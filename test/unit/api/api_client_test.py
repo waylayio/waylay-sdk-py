@@ -1,5 +1,7 @@
 """Test suite for package `waylay.api`."""
 
+from __future__ import annotations
+
 from types import SimpleNamespace
 from typing import Any, Dict, List, Union, AsyncIterator
 from datetime import datetime, date
@@ -526,7 +528,7 @@ DESERIALIZE_CASES = [
                 "code": "RESOURCE_NOT_FOUND",
             },
         },
-        {"2XX": SimpleNamespace}, # TODO fix: should return SimpleNamespace
+        {"2XX": SimpleNamespace},  # TODO fix: should return SimpleNamespace
         None,
     ),
     # select path argument
