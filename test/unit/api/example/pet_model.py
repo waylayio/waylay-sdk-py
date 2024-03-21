@@ -1,8 +1,8 @@
 from __future__ import annotations
 from enum import Enum
 
-from typing import Annotated, List, NotRequired, Optional, Union
-from typing_extensions import TypedDict
+from typing import List, Optional, Union
+from typing_extensions import TypedDict, NotRequired, Annotated
 from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictStr
 
 

@@ -1,5 +1,7 @@
 """Test suite for package `waylay.api`."""
 
+from __future__ import annotations
+
 from types import SimpleNamespace
 from typing import Any, Dict, List, Union, AsyncIterator
 from datetime import datetime, date
@@ -526,7 +528,7 @@ DESERIALIZE_CASES = [
                 "code": "RESOURCE_NOT_FOUND",
             },
         },
-        {"2XX": SimpleNamespace}, # TODO fix: should return SimpleNamespace
+        {"2XX": SimpleNamespace},  # TODO fix: should return SimpleNamespace
         None,
     ),
     # select path argument
@@ -705,7 +707,7 @@ async def test_deserialize_partially_fetched_error_stream(
         stream=TestResponseStream([b"a", b"b", b"c"]),
         headers={"content-length": "3"},
     )
-    await anext(resp.aiter_raw(chunk_size=1))
+    await resp.aiter_raw(chunk_size=1).__anext__()
     with pytest.raises(ApiError) as excinfo:
         waylay_api_client.deserialize(resp, {})
     assert (

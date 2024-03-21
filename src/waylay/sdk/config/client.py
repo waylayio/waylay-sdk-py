@@ -1,5 +1,6 @@
 """Config mixin for the SDK client."""
 
+from __future__ import annotations
 from typing import Optional
 
 from ..auth import (

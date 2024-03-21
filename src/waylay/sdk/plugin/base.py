@@ -1,7 +1,6 @@
 """Base classes for Waylay SDK Plugins."""
 
-from typing import Iterator, Optional, Generic, Type, TypeVar
-from collections.abc import Mapping
+from typing import Iterator, Optional, Generic, Type, TypeVar, Mapping
 from ..api import ApiClient, HttpClientOptions
 from ..api.exceptions import SyncCtxMgtNotSupportedError
 

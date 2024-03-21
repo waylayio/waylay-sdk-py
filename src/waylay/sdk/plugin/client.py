@@ -1,5 +1,6 @@
 """Client mixin for plugins."""
 
+import sys
 from typing import Type, Dict, Optional
 from importlib.metadata import entry_points
 import warnings
@@ -26,8 +27,16 @@ class WithServicesAndTools(WithApiClient):
         self._load_plugins()
 
     def _load_plugins(self):
-        for entry_point in entry_points(group="dynamic", name="waylay_sdk_plugins"):
-            for plugin_class in entry_point.load():
+        ep_group = "dynamic"
+        ep_name = "waylay_sdk_plugins"
+        if sys.version_info >= (3, 10):
+            waylay_entry_points = entry_points(group=ep_group, name=ep_name)
+        else:
+            waylay_entry_points = [
+                ep for ep in entry_points().get(ep_group, []) if ep.name == ep_name
+            ]
+        for ep in waylay_entry_points:
+            for plugin_class in ep.load():
                 self.register(plugin_class)
 
     def register(self, plugin_class: Type[WaylayPlugin]) -> Optional[WaylayPlugin]:
