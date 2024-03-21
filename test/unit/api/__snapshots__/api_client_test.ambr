@@ -112,15 +112,8 @@
     dict({
     }),
     None,
-    'dict',
-    dict({
-      'hello': 'world',
-      'key': list([
-        1,
-        2,
-        3,
-      ]),
-    }),
+    '_Model',
+    _Model(hello='world', key=[1, 2, 3]),
   )
 # ---
 # name: test_deserialize[json_dict1]
@@ -130,15 +123,8 @@
     dict({
     }),
     None,
-    'dict',
-    dict({
-      'name': 'Lord Biscuit, Master of Naps',
-      'owner': dict({
-        'id': 123,
-        'name': 'Simon',
-      }),
-      'tag': 'doggo',
-    }),
+    '_Model',
+    _Model(name='Lord Biscuit, Master of Naps', owner=_Model(id=123, name='Simon'), tag='doggo'),
   )
 # ---
 # name: test_deserialize[json_dict_*_dummy_union]
@@ -292,11 +278,8 @@
       '4XX': typing.Dict[str, str],
     }),
     None,
-    'dict',
-    dict({
-      'code': 'RESOURCE_NOT_FOUND',
-      'message': 'some not found message',
-    }),
+    '_Model',
+    _Model(message='some not found message', code='RESOURCE_NOT_FOUND'),
   )
 # ---
 # name: test_deserialize[json_dict_none]
@@ -307,15 +290,8 @@
       '200': None,
     }),
     None,
-    'dict',
-    dict({
-      'name': 'Lord Biscuit, Master of Naps',
-      'owner': dict({
-        'id': 123,
-        'name': 'Simon',
-      }),
-      'tag': 'doggo',
-    }),
+    '_Model',
+    _Model(name='Lord Biscuit, Master of Naps', owner=_Model(id=123, name='Simon'), tag='doggo'),
   )
 # ---
 # name: test_deserialize[json_dict_object]
@@ -373,9 +349,7 @@
       'hello',
       'world',
       123,
-      dict({
-        'key': 'value',
-      }),
+      _Model(key='value'),
     ]),
   )
 # ---
@@ -815,13 +789,10 @@
       Reason: Not Found
       Response headers: Headers({'content-length': '67', 'content-type': 'application/json'})
       Response content: <bytes: len=67>
-      Response data: {'message': 'some not found message', 'code': 'RESOURCE_NOT_FOUND'}
+      Response data: message='some not found message' code='RESOURCE_NOT_FOUND'
     ''',
-    'dict',
-    dict({
-      'code': 'RESOURCE_NOT_FOUND',
-      'message': 'some not found message',
-    }),
+    '_Model',
+    _Model(message='some not found message', code='RESOURCE_NOT_FOUND'),
   )
 # ---
 # name: test_deserialize_error_responses[response_kwargs5-response_type_map5][{'400': <class 'unit.api.example.pet_model.Pet'>}]
@@ -867,17 +838,10 @@
       Reason: Bad Request
       Response headers: Headers({'content-length': '95', 'content-type': 'application/json'})
       Response content: <bytes: len=95>
-      Response data: {'name': 'Lord Biscuit, Master of Naps', 'owner': {'id': 123, 'name': 'Simon'}, 'tag': 'doggo'}
+      Response data: name='Lord Biscuit, Master of Naps' owner=_Model(id=123, name='Simon') tag='doggo'
     ''',
-    'dict',
-    dict({
-      'name': 'Lord Biscuit, Master of Naps',
-      'owner': dict({
-        'id': 123,
-        'name': 'Simon',
-      }),
-      'tag': 'doggo',
-    }),
+    '_Model',
+    _Model(name='Lord Biscuit, Master of Naps', owner=_Model(id=123, name='Simon'), tag='doggo'),
   )
 # ---
 # name: test_deserialize_error_responses[response_kwargs8-response_type_map8][{}]

@@ -14,6 +14,7 @@ from .http import (
     RequestData,
 )
 from .exceptions import ApiError, ApiValueError
+from ._models import Model, Primitive
 
 __all__ = [
     "ApiClient",
@@ -29,4 +30,6 @@ __all__ = [
     "RequestData",
     "ApiError",
     "ApiValueError",
+    "Model",
+    "Primitive",
 ]

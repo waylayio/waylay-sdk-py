@@ -189,9 +189,11 @@ class WithSerializationSupport:
             # if not found, look for '1XX', '2XX', etc.
             response_type = response_types_map.get(status_code_key[0] + "XX")
         if not response_type:
-            # if still not found, look for default response type, otherwise use `Any`
+            # if still not found, look for default response type, otherwise use `Model`
             response_type = (
-                response_types_map.get("*") or response_types_map.get("default") or Any  # type: ignore
+                response_types_map.get("*")
+                or response_types_map.get("default")
+                or Model
             )
 
         # deserialize response data
