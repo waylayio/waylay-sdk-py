@@ -707,7 +707,7 @@ async def test_deserialize_partially_fetched_error_stream(
         stream=TestResponseStream([b"a", b"b", b"c"]),
         headers={"content-length": "3"},
     )
-    await anext(resp.aiter_raw(chunk_size=1))
+    await resp.aiter_raw(chunk_size=1).__anext__()
     with pytest.raises(ApiError) as excinfo:
         waylay_api_client.deserialize(resp, {})
     assert (
