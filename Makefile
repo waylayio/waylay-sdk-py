@@ -11,11 +11,19 @@ VENV_DIR=.venv
 VENV_ACTIVATE_CMD=${VENV_DIR}/bin/activate
 VENV_ACTIVATE=. ${VENV_ACTIVATE_CMD}
 
+REQ_FILE_BUILD=requirements/requirements.build.$$(bin/pyversion).txt
+REQ_FILE=requirements/requirements.$$(bin/pyversion).txt
+REQ_FILE_DEV=requirements/requirements.dev.$$(bin/pyversion).txt
+
 ${VENV_ACTIVATE_CMD}:
 	python3 -m venv ${VENV_DIR}
 	${VENV_ACTIVATE} && make dev-install
 
 install: ${VENV_ACTIVATE_CMD}
+
+assert-venv:
+	@if [[ "$$(python -c 'import sys; print(sys.prefix)')" != "$$(pwd)/${VENV_DIR}" ]]; \
+	  then ${printMsg} "Please run in the correct python venv: ${VENV_DIR}" "FAILED"; exit 1; fi
 
 clean:
 	rm -fr ${VENV_DIR}
@@ -23,19 +31,18 @@ clean:
 	rm -fr */.*_cache
 	rm -fr */src/*.egg-info
 
-install-dependencies:
-	pip install -r requirements/requirements.$$(bin/pyversion).txt
-
-install-dev-dependencies:
-# need to install the `waylay-sdk` first, because the `waylay_<SERVICE>` packages require it
+exec-dev-dependencies:
+	pip install -r "${REQ_FILE_BUILD}"
 	pip install -e . --no-deps
-	pip install -r requirements/requirements.$$(bin/pyversion).txt
-	pip install -r requirements/requirements.dev.$$(bin/pyversion).txt
+	pip install -r "${REQ_FILE}"
+	pip install -r "${REQ_FILE_DEV}"
 	pip install -e test/plugin
 	
-uninstall-dependencies:
-	pip uninstall -r requirements/requirements.$$(bin/pyversion).txt -y
-	pip uninstall -r requirements/requirements.dev.$$(bin/pyversion).txt -y
+exec-upgrade-buildtools:
+	pip install --upgrade pip
+	pip install --upgrade setuptools
+	pip install --upgrade wheel
+	pip install --upgrade build
 
 clean-eggs:
 	find . -name '.eggs' | xargs -L 1 rm -frv 
@@ -54,30 +61,28 @@ clean-caches:
 dist-clean:
 	rm -fr dist build
 
-uninstall-pkg: dist-clean
-	pip uninstall waylay-sdk -y
-	pip uninstall waylay-sdk-plugin-example -y
-	@${printMsg} "uninstall-pkg" "Development packages uninstalled"
-
-full-clean:
-	make uninstall-pkg
-	make uninstall-dependencies
-	make clean-caches
-	make clean-eggs
-
-dev-install-pkg:  ## Install waylay-sdk with development dependency constraints as specified in the package.
+exec-dev-install-pkg:  ## Install waylay-sdk with development dependency constraints as specified in the package.
 	pip install -e ".[dev]"
 	pip install -e test/plugin
 
-dev-install:  ### Install a development environment with frozen dependencies from 'requirements/requirements.[dev.].txt'
-	make ci-upgrade-buildtools
-	make install-dev-dependencies
-	make dev-install-pkg
+exec-dev-install: ### Install a development environment with frozen dependencies'
+	make exec-dev-dependencies
+	make exec-dev-install-pkg
 
-install-pkg:  ### Install waylay-sdk with dependency constraints as specified in the package. (e.g. for notebook tests)
-	pip install .
+exec-install-pkg: ### Install waylay-sdk with dependency constraints as specified in the package. (e.g. for notebook tests)
+	pip install -e .
 
-dev-reinstall: full-clean  dev-install  ### Remove all dependences and reinstall with frozen dependencies
+exec-dist:
+	python -m build
+	rm -fr build
+
+dev-install: install
+	@${VENV_ACTIVATE} && make exec-dev-install
+
+dev-reinstall: clean dev-install ### Remove all dependences and reinstall with frozen dependencies
+
+dist: install dist-clean
+	@${VENV_ACTIVATE} && make exec-dist
 
 exec-lint-fix:
 	@ruff check --fix
@@ -93,16 +98,21 @@ exec-typecheck:
 exec-format:
 	@ruff format
 
-format:
+exec-code-qa: exec-lint exec-typecheck
+
+exec-test-unit:
+	pytest test/unit
+
+exec-test: exec-code-qa exec-test-unit exec-test-unit
+
+format: install
 	${VENV_ACTIVATE} && make exec-format exec-lint-fix
 
 code-qa: install ### perform code quality checks
 	${VENV_ACTIVATE} && make exec-code-qa
 
-exec-code-qa: exec-lint exec-typecheck
-
 test-unit: install
-	${VENV_ACTIVATE} && pytest test/unit
+	${VENV_ACTIVATE} && make exec-test-unit
 
 test-unit-coverage: install
 	${VENV_ACTIVATE} && pytest --cov-report term-missing:skip-covered --cov=src --cov-fail-under=90 test/unit
@@ -121,39 +131,17 @@ test-integration-coverage-report: install ### generate html coverage report for 
 
 test: format test-unit ### perform all quality checks and tests, except for integration tests
 
-upgrade-buildtools:
-	pip install --upgrade pip
-	pip install --upgrade setuptools
-	pip install --upgrade wheel
-
-upgrade-buildtools-latest:
-	pip install --upgrade pip==24.0
-	pip install --upgrade setuptools==69.1.1
-	pip install --upgrade wheel==0.42.0
-
-ci-upgrade-buildtools:
-	make ci-upgrade-buildtools-$$(bin/pyversion)
-
-
-ci-upgrade-buildtools-3.9: upgrade-buildtools-latest
-
-ci-upgrade-buildtools-3.10: upgrade-buildtools-latest
-
-ci-upgrade-buildtools-3.11: upgrade-buildtools-latest
-
-ci-upgrade-buildtools-3.12: upgrade-buildtools-latest
 
 ci-install:
-	make ci-upgrade-buildtools
-	make install-dev-dependencies 
-	make dev-install-pkg
+	make exec-dev-dependencies
+	make exec-dev-install-pkg
 
 ci-install-latest:
-	make ci-upgrade-buildtools
+	make exec-upgrade-buildtools
 	# latest regular dependencies
-	make install-pkg
+	make exec-install-pkg
 	# frozen development dependencies
-	make install-dev-dependencies
+	make exec-dev-dependencies
 
 ci-code-qa: exec-lint exec-typecheck ### perform code quality checks
 
@@ -162,25 +150,56 @@ ci-test-unit: test-unit
 
 ci-test-integration: test-integration
 
-ci-dist: dist-clean clean-caches
-	python -m build
-	rm -fr build
+ci-dist: dist-clean clean-caches exec-dist
+
 
 freeze-dependencies: ## perform a full reinstall procedure and regenerate the 'requirements/requirements[.dev][.pyversion].txt' files
 	make clean
 	python3 -m venv ${VENV_DIR}
-	@${VENV_ACTIVATE} && make execute_freeze_scripts
+	@${VENV_ACTIVATE} && make exec-freeze-deps
 
-make execute_freeze_scripts: 
-	make upgrade-buildtools
-	# install with dependencies specified in pyproject.toml
-	make install-pkg 
-	pip uninstall waylay-sdk -y
-	bin/freeze-dependencies
-	# install with dependencies specified in pyproject.toml (development mode)
-	make dev-install-pkg
-	bin/freeze-dev-dependencies
 
+FREEZE_CMD=bin/freeze-dependencies
+exec-freeze-deps:
+	make exec-upgrade-buildtools
+	REQ_PIP_ARGS="--all" REQ_FILE="${REQ_FILE_BUILD}" ${FREEZE_CMD}
+	make exec-install-pkg
+	REQ_FILE="${REQ_FILE}" REQ_EXCLUDES="${REQ_FILE_BUILD}" ${FREEZE_CMD}
+	make exec-dev-install-pkg
+	REQ_FILE="${REQ_FILE_DEV}" REQ_EXCLUDES="${REQ_FILE_BUILD} ${REQ_FILE}" ${FREEZE_CMD}
+
+
+CONDA_INIT=source $$(conda info --base)/etc/profile.d/conda.sh
+
+
+PYTHON_VERSION?=3.9
+PYTHON_VERSIONS=3.9 3.10 3.11 3.12
+
+freeze-deps-conda:
+	@-conda env remove -n waylay-sdk-${PYTHON_VERSION}
+	@conda create -y -n waylay-sdk-${PYTHON_VERSION} python=${PYTHON_VERSION} 
+	@${CONDA_INIT} && conda activate waylay-sdk-${PYTHON_VERSION} && make exec-freeze-deps
+
+install-conda:
+	-conda create -y -n waylay-sdk-${PYTHON_VERSION} python=${PYTHON_VERSION} 
+	@${CONDA_INIT} && conda activate waylay-sdk-${PYTHON_VERSION} && make exec-dev-install
+
+test-conda:
+	@${CONDA_INIT} && conda activate waylay-sdk-${PYTHON_VERSION} && make exec-test
+
+TARGET?=test-conda
+_exec_all_python_versions:
+	@for ver in ${PYTHON_VERSIONS}; do ${printMsg} "${TARGET}" "$$ver"; PYTHON_VERSION=$$ver make ${TARGET} || exit 1; done
+	@${printMsg} "${TARGET}" "DONE: ${PYTHON_VERSIONS}"
+
+freeze-deps-conda-all:
+	TARGET=freeze-deps-conda make _exec_all_python_versions
+
+test-conda-all:
+	TARGET=test-conda make _exec_all_python_versions
+
+install-conda-all:
+	TARGET=install-conda make _exec_all_python_versions
 
 pdoc: # TODO 
 	rm -fr ./doc/api/

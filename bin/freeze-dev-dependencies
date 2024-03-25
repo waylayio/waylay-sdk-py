@@ -1,7 +1,0 @@
-#!/bin/bash
-printMsg="\033[36m\033[1m%-15s\033[0m\033[36m %-30s\033[0m
-"
-py_version=$(bin/pyversion)
-pip freeze | grep -e '^-e ' -v > requirements/requirements.all.${py_version}.txt
-comm -23 <(sort -i requirements/requirements.all.${py_version}.txt | grep -e '^certifi==' -v) <(sort -i requirements/requirements.${py_version}.txt) > requirements/requirements.dev.${py_version}.txt
-printf "${printMsg}" "freeze-dev-dependencies" "PLEASE REVIEW CHANGES TO requirements/requirements.dev.${py_version}.txt BEFORE COMMITTING"
