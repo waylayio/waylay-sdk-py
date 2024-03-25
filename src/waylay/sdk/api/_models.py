@@ -47,11 +47,16 @@ class _BaseModel(BaseModel, ABC):
             for k, v in model_dict.items()
             if v is not None or k in self.model_fields_set
         }
-    
-    @model_validator(mode='wrap') # type: ignore[arg-type]
+
+    @model_validator(mode="wrap")  # type: ignore[arg-type]
     def _model_validator(
         cls, value: Any, handler: ModelWrapValidatorHandler, info: ValidationInfo
     ):
+        """The default validator of the model.
+
+        When validation is called with a `skip_validation=True` context (e.g. `cls.model_validate(data, context={"skip_validation": True})`), the model is constructed without validation.
+        Any fields with a `Model` type will be constructed from their dict representation recursively.
+        """
         context = info.context or {}
         try:
             return handler(value)
@@ -63,7 +68,13 @@ class _BaseModel(BaseModel, ABC):
                     raise
                 for field_name in model.model_fields_set:
                     field_value = getattr(model, field_name)
-                    cls.__pydantic_validator__.validate_assignment(model, field_name, field_value, strict=(info.config or {}).get('strict'), context=context)
+                    cls.__pydantic_validator__.validate_assignment(
+                        model,
+                        field_name,
+                        field_value,
+                        strict=(info.config or {}).get("strict"),
+                        context=context,
+                    )
                 return model
             else:
                 raise
@@ -72,6 +83,11 @@ class _BaseModel(BaseModel, ABC):
     def _field_validator(
         cls, value: Any, handler: ValidatorFunctionWrapHandler, info: ValidationInfo
     ):
+        """The default field validator of the model.
+
+        When validation is called with a `skip_validation=True` context, the field is assigned without validation.
+        If the field is a `Model` type, the model will be constructed from its dict representation recursively.
+        """
         context = info.context or {}
         try:
             return handler(value)
@@ -83,7 +99,8 @@ class _BaseModel(BaseModel, ABC):
                     try:
                         config = (
                             ConfigDict(arbitrary_types_allowed=True, strict=False)
-                            if not isclass(field_type) or not issubclass(field_type, BaseModel)
+                            if not isclass(field_type)
+                            or not issubclass(field_type, BaseModel)
                             else None
                         )
                         return TypeAdapter(field_type, config=config).validate_python(

@@ -298,8 +298,10 @@ def _deserialize(data: Any, klass: Any):
     try:
         return type_adapter.validate_python(data)
     except (TypeError, ValidationError) as exc:
-        try: 
-            _deserialized =  type_adapter.validate_python(data, strict=False, context={"skip_validation": True})
+        try:
+            _deserialized = type_adapter.validate_python(
+                data, strict=False, context={"skip_validation": True}
+            )
             log.warning(
                 "Failed to deserialize response into class %s, using backup non-validating deserializer instead.",
                 klass,

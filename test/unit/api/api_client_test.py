@@ -612,15 +612,17 @@ DESERIALIZE_CASES = [
         "json_model_invalid_submodel_list_field",
         {
             "status_code": 200,
-            "json": {"pets": [
-                {"name": 111, "owner": {"id": "invalidId", "name": "Simon"}},
-                {"name": "Chop"},
-            ]},
+            "json": {
+                "pets": [
+                    {"name": 111, "owner": {"id": "invalidId", "name": "Simon"}},
+                    {"name": "Chop"},
+                ]
+            },
         },  # pets.0: id type is str instead of int, pets.1: missing owner
         {"200": PetList},
         None,
     ),
-        (
+    (
         "json_model_invalid_submodule_list",
         {
             "status_code": 200,
