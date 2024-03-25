@@ -19,7 +19,7 @@ This client provides basic configuration, authorization and plugin features for 
 
 It includes a generic http client to make authenticated calls to the services available on your _Waylay_ gateway endpoint.
 
-Support for specific Waylay services or tools is provided by seperate [service](#service-packages) and [tool](#tool-packages) packages.
+Support for specific Waylay services or tools is provided by separate [service](#service-packages) and [tool](#tool-packages) packages.
 
 ## Basic usage
 
