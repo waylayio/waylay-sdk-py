@@ -3,10 +3,12 @@ from enum import Enum
 
 from typing import List, Optional, Union
 from typing_extensions import TypedDict, NotRequired, Annotated
-from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictStr
+from pydantic import Field, StrictBool, StrictInt, StrictStr
+
+from waylay.sdk.api._models import _BaseModel
 
 
-class PetList(BaseModel):
+class PetList(_BaseModel):
     """Pet List."""
 
     pets: List[Pet]
@@ -18,7 +20,7 @@ class PetList(BaseModel):
     }
 
 
-class Pet(BaseModel):
+class Pet(_BaseModel):
     """Pet."""
 
     name: StrictStr
@@ -32,7 +34,7 @@ class Pet(BaseModel):
     }
 
 
-class PetOwner(BaseModel):
+class PetOwner(_BaseModel):
     """Owner."""
 
     id: StrictInt

@@ -298,18 +298,28 @@ def _deserialize(data: Any, klass: Any):
     try:
         return type_adapter.validate_python(data)
     except (TypeError, ValidationError) as exc:
-        try:
-            _deserialized = _MODEL_TYPE_ADAPTER.validate_python(data)
+        try: 
+            _deserialized =  type_adapter.validate_python(data, strict=False, context={"skip_validation": True})
             log.warning(
-                "Failed to deserialize response into class %s, using backup deserializer instead.",
+                "Failed to deserialize response into class %s, using backup non-validating deserializer instead.",
                 klass,
                 exc_info=exc,
                 extra={"data": data, "class": klass},
             )
             return _deserialized
-        except (TypeError, ValidationError) as exc2:
-            log.warning(
-                "Failed to deserialize response as a generic Model, returning original data.",
-                exc_info=exc2,
-            )
-            return data
+        except (TypeError, ValidationError):
+            try:
+                _deserialized = _MODEL_TYPE_ADAPTER.validate_python(data)
+                log.warning(
+                    "Failed to deserialize response into class %s, using backup generic model deserializer instead.",
+                    klass,
+                    exc_info=exc,
+                    extra={"data": data, "class": klass},
+                )
+                return _deserialized
+            except (TypeError, ValidationError) as exc2:
+                log.warning(
+                    "Failed to deserialize response as a generic Model, returning original data.",
+                    exc_info=exc2,
+                )
+                return data

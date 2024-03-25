@@ -528,6 +528,81 @@
     ]),
   )
 # ---
+# name: test_deserialize[json_model_invalid_field]
+  tuple(
+    b'{"name": 111, "owner": {"id": 456, "name": "Simon"}}',
+    200,
+    dict({
+      '200': <class 'unit.api.example.pet_model.Pet'>,
+    }),
+    None,
+    'Pet',
+    Pet(name=111, owner=PetOwner(id=456, name='Simon'), tag=None),
+  )
+# ---
+# name: test_deserialize[json_model_invalid_submodel_field]
+  tuple(
+    b'{"name": 111, "owner": {"id": "invalidId", "name": "Simon"}}',
+    200,
+    dict({
+      '200': <class 'unit.api.example.pet_model.Pet'>,
+    }),
+    None,
+    'Pet',
+    Pet(name=111, owner=PetOwner(id='invalidId', name='Simon'), tag=None),
+  )
+# ---
+# name: test_deserialize[json_model_invalid_submodel_list_field]
+  tuple(
+    b'{"pets": [{"name": 111, "owner": {"id": "invalidId", "name": "Simon"}}, {"name": "Chop"}]}',
+    200,
+    dict({
+      '200': <class 'unit.api.example.pet_model.PetList'>,
+    }),
+    None,
+    'PetList',
+    PetList(pets=[Pet(name=111, owner=PetOwner(id='invalidId', name='Simon'), tag=None), Pet(name='Chop', tag=None)]),
+  )
+# ---
+# name: test_deserialize[json_model_invalid_submodule_list]
+  tuple(
+    b'[{"name": 111, "owner": {"id": "invalidId", "name": "Simon"}}, {"name": "Chop"}]',
+    200,
+    dict({
+      '200': typing.List[unit.api.example.pet_model.Pet],
+    }),
+    None,
+    'list',
+    list([
+      Pet(name=111, owner=PetOwner(id='invalidId', name='Simon'), tag=None),
+      Pet(name='Chop', tag=None),
+    ]),
+  )
+# ---
+# name: test_deserialize[json_model_missing_field]
+  tuple(
+    b'{"owner": {"id": 456, "name": "Simontis"}}',
+    200,
+    dict({
+      '200': <class 'unit.api.example.pet_model.Pet'>,
+    }),
+    None,
+    'Pet',
+    Pet(owner=PetOwner(id=456, name='Simontis'), tag=None),
+  )
+# ---
+# name: test_deserialize[json_model_missing_submodel_field]
+  tuple(
+    b'{"name": "Chop"}',
+    200,
+    dict({
+      '200': <class 'unit.api.example.pet_model.Pet'>,
+    }),
+    None,
+    'Pet',
+    Pet(name='Chop', tag=None),
+  )
+# ---
 # name: test_deserialize[json_number]
   tuple(
     b'123',
