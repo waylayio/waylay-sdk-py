@@ -27,7 +27,7 @@ jobs:
           cache-dependency-path: '**/requirements*.txt'
       - run: make ci-install
       - run: make ci-code-qa
-      - run: make ci-test-unit  
+      - run: make ci-test-unit
   
   integration_test:
     name: Unit and Integration Test Python 3.11

@@ -203,9 +203,27 @@ install-conda-all:
 
 pdoc: # TODO 
 	rm -fr ./doc/api/
-	pdoc -o ./doc/api \
-		src/waylay/sdk/client.py \
-		src/waylay/sdk/config.py \
-		src/waylay/sdk/exceptions.py \
-		src/waylay/sdk/auth.py \
-		src/waylay/sdk/service.py 
+	${VENV_ACTIVATE} && pip install pdoc
+	${VENV_ACTIVATE} && pdoc -o ./doc/api \
+		waylay.sdk \
+		waylay.sdk.config \
+		waylay.sdk.config.client \
+		waylay.sdk.config.model \
+		waylay.sdk.auth \
+		waylay.sdk.auth.provider \
+		waylay.sdk.auth.model \
+		waylay.sdk.auth.interactive \
+		waylay.sdk.auth.exceptions \
+		waylay.sdk.auth.parse \
+		waylay.sdk.client \
+		waylay.sdk.plugin \
+		waylay.sdk.plugin.client \
+		waylay.sdk.plugin.loader \
+		waylay.sdk.plugin.base \
+		waylay.sdk.api \
+		waylay.sdk.api.client \
+		waylay.sdk.api.http \
+		waylay.sdk.api.exceptions \
+		waylay.sdk.api.serialization \
+		waylay.sdk.exceptions
+	${VENV_ACTIVATE} && pip uninstall pdoc -y
