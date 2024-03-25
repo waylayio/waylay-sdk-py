@@ -227,3 +227,9 @@ pdoc: # TODO
 		waylay.sdk.api.serialization \
 		waylay.sdk.exceptions
 	${VENV_ACTIVATE} && pip uninstall pdoc -y
+
+
+test-publish:
+	${VENV_ACTIVATE} && pip install twine
+	${VENV_ACTIVATE} && python -m twine upload --repository testpypi dist/*
+	open https://test.pypi.org/project/waylay-sdk

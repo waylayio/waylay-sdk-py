@@ -4,6 +4,8 @@ Python SDK for the Waylay Platform.
 
 This `waylay-sdk` package provides a basic SDK client for the [Waylay REST apis](https://docs.waylay.io/#/api/?id=openapi-docs). 
 
+See [Waylay Docs](https://docs.waylay.io/#/api/sdk/python) for documentation.
+
 ## Installation
 
 This package requires a python runtime `3.9` or higher.
@@ -13,7 +15,7 @@ The basic client can be installed with
 pip install waylay-sdk
 ```
 
-This client only provides basic configuration, authorization and plugin features for the SDK.
+This client provides basic configuration, authorization and plugin features for the SDK.
 
 It includes a generic http client to make authenticated calls to the services available on your _Waylay_ gateway endpoint.
 
@@ -71,7 +73,9 @@ Each _service_ provides two packages:
 * an _api_ package `waylay-<service>-sdk` that describes all resources and actions for that service. JSON request and responses are represented as basic python data (_dict_, _list_, primitives)
 * a _types_ package `waylay-<service>-sdk-types` that provides [pydantic](https://docs.pydantic.dev/) models to represent JSON request and responses.
 
-The _types_ package is optional. When installed, its _pydantic_ models are used to serialize requests and deserialize responses. This makes it easier to interact with the API as a developer. But as the underlying REST api evolves, the _types_ package might require regular dependency updates.
+The _types_ package is optional. When installed, its _pydantic_ models are used to serialize requests and deserialize responses. When used in a python IDE, code completion will help you navigate the attributes of request and responses.
+This makes it easier to interact with the API as a developer. 
+But as the underlying REST api evolves, the _types_ package might require regular dependency updates.
 
 Use the _types_ package for interactive cases (python notebooks), or solutions that are regularly tested and maintained. 
 
