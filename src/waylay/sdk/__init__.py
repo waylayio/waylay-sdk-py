@@ -13,6 +13,7 @@ from .auth import (
 from .plugin import WaylayService, WaylayTool, WaylayPlugin, PluginAccess
 from .api import ApiClient
 from .exceptions import WaylayError
+from ._version import __version__
 
 __all__ = [
     "WaylayClient",
@@ -29,4 +30,5 @@ __all__ = [
     "PluginAccess",
     "ApiClient",
     "WaylayError",
+    "__version__",
 ]
