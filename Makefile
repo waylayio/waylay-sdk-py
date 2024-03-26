@@ -15,6 +15,9 @@ REQ_FILE_BUILD=requirements/requirements.build.$$(bin/pyversion).txt
 REQ_FILE=requirements/requirements.$$(bin/pyversion).txt
 REQ_FILE_DEV=requirements/requirements.dev.$$(bin/pyversion).txt
 
+PYTEST_ARGS?=''
+PYTEST_CMD=${VENV_ACTIVATE} && pytest ${PYTEST_ARGS}
+
 ${VENV_ACTIVATE_CMD}:
 	python3 -m venv ${VENV_DIR}
 	${VENV_ACTIVATE} && make dev-install
@@ -100,10 +103,8 @@ exec-format:
 
 exec-code-qa: exec-lint exec-typecheck
 
-exec-test-unit:
-	pytest test/unit
-
-exec-test: exec-code-qa exec-test-unit exec-test-unit
+exec-test: exec-code-qa
+	pytest ${PYTEST_ARGS} test/unit
 
 format: install
 	${VENV_ACTIVATE} && make exec-format exec-lint-fix
@@ -112,22 +113,22 @@ code-qa: install ### perform code quality checks
 	${VENV_ACTIVATE} && make exec-code-qa
 
 test-unit: install
-	${VENV_ACTIVATE} && make exec-test-unit
+	${PYTEST_CMD} test/unit
 
 test-unit-coverage: install
-	${VENV_ACTIVATE} && pytest --cov-report term-missing:skip-covered --cov=src --cov-fail-under=90 test/unit
+	${PYTEST_CMD} --cov-report term-missing:skip-covered --cov=src --cov-fail-under=90 test/unit
 
 test-unit-coverage-report: install ### generate html coverage report for the unit tests
-	${VENV_ACTIVATE} && pytest --cov-report html:cov_report --cov=src --cov-fail-under=90 test/unit
+	${PYTEST_CMD} --cov-report html:cov_report --cov=src --cov-fail-under=90 test/unit
 
 test-coverage-report: install ### generate html coverage report for the unit and integration tests
-	${VENV_ACTIVATE} && pytest --cov-report html:cov_report_all --cov=src --cov-fail-under=90 test/unit test/integration
+	${PYTEST_CMD} --cov-report html:cov_report_all --cov=src --cov-fail-under=90 test/unit test/integration
 
 test-integration: install
-	${VENV_ACTIVATE} && pytest test/integration
+	${PYTEST_CMD} test/integration
 
 test-integration-coverage-report: install ### generate html coverage report for the integration tests
-	${VENV_ACTIVATE} && pytest --cov-report html:cov_report/integration --cov=src test/integration
+	${PYTEST_CMD} --cov-report html:cov_report/integration --cov=src test/integration
 
 test: format test-unit ### perform all quality checks and tests, except for integration tests
 
