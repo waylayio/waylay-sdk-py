@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias  # >= Python 3.10
 
 from pydantic import (
-    BaseModel,
+    BaseModel as PydanticBaseModel,
     ConfigDict,
     SerializationInfo,
     StrictStr,
@@ -30,7 +30,7 @@ from pydantic import (
 from pydantic.functional_validators import ModelWrapValidatorHandler
 
 
-class _BaseModel(BaseModel, ABC):
+class BaseModel(PydanticBaseModel, ABC):
     """Waylay base model class that adds some additional methods to Pydantic's `BaseModel`, including a custom validator and serializer."""
 
     @model_serializer(mode="wrap")
@@ -100,7 +100,7 @@ class _BaseModel(BaseModel, ABC):
                         config = (
                             ConfigDict(arbitrary_types_allowed=True, strict=False)
                             if not isclass(field_type)
-                            or not issubclass(field_type, BaseModel)
+                            or not issubclass(field_type, PydanticBaseModel)
                             else None
                         )
                         return TypeAdapter(field_type, config=config).validate_python(
@@ -130,7 +130,7 @@ class _BaseModel(BaseModel, ABC):
         return cls.model_validate_json(json_data)
 
 
-class _Model(_BaseModel):
+class _Model(BaseModel):
     """A simple model that allows all additional attributes."""
 
     model_config = ConfigDict(extra="allow")

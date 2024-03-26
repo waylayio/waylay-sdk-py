@@ -5,10 +5,10 @@ from typing import List, Optional, Union
 from typing_extensions import TypedDict, NotRequired, Annotated
 from pydantic import Field, StrictBool, StrictInt, StrictStr
 
-from waylay.sdk.api._models import _BaseModel
+from waylay.sdk.api._models import BaseModel
 
 
-class PetList(_BaseModel):
+class PetList(BaseModel):
     """Pet List."""
 
     pets: List[Pet]
@@ -20,7 +20,7 @@ class PetList(_BaseModel):
     }
 
 
-class Pet(_BaseModel):
+class Pet(BaseModel):
     """Pet."""
 
     name: StrictStr
@@ -34,7 +34,7 @@ class Pet(_BaseModel):
     }
 
 
-class PetOwner(_BaseModel):
+class PetOwner(BaseModel):
     """Owner."""
 
     id: StrictInt
