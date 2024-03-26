@@ -4,10 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "waylay-sdk"
-version = "0.0.3"
+version = "0.0.4-beta.02"
 description = "Waylay Python SDK."
 requires-python = ">=3.9"
+keywords = ["waylay", "sdk"]
+readme = "README.md"
 authors = [{name = "Waylay", email = "info@waylay.io"}]
+license={file = "LICENSE.txt"}
 dependencies = [
     "httpx",
     "appdirs",
@@ -49,12 +52,6 @@ dev = [
     'types-python-dateutil',
     'docformatter',
     'pre-commit',
-]
-services = [
-    "waylay_registry_api @ git+https://github.com/waylayio/waylay-py-services@main#subdirectory=services/registry/waylay_registry_api"
-]
-services-types = [
-    "waylay_registry_types @ git+https://github.com/waylayio/waylay-py-services@main#subdirectory=services/registry/waylay_registry_types"
 ]
 
 [tool.pytest.ini_options]

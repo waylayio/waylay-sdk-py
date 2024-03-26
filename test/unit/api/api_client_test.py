@@ -8,6 +8,7 @@ from datetime import datetime, date
 from pathlib import Path
 
 import pytest
+from syrupy.filters import paths
 import httpx
 from pytest_httpx import HTTPXMock
 
@@ -169,7 +170,6 @@ async def test_serialize_and_call(
         lambda content_type: b"---boundary---",
     )
     request = waylay_api_client.build_request(**test_input)
-    assert request.__dict__ == snapshot
     httpx_mock.add_response()
     await waylay_api_client.send(request)
     requests = httpx_mock.get_requests()
@@ -177,10 +177,10 @@ async def test_serialize_and_call(
     request = requests[0]
     request_data = await request.aread()
     assert (
-        request,
-        request.headers,
+        request.__dict__,
+        dict(request.headers),
         request_data,
-    ) == snapshot
+    ) == snapshot(exclude=paths("0._content", "0.headers", "0.stream", "1.user-agent"))
 
 
 async def test_call_invalid_method(waylay_api_client: ApiClient):

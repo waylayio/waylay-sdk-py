@@ -201,13 +201,13 @@ async def test_used_client_ctx(my_client: WaylayClient):
     async with my_client.tst2 as tst2:
         # creates new api client in scope of service
         # ALT: fails (dissallow mixing of ctx mgmt and lazy init)
-        # ALT: seperate state for in_cxt client and shared client.
+        # ALT: separate state for in_cxt client and shared client.
         tst2_ctx_api_client = tst2.api_client
         assert tst2_ctx_api_client is not tst_client
         await assert_call_echo(tst2)
 
     # TBD: original client is not restored
-    # ALT: use stack/seperate state
+    # ALT: use stack/separate state
     assert tst2_ctx_api_client.is_closed
     assert my_client.tst2.api_client is tst2_ctx_api_client
     assert my_client.tst.api_client is tst_client
@@ -216,7 +216,7 @@ async def test_used_client_ctx(my_client: WaylayClient):
     async with my_client as m:
         # creates new api client in scope of main client
         # ALT: fails (dissallow mixing of ctx mgmt and lazy init)
-        # ALT: seperate state for in_cxt client and shared client.
+        # ALT: separate state for in_cxt client and shared client.
         assert m.api_client is not tst_client
         # TBD: new client is not copied to other services!
         # ALT: replace closed clients of all services!

@@ -1,3 +1,4 @@
+# -e git+https://github.com/waylayio/waylay-py-core.git@f7350a3fe7a32ea2f0a935882719a5bee5799159#egg=waylay_sdk_plugin_example&subdirectory=test/plugin
 PyYAML==6.0.1
 cfgv==3.4.0
 charset-normalizer==3.3.2
@@ -10,16 +11,15 @@ iniconfig==2.0.0
 mypy-extensions==1.0.0
 mypy==1.9.0
 nodeenv==1.8.0
-packaging==24.0
 platformdirs==4.2.0
 pluggy==1.4.0
-pre-commit==3.6.2
+pre-commit==3.7.0
 pytest-asyncio==0.23.6
-pytest-cov==4.1.0
+pytest-cov==5.0.0
 pytest-httpx==0.30.0
-pytest-mock==3.12.0
+pytest-mock==3.14.0
 pytest==8.1.1
-ruff==0.3.3
+ruff==0.3.4
 starlette==0.37.2
 syrupy==4.6.1
 types-appdirs==1.4.3.5
