@@ -654,7 +654,7 @@ def test_deserialize(
     response_kwargs = _retrieve_fixture_values(request, response_kwargs)
     response = Response(**response_kwargs)
     deserialized = waylay_api_client.deserialize(
-        response, response_type_map, select_path
+        response, response_type_map=response_type_map, select_path=select_path
     )
     assert (
         response.content,
@@ -751,7 +751,9 @@ def test_deserialize_error_responses(
     """Test REST param deserializer when error response."""
     response_kwargs = _retrieve_fixture_values(request, response_kwargs)
     with pytest.raises(ApiError) as excinfo:
-        waylay_api_client.deserialize(Response(**response_kwargs), response_type_map)
+        waylay_api_client.deserialize(
+            Response(**response_kwargs), response_type_map=response_type_map
+        )
     assert (
         str(excinfo.value),
         type(excinfo.value.data).__name__,
@@ -769,7 +771,7 @@ async def test_deserialize_partially_fetched_error_stream(
     )
     await resp.aiter_raw(chunk_size=1).__anext__()
     with pytest.raises(ApiError) as excinfo:
-        waylay_api_client.deserialize(resp, {})
+        waylay_api_client.deserialize(resp, response_type_map={})
     assert (
         str(excinfo.value),
         type(excinfo.value.data).__name__,

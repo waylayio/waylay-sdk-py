@@ -39,7 +39,7 @@ from .http import (
 from .exceptions import ApiValueError, ApiError
 from ._models import Model
 
-
+_DEFAULT_RESPONSE_TYPE = Model
 _PRIMITIVE_BYTE_TYPES = (bytes, bytearray)
 _CLASS_MAPPING = {
     "date": datetime.date,
@@ -82,7 +82,8 @@ class WithSerializationSupport:
         timeout: httpxc.TimeoutTypes | None = None,
         extensions: httpxc.RequestExtensions | None = None,
         # Deserialization arguments
-        response_types_map: Mapping[str, Type | None] | None = None,
+        response_type_map: Mapping[str, Type | None] | None = None,
+        response_type: Type | None = None,
         select_path: str = "",
         raw_response: bool = False,
         # Additional parameters passed on to the http client
@@ -116,8 +117,9 @@ class WithSerializationSupport:
             return response
         return self.deserialize(
             response,
-            response_types_map,
-            select_path,
+            response_type_map=response_type_map,
+            response_type=response_type,
+            select_path=select_path,
             stream=send_args.get("stream", False),
         )
 
@@ -161,14 +163,17 @@ class WithSerializationSupport:
     def deserialize(
         self,
         response: Response,
-        response_types_map: Mapping[str, Type | None] | None = None,
+        *,
+        response_type: Type | None = None,
+        response_type_map: Mapping[str, Type | None] | None = None,
         select_path: str = "",
         stream: bool = False,
     ) -> Any:
         """Deserialize a http response into a python object.
 
         :param response_data: Response object to be deserialized.
-        :param response_types_map: A mapping of response types per status code: examples [{"200": Model}, {"2XX": Model}, {"*": Model}]
+        :param response_type: Response type to use for any status code.
+        :param response_type_map: A mapping of response types per status code: examples [{"200": Model}, {"2XX": Model}, {"*": Model}]
         :param select_path: json path to be extracted from the json payload.
         :return: An instance of the type specified in the mapping.
         """
@@ -178,23 +183,9 @@ class WithSerializationSupport:
             )
             return response
         status_code = response.status_code
-        status_code_key = str(status_code)
-        response_types_map = response_types_map or {}
-        response_type = response_types_map.get(status_code_key, None)
-        if (
-            not response_type
-            and isinstance(status_code, int)
-            and 100 <= response.status_code <= 599
-        ):
-            # if not found, look for '1XX', '2XX', etc.
-            response_type = response_types_map.get(status_code_key[0] + "XX")
-        if not response_type:
-            # if still not found, look for default response type, otherwise use `Model`
-            response_type = (
-                response_types_map.get("*")
-                or response_types_map.get("default")
-                or Model
-            )
+        response_type = _response_type_for_status_code(
+            status_code, response_type, response_type_map
+        )
 
         # deserialize response data
         return_data = None
@@ -325,3 +316,19 @@ def _deserialize(data: Any, klass: Any):
                     exc_info=exc2,
                 )
                 return data
+
+
+def _response_type_for_status_code(
+    status_code,
+    response_type: Type | None,
+    response_type_map: Mapping[str, Type | None] | None = None,
+):
+    status_code_key=str(status_code)
+    rt_map = { '2XX': response_type } if response_type is not None else response_type_map
+    if rt_map is None:
+        return _DEFAULT_RESPONSE_TYPE
+    for key in [status_code_key, f"{status_code_key[0]}XX", "default", "*"]:
+        rt = rt_map.get(key)
+        if rt is not None:
+            return rt
+    return _DEFAULT_RESPONSE_TYPE
