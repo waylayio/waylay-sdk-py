@@ -3,7 +3,9 @@ from enum import Enum
 
 from typing import List, Optional, Union
 from typing_extensions import TypedDict, NotRequired, Annotated
-from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictStr
+from pydantic import Field, StrictBool, StrictInt, StrictStr
+
+from waylay.sdk.api._models import BaseModel
 
 
 class PetList(BaseModel):

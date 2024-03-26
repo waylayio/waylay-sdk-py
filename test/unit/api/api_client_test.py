@@ -574,6 +574,66 @@ DESERIALIZE_CASES = [
         {"200": List[str]},
         "pets[1:].name",
     ),
+    # invalid/partial data
+    (
+        "json_model_invalid_field",
+        {
+            "status_code": 200,
+            "json": {"name": 111, "owner": {"id": 456, "name": "Simon"}},
+        },  # name type is int instead of str
+        {"200": Pet},
+        None,
+    ),
+    (
+        "json_model_invalid_submodel_field",
+        {
+            "status_code": 200,
+            "json": {"name": 111, "owner": {"id": "invalidId", "name": "Simon"}},
+        },  # owner.id type is str instead of int
+        {"200": Pet},
+        None,
+    ),
+    (
+        "json_model_missing_field",
+        {
+            "status_code": 200,
+            "json": {"owner": {"id": 456, "name": "Simontis"}},
+        },  # missing name
+        {"200": Pet},
+        None,
+    ),
+    (
+        "json_model_missing_submodel_field",
+        {"status_code": 200, "json": {"name": "Chop"}},  # missing owner
+        {"200": Pet},
+        None,
+    ),
+    (
+        "json_model_invalid_submodel_list_field",
+        {
+            "status_code": 200,
+            "json": {
+                "pets": [
+                    {"name": 111, "owner": {"id": "invalidId", "name": "Simon"}},
+                    {"name": "Chop"},
+                ]
+            },
+        },  # pets.0: id type is str instead of int, pets.1: missing owner
+        {"200": PetList},
+        None,
+    ),
+    (
+        "json_model_invalid_submodule_list",
+        {
+            "status_code": 200,
+            "json": [
+                {"name": 111, "owner": {"id": "invalidId", "name": "Simon"}},
+                {"name": "Chop"},
+            ],
+        },  # 0: id type is str instead of int, 1: missing owner
+        {"200": List[Pet]},
+        None,
+    ),
 ]
 
 
