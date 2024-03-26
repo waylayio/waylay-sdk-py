@@ -234,3 +234,14 @@ test-publish:
 	${VENV_ACTIVATE} && pip install twine
 	${VENV_ACTIVATE} && python -m twine upload --repository testpypi dist/*
 	open https://test.pypi.org/project/waylay-sdk
+
+_assert_tagged:
+	@ export _PKG_VERSION_SCRIPT='from importlib.metadata import version; print(version("waylay.sdk"))' && \
+		export _PKG_VERSION=$$(python -c "$${_PKG_VERSION_SCRIPT}") && \
+		export _GIT_VERSION=$$(git describe --tags --dirty) && \
+	if [[ $${_PKG_VERSION} != $${_GIT_VERSION} ]]; then ${printMsg} "$${_PKG_VERSION} (package) !=  $${_GIT_VERSION} (git tag)" "won't publish" && exit 1; fi
+
+publish: _assert_tagged
+	${VENV_ACTIVATE} && pip install twine
+	${VENV_ACTIVATE} && python -m twine upload dist/*
+	open https://pypi.org/project/waylay-sdk
