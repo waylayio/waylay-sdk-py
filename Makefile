@@ -28,7 +28,7 @@ assert-venv:
 	@if [[ "$$(python -c 'import sys; print(sys.prefix)')" != "$$(pwd)/${VENV_DIR}" ]]; \
 	  then ${printMsg} "Please run in the correct python venv: ${VENV_DIR}" "FAILED"; exit 1; fi
 
-clean:
+clean: dist-clean
 	rm -fr ${VENV_DIR}
 	rm -fr .*_cache
 	rm -fr */.*_cache
@@ -79,7 +79,7 @@ dev-install: install
 
 dev-reinstall: clean dev-install ### Remove all dependences and reinstall with frozen dependencies
 
-dist: clean install dist-clean
+dist: clean install
 	@${VENV_ACTIVATE} && make exec-dist
 
 exec-lint-fix:
@@ -231,13 +231,13 @@ test-publish:
 	open https://test.pypi.org/project/waylay-sdk
 
 _assert_tagged:
-	@ export _PKG_VERSION_SCRIPT='from importlib.metadata import version; print(version("waylay.sdk"))' && \
+	@ ${VENV_ACTIVATE} && export _PKG_VERSION_SCRIPT='from importlib.metadata import version; print(version("waylay.sdk"))' && \
 		export _PKG_VERSION=$$(python -c "$${_PKG_VERSION_SCRIPT}") && \
 		export _GIT_VERSION=$$(git describe --tags --dirty) && \
 	echo "package version: $${_PKG_VERSION}" &&\
 	echo "git tag version: $${_GIT_VERSION}" &&\
 	if [[ $${_PKG_VERSION} != $${_GIT_VERSION} ]]; \
-	then ${printMsg} "Versions do not agree. Tag and invoke `make dist` first." && exit 1; \
+	then ${printMsg} "Versions do not agree. Tag and invoke _make dist_ first." && exit 1; \
 	fi
 
 publish: _assert_tagged
