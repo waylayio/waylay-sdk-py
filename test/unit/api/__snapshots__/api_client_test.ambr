@@ -791,7 +791,7 @@
     'some_text_resopnse',
   )
 # ---
-# name: test_deserialize_error_responses[response_kwargs0-response_type_map0][{'404': typing.Dict[str, str]}]
+# name: test_deserialize_error_responses[response_kwargs0-response_type0][{'404': typing.Dict[str, str]}]
   tuple(
     '''
       ApiError
@@ -808,7 +808,7 @@
     }),
   )
 # ---
-# name: test_deserialize_error_responses[response_kwargs1-response_type_map1][{'4XX': <class 'dict'>}]
+# name: test_deserialize_error_responses[response_kwargs1-response_type1][{'4XX': <class 'dict'>}]
   tuple(
     '''
       ApiError
@@ -825,7 +825,7 @@
     }),
   )
 # ---
-# name: test_deserialize_error_responses[response_kwargs2-response_type_map2][{'4XX': typing.Any}]
+# name: test_deserialize_error_responses[response_kwargs2-response_type2][{'4XX': typing.Any}]
   tuple(
     '''
       ApiError
@@ -842,7 +842,7 @@
     }),
   )
 # ---
-# name: test_deserialize_error_responses[response_kwargs3-response_type_map3][{'4XX': typing.Any}]
+# name: test_deserialize_error_responses[response_kwargs3-response_type3][{'4XX': typing.Any}]
   tuple(
     '''
       ApiError
@@ -856,7 +856,7 @@
     'some not found message',
   )
 # ---
-# name: test_deserialize_error_responses[response_kwargs4-response_type_map4][{}]
+# name: test_deserialize_error_responses[response_kwargs4-response_type4][{}]
   tuple(
     '''
       ApiError
@@ -870,7 +870,7 @@
     _Model(message='some not found message', code='RESOURCE_NOT_FOUND'),
   )
 # ---
-# name: test_deserialize_error_responses[response_kwargs5-response_type_map5][{'400': <class 'unit.api.example.pet_model.Pet'>}]
+# name: test_deserialize_error_responses[response_kwargs5-response_type5][{'400': <class 'unit.api.example.pet_model.Pet'>}]
   tuple(
     '''
       ApiError
@@ -884,7 +884,7 @@
     Pet(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize_error_responses[response_kwargs6-response_type_map6][{'default': typing.Any}]
+# name: test_deserialize_error_responses[response_kwargs6-response_type6][{'default': typing.Any}]
   tuple(
     '''
       ApiError
@@ -905,7 +905,7 @@
     }),
   )
 # ---
-# name: test_deserialize_error_responses[response_kwargs7-response_type_map7][{}]
+# name: test_deserialize_error_responses[response_kwargs7-response_type7][{}]
   tuple(
     '''
       ApiError
@@ -919,7 +919,7 @@
     _Model(name='Lord Biscuit, Master of Naps', owner=_Model(id=123, name='Simon'), tag='doggo'),
   )
 # ---
-# name: test_deserialize_error_responses[response_kwargs8-response_type_map8][{}]
+# name: test_deserialize_error_responses[response_kwargs8-response_type8][{}]
   tuple(
     '''
       ApiError
