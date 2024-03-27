@@ -45,12 +45,7 @@ exec-upgrade-buildtools:
 	pip install --upgrade pip
 	pip install --upgrade setuptools
 	pip install --upgrade wheel
-	pip install --upgrade build
-
-clean-eggs:
-	find . -name '.eggs' | xargs -L 1 rm -frv 
-	find . -name '*.egg-info' | xargs -L 1 rm -frv 
-	@${printMsg} "clean-eggs" ".eggs folders cleaned"
+	pip install --upgrade buildtools
 
 clean-caches:
 	find . -name '__pycache__' | xargs -L 1 rm -frv 
@@ -84,7 +79,7 @@ dev-install: install
 
 dev-reinstall: clean dev-install ### Remove all dependences and reinstall with frozen dependencies
 
-dist: install dist-clean
+dist: clean install dist-clean
 	@${VENV_ACTIVATE} && make exec-dist
 
 exec-lint-fix:
@@ -151,7 +146,7 @@ ci-test-unit: test-unit
 
 ci-test-integration: test-integration
 
-ci-dist: dist-clean clean-caches exec-dist
+ci-dist: dist-clean exec-dist
 
 
 freeze-dependencies: ## perform a full reinstall procedure and regenerate the 'requirements/requirements[.dev][.pyversion].txt' files
@@ -239,7 +234,11 @@ _assert_tagged:
 	@ export _PKG_VERSION_SCRIPT='from importlib.metadata import version; print(version("waylay.sdk"))' && \
 		export _PKG_VERSION=$$(python -c "$${_PKG_VERSION_SCRIPT}") && \
 		export _GIT_VERSION=$$(git describe --tags --dirty) && \
-	if [[ $${_PKG_VERSION} != $${_GIT_VERSION} ]]; then ${printMsg} "$${_PKG_VERSION} (package) !=  $${_GIT_VERSION} (git tag)" "won't publish" && exit 1; fi
+	echo "package version: $${_PKG_VERSION}" &&\
+	echo "git tag version: $${_GIT_VERSION}" &&\
+	if [[ $${_PKG_VERSION} != $${_GIT_VERSION} ]]; \
+	then ${printMsg} "Versions do not agree. Tag and invoke `make dist` first." && exit 1; \
+	fi
 
 publish: _assert_tagged
 	${VENV_ACTIVATE} && pip install twine
