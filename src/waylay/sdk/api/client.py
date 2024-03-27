@@ -3,7 +3,7 @@
 from __future__ import annotations
 from typing import Mapping, Optional, Tuple, Union
 
-from ..__version__ import __version__
+from .._version import __version__
 from ..config import WaylayConfig
 
 from .exceptions import SyncCtxMgtNotSupportedError
