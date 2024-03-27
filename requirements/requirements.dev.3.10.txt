@@ -1,11 +1,11 @@
-# -e git+https://github.com/waylayio/waylay-py-core.git@f7350a3fe7a32ea2f0a935882719a5bee5799159#egg=waylay_sdk_plugin_example&subdirectory=test/plugin
+# -e git+https://github.com/waylayio/waylay-py-core.git@62a140c30cdf7500eaa8bda96e03933043c87176#egg=waylay_sdk_plugin_example&subdirectory=test/plugin
 PyYAML==6.0.1
 cfgv==3.4.0
 charset-normalizer==3.3.2
 coverage==7.4.4
 distlib==0.3.8
 docformatter==1.7.5
-filelock==3.13.1
+filelock==3.13.3
 identify==2.5.35
 iniconfig==2.0.0
 mypy-extensions==1.0.0

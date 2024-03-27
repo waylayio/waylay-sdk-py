@@ -45,7 +45,7 @@ exec-upgrade-buildtools:
 	pip install --upgrade pip
 	pip install --upgrade setuptools
 	pip install --upgrade wheel
-	pip install --upgrade buildtools
+	pip install --upgrade build
 
 clean-caches:
 	find . -name '__pycache__' | xargs -L 1 rm -frv 
