@@ -25,7 +25,9 @@ class MyService(WaylayService):
         resp = await self.api_client.send(req)
         if with_http_info:
             return resp
-        return self.api_client.deserialize(resp, {"*": Model}, select_path)
+        return self.api_client.deserialize(
+            resp, response_type_map={"*": Model}, select_path=select_path
+        )
 
 
 class MyTool(WaylayTool):
