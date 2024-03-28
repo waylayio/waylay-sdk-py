@@ -10,14 +10,25 @@ from .api.http import AsyncClient
 
 
 if TYPE_CHECKING:
-    from .plugin.type_stubs import BrokerService, RegistryService
+    from .plugin.type_stubs import (
+        AlarmsService,
+        DataService,
+        RegistryService,
+        ResourcesService,
+        RulesService,
+        StorageService,
+    )
 
 
 class WaylayClient(WithConfig, WithServicesAndTools):
     """REST client for the Waylay Platform."""
 
+    alarms: "AlarmsService"
+    data: "DataService"
     registry: "RegistryService"
-    broker: "BrokerService"
+    resources: "ResourcesService"
+    rules: "RulesService"
+    storage: "StorageService"
 
     def __init__(
         self,

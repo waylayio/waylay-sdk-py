@@ -83,76 +83,76 @@ When not installed, the SDK client does not interfere with the json representati
 
 The Service plugs are _generated_ from their [openapi description](https://docs.waylay.io/#/api/?id=openapi-docs).
 
-### `waylay-alarms-sdk` _Alarms_ api package
+### `waylay-sdk-alarms` _Alarms_ api package
 
-The [waylay-alarms-sdk](https://pypi.org/project/waylay-alarms-sdk) package provides the client bindings for the [Alarms](https://docs.waylay.io/#/api/alarms/) service, based on its [openapi](https://docs.waylay.io/openapi/public/redocly/alarms.html) specification.
+The [waylay-sdk-alarms](https://pypi.org/project/waylay-sdk-alarms) package provides the client bindings for the [Alarms](https://docs.waylay.io/#/api/alarms/) service, based on its [openapi](https://docs.waylay.io/openapi/public/redocly/alarms.html) specification.
 
 ```bash
 ## with types
-pip install waylay-alarms-sdk[types]
+pip install waylay-sdk-alarms[types]
 
 ## without types
-pip install waylay-alarms-sdk
+pip install waylay-sdk-alarms
 ```
 
-### `waylay-data-sdk` _Data_ (broker) api package
+### `waylay-sdk-data` _Data_ (broker) api package
 
-The [waylay-data-sdk](https://pypi.org/project/waylay-data-sdk) package provides the client bindings for the `data` api of the [broker](https://docs.waylay.io/#/api/broker/) service, based on its [openapi](https://docs.waylay.io/openapi/public/redocly/broker.html) specification.
+The [waylay-sdk-data](https://pypi.org/project/waylay-sdk-data) package provides the client bindings for the `data` api of the [broker](https://docs.waylay.io/#/api/broker/) service, based on its [openapi](https://docs.waylay.io/openapi/public/redocly/broker.html) specification.
 
 ```bash
 ## with types
-pip install waylay-data-sdk[types]
+pip install waylay-sdk-data[types]
 
 ## without types
-pip install waylay-data-sdk
+pip install waylay-sdk-data
 ```
 
-### `waylay-resources-sdk` _Resources_ (digital twin) api package
+### `waylay-sdk-resources` _Resources_ (digital twin) api package
 
-The [waylay-resources-sdk](https://pypi.org/project/waylay-resources-sdk) package provides the client bindings for the [resources](https://docs.waylay.io/#/api/resources/) service, based on its [openapi](https://docs.waylay.io/openapi/public/redocly/resources.html) specification.
+The [waylay-sdk-resources](https://pypi.org/project/waylay-sdk-resources) package provides the client bindings for the [resources](https://docs.waylay.io/#/api/resources/) service, based on its [openapi](https://docs.waylay.io/openapi/public/redocly/resources.html) specification.
 
 ```bash
 ## with types
-pip install waylay-resources-sdk[types]
+pip install waylay-sdk-resources[types]
 
 ## without types
-pip install waylay-resources-sdk
+pip install waylay-sdk-resources
 ```
 
-### `waylay-rules-sdk` _Rules_ (rules engine) api package
+### `waylay-sdk-rules` _Rules_ (rules engine) api package
 
-The [waylay-rules-sdk](https://pypi.org/project/waylay-rules-sdk) package provides the client bindings for the [rules](https://docs.waylay.io/#/api/rules/) service, based on its [openapi](https://docs.waylay.io/openapi/public/redocly/rules.html) specification.
+The [waylay-sdk-rules](https://pypi.org/project/waylay-sdk-rules) package provides the client bindings for the [rules](https://docs.waylay.io/#/api/rules/) service, based on its [openapi](https://docs.waylay.io/openapi/public/redocly/rules.html) specification.
 
 ```bash
 ## with types
-pip install waylay-rules-sdk[types]
+pip install waylay-sdk-rules[types]
 
 ## without types
-pip install waylay-rules-sdk
+pip install waylay-sdk-rules
 ```
 
-### `waylay-storage-sdk` _Storage_ (file object storage) api package
+### `waylay-sdk-storage` _Storage_ (file object storage) api package
 
-The [waylay-storage-sdk](https://pypi.org/project/waylay-storage-sdk) package provides the client bindings for the [storage](https://docs.waylay.io/#/api/storage/) service, based on its [openapi](https://docs.waylay.io/openapi/public/redocly/storage.html) specification.
+The [waylay-sdk-storage](https://pypi.org/project/waylay-sdk-storage) package provides the client bindings for the [storage](https://docs.waylay.io/#/api/storage/) service, based on its [openapi](https://docs.waylay.io/openapi/public/redocly/storage.html) specification.
 
 ```bash
 ## with types
-pip install waylay-storage-sdk[types]
+pip install waylay-sdk-storage[types]
 
 ## without types
-pip install waylay-storage-sdk
+pip install waylay-sdk-storage
 ```
 
-### `waylay-registry-sdk` _Function Registry V2_ api package
+### `waylay-sdk-registry` _Function Registry V2_ api package
 
-The [waylay-registry-sdk](https://pypi.org/project/waylay-registry-sdk) package provides the client bindings for the [registry v2](https://docs.waylay.io/#/api/registry/) service, based on its [openapi](https://docs.waylay.io/openapi/public/redocly/registry.html) specification.
+The [waylay-sdk-registry](https://pypi.org/project/waylay-sdk-registry) package provides the client bindings for the [registry v2](https://docs.waylay.io/#/api/registry/) service, based on its [openapi](https://docs.waylay.io/openapi/public/redocly/registry.html) specification.
 
 ```bash
 ## with types
-pip install waylay-registry-sdk[types]
+pip install waylay-sdk-registry[types]
 
 ## without types
-pip install waylay-registry-sdk
+pip install waylay-sdk-registry
 ```
 
 
@@ -161,15 +161,15 @@ pip install waylay-registry-sdk
 Tool packages provide SDK extensions for specific use cases.
 
 
-### `waylay-ml-adapter-sdk` _ML Adapter_ tool package
+### `waylay-sdk-ml-adapter` _ML Adapter_ tool package
 
-The [waylay-ml-adapter-sdk](https://pypi.org/project/waylay-ml-adapter-sdk) package provides utilities for using and deploying Machine Learning models in plugs and webscripts.
+The [waylay-sdk-ml-adapter](https://pypi.org/project/waylay-sdk-ml-adapter) package provides utilities for using and deploying Machine Learning models in plugs and webscripts.
 
 ```bash
 ## basic install
-pip install waylay-ml-adapter-sdk
+pip install waylay-sdk-ml-adapter
 
 ## install with support for pytorch models
-pip install waylay-ml-adapter-sdk[pytorch]
+pip install waylay-sdk-ml-adapter[pytorch]
 
 ```
