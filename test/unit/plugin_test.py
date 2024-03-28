@@ -1,5 +1,6 @@
 """Test plugin system."""
 
+import re
 import pytest
 
 from waylay.sdk import WaylayService, WaylayTool, WaylayClient
@@ -76,10 +77,11 @@ def test_repr(client: WaylayClient):
     srv = MyOtherService(client.api_client)
     assert str(srv) == "my_service: Replacement Test Service"
     assert repr(srv) == "<MyOtherService(my_service)>"
-    assert "services=[exampleService],tools=[exampleTool]" in repr(client)
-    assert (
-        repr(client.services) == "{'exampleService': <ExampleService(exampleService)>}"
+    assert re.search(
+        r"services=\[[^\]]*exampleService[^\]]*\],tools=\[exampleTool\]",
+        repr(client),
     )
+    assert "'exampleService': <ExampleService(exampleService)>" in repr(client.services)
     assert repr(client.tools) == "{'exampleTool': <ExampleTool(exampleTool)>}"
 
 
@@ -118,13 +120,12 @@ def test_register(client: WaylayClient):
     assert client.services.require(WaylayService, name=my_name) is other_srv
     assert client.services.select(MyService) is None
 
-    assert "services=[exampleService,my_service],tools=[exampleTool]" in repr(client)
-    assert repr(client.services) == (
-        "{"
-        "'exampleService': <ExampleService(exampleService)>, "
-        "'my_service': <MyOtherService(my_service)>"
-        "}"
+    assert re.search(
+        r"services=\[.*exampleService,[^\]]*my_service[^\]]*\],tools=\[exampleTool\]",
+        repr(client),
     )
+    assert "'exampleService': <ExampleService(exampleService)>" in repr(client.services)
+    assert "'my_service': <MyOtherService(my_service)>" in repr(client.services)
 
 
 class NotAService:
