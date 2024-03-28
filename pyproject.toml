@@ -26,9 +26,9 @@ dependencies = [
     "waylay-sdk-alarms",
     "waylay-sdk-data",
     "waylay-sdk-registry",
-    # "waylay-sdk-resources",
+    "waylay-sdk-resources",
     "waylay-sdk-rules",
-    # "waylay-sdk-storage",
+    "waylay-sdk-storage",
 ]
 
 [project.urls]
