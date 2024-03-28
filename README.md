@@ -40,7 +40,7 @@ async def execute(request: Request, waylay: WaylayClient):
     # with only the 'waylay-sdk' package:
     templates = await waylay.api_client('GET', '/rules/v1/templates', query=template_query)
 
-    # with the 'waylay-rules-sdk' service plugin package
+    # with the 'waylay-sdk-rules' service plugin package
     # templates = await waylay.rules.templates.list(query=template_query)
     return templates
 ```
@@ -51,7 +51,7 @@ When used outside the Waylay platform (e.g. in a _python notebook_) the client r
 * an API key-secret pair: see [Waylay Console](console.waylay.io) at _>Settings>Authentication keys_.
 
 ```python
-from waylay.sdk install WaylayClient
+from waylay.sdk import WaylayClient
 
 # this will interactively request the gateway and credentials on first usage.
 client = WaylayClient.from_profile()
