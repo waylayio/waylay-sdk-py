@@ -68,13 +68,17 @@ class BaseModel(PydanticBaseModel, ABC):
                     raise
                 for field_name in model.model_fields_set:
                     field_value = getattr(model, field_name)
-                    cls.__pydantic_validator__.validate_assignment(
-                        model,
-                        field_name,
-                        field_value,
-                        strict=(info.config or {}).get("strict"),
-                        context=context,
-                    )
+                    strict = (info.config or {}).get("strict")
+                    try:
+                        cls.__pydantic_validator__.validate_assignment(
+                            model,
+                            field_name,
+                            field_value,
+                            strict=strict,
+                            context=context,
+                        )
+                    except BaseException:
+                        pass
                 return model
             else:
                 raise
