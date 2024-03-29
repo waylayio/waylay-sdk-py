@@ -3,6 +3,6 @@
 from typing import Type, List
 
 from .base import WaylayPlugin
+from waylay.sdk.services.gateway import GatewayService
 
-# no default services or tools for now.
-PLUGINS: List[Type[WaylayPlugin]] = []
+PLUGINS: List[Type[WaylayPlugin]] = [GatewayService]
