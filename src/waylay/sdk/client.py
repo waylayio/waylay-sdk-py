@@ -3,6 +3,8 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 
+from waylay.sdk.services.gateway import GatewayService
+
 from .plugin.client import WithServicesAndTools
 from .config.client import WaylayConfig, WithConfig, HttpClientOptions
 from .api import ApiClient
@@ -23,6 +25,7 @@ if TYPE_CHECKING:
 class WaylayClient(WithConfig, WithServicesAndTools):
     """REST client for the Waylay Platform."""
 
+    gateway: GatewayService
     alarms: "AlarmsService"
     data: "DataService"
     registry: "RegistryService"
