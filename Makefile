@@ -231,7 +231,7 @@ test-publish:
 	open https://test.pypi.org/project/waylay-sdk-core
 
 _assert_tagged:
-	@ ${VENV_ACTIVATE} && export _PKG_VERSION_SCRIPT='from importlib.metadata import version; print(version("waylay.sdk"))' && \
+	@ ${VENV_ACTIVATE} && export _PKG_VERSION_SCRIPT='from importlib.metadata import version; print(version("waylay-sdk-core"))' && \
 		export _PKG_VERSION=$$(python -c "$${_PKG_VERSION_SCRIPT}") && \
 		export _GIT_VERSION=$$(git describe --tags --dirty) && \
 	echo "package version: $${_PKG_VERSION}" &&\
