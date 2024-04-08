@@ -59,7 +59,7 @@ clean-caches:
 dist-clean:
 	rm -fr dist build
 
-exec-dev-install-pkg:  ## Install waylay-sdk with development dependency constraints as specified in the package.
+exec-dev-install-pkg:  ## Install waylay-sdk-core with development dependency constraints as specified in the package.
 	pip install -e ".[dev]"
 	pip install -e test/plugin
 
@@ -67,7 +67,7 @@ exec-dev-install: ### Install a development environment with frozen dependencies
 	make exec-dev-dependencies
 	make exec-dev-install-pkg
 
-exec-install-pkg: ### Install waylay-sdk with dependency constraints as specified in the package. (e.g. for notebook tests)
+exec-install-pkg: ### Install waylay-sdk-core with dependency constraints as specified in the package. (e.g. for notebook tests)
 	pip install -e .
 
 exec-dist:
@@ -228,7 +228,7 @@ pdoc: # TODO
 test-publish:
 	${VENV_ACTIVATE} && pip install twine
 	${VENV_ACTIVATE} && python -m twine upload --repository testpypi dist/*
-	open https://test.pypi.org/project/waylay-sdk
+	open https://test.pypi.org/project/waylay-sdk-core
 
 _assert_tagged:
 	@ ${VENV_ACTIVATE} && export _PKG_VERSION_SCRIPT='from importlib.metadata import version; print(version("waylay.sdk"))' && \
@@ -243,4 +243,4 @@ _assert_tagged:
 publish: _assert_tagged
 	${VENV_ACTIVATE} && pip install twine
 	${VENV_ACTIVATE} && python -m twine upload dist/*
-	open https://pypi.org/project/waylay-sdk
+	open https://pypi.org/project/waylay-sdk-core

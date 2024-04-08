@@ -1,3 +1,3 @@
-"""Release version of waylay-sdk."""
+"""Release version of waylay-sdk-core."""
 
-__version__ = "0.0.6"
+__version__ = "0.1.0"
