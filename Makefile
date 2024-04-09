@@ -31,8 +31,9 @@ assert-venv:
 clean: dist-clean
 	rm -fr ${VENV_DIR}
 	rm -fr .*_cache
-	rm -fr */.*_cache
-	rm -fr */src/*.egg-info
+	rm -fr **/.*_cache
+	rm -fr **/__pycache__
+	rm -fr src/*.egg-info
 
 exec-dev-dependencies:
 	pip install -r "${REQ_FILE_BUILD}"
