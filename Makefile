@@ -31,8 +31,9 @@ assert-venv:
 clean: dist-clean
 	rm -fr ${VENV_DIR}
 	rm -fr .*_cache
-	rm -fr */.*_cache
-	rm -fr */src/*.egg-info
+	rm -fr **/.*_cache
+	rm -fr **/__pycache__
+	rm -fr src/*.egg-info
 
 exec-dev-dependencies:
 	pip install -r "${REQ_FILE_BUILD}"
@@ -231,7 +232,7 @@ test-publish:
 	open https://test.pypi.org/project/waylay-sdk-core
 
 _assert_tagged:
-	@ ${VENV_ACTIVATE} && export _PKG_VERSION_SCRIPT='from importlib.metadata import version; print(version("waylay.sdk"))' && \
+	@ ${VENV_ACTIVATE} && export _PKG_VERSION_SCRIPT='from importlib.metadata import version; print(version("waylay-sdk-core"))' && \
 		export _PKG_VERSION=$$(python -c "$${_PKG_VERSION_SCRIPT}") && \
 		export _GIT_VERSION=$$(git describe --tags --dirty) && \
 	echo "package version: $${_PKG_VERSION}" &&\
