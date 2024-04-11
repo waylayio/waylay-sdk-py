@@ -1,6 +1,8 @@
 """API client."""
 
 from __future__ import annotations
+import contextlib
+import json
 import logging
 import re
 import datetime
@@ -8,17 +10,18 @@ from urllib.parse import quote
 from inspect import isclass
 from typing import (
     Any,
+    AsyncIterator,
     Mapping,
     Optional,
     AsyncIterable,
     Type,
+    TypeVar,
     Union,
     Iterable,
     Protocol,
     runtime_checkable,
 )
 from abc import abstractmethod
-import warnings
 
 from pydantic import BaseModel, ConfigDict, TypeAdapter, ValidationError
 from pydantic_core import to_jsonable_python
@@ -176,9 +179,6 @@ class WithSerializationSupport:
         :return: An instance of the type specified in the mapping.
         """
         if stream:
-            warnings.warn(
-                "Using `stream=True` is currently only supported with `raw_response=True`."
-            )
             return response
         status_code = response.status_code
         response_type = _response_type_for_status_code(status_code, response_type)
@@ -194,15 +194,7 @@ class WithSerializationSupport:
                 try:
                     _data = response.json()
                     if select_path:
-                        jsonpath_expr = jsonpath_parse(select_path)
-                        match_values = [
-                            match.value for match in jsonpath_expr.find(_data)
-                        ]
-                        _data = (
-                            match_values[0]
-                            if not re.search(r"\[(\*|.*:.*|.*,.*)\]", select_path)
-                            else match_values
-                        )
+                        _data = _extract_selected(_data, select_path)
                 except ValueError:
                     _data = response.text
                 if _data is not None:
@@ -329,3 +321,71 @@ def _response_type_for_status_code(
         if rt is not None:
             return rt
     return _DEFAULT_RESPONSE_TYPE
+
+
+def _extract_selected(data, select_path: str):
+    if not select_path:
+        return data
+    jsonpath_expr = jsonpath_parse(select_path)
+    match_values = [match.value for match in jsonpath_expr.find(data)]
+    data = (
+        match_values[0]
+        if not re.search(r"\[(\*|.*:.*|.*,.*)\]", select_path)
+        else match_values
+    )
+    return data
+
+
+TEXT_EVENT_STREAM_CONTENT_TYPE = "text/event-stream"
+NDJSON_EVENT_STREAM_CONTENT_TYPE = "application/x-ndjson"
+
+T = TypeVar("T")
+
+
+async def iter_event_stream(
+    response: Response,
+    response_type: Mapping[str, Type | None] | Type | None = None,
+    select_path: str = "",
+    *,
+    _ignore_retry_events: bool = True,
+) -> AsyncIterator[Any]:
+    _response_type = _response_type_for_status_code(response.status_code, response_type)
+    content_type = response.headers.get("content-type", "")
+    try:
+        async for event_str_batch in response.aiter_text():
+            for event_str in event_str_batch.split("\r\n\r"):
+                event = __parse_event(event_str, content_type)
+                if not event:
+                    continue
+                if _ignore_retry_events and len(event) == 1 and "retry" in event:
+                    continue
+                _deserialized_event = _deserialize(
+                    _extract_selected(event, select_path), _response_type
+                )
+                yield _deserialized_event
+    finally:
+        await response.aclose()
+
+
+def __parse_event(event_str: str, content_type: str):
+    if content_type.startswith(TEXT_EVENT_STREAM_CONTENT_TYPE):
+        event = {}
+        for line in event_str.split("\n"):
+            keyword, *data = line.split(": ", 1)
+            keyword = keyword.strip()
+            _data = data[0].strip() if data else ""
+            with contextlib.suppress(ValueError, TypeError):
+                _data = json.loads(_data)
+            if keyword or data:
+                event[keyword] = _data
+        return event
+    elif content_type == NDJSON_EVENT_STREAM_CONTENT_TYPE:
+        try:
+            event = json.loads(event_str)
+        except (ValueError, TypeError):
+            log.warning("Cannot deserialize event\n%s", event_str, exc_info=True)
+    else:
+        raise ApiValueError(
+            f"Expected content-type '{TEXT_EVENT_STREAM_CONTENT_TYPE}' or '{NDJSON_EVENT_STREAM_CONTENT_TYPE}', got '{content_type}'"
+        )
+    return event
