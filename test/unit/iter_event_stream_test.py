@@ -10,9 +10,13 @@ from starlette.routing import Route as StarletteRoute
 from starlette.requests import Request as StarletteRequest
 
 
-from waylay.sdk.api.serialization import iter_event_stream
+from waylay.sdk.api.client import ApiClient
+from waylay.sdk.api.http import HttpClientOptions
 from waylay.sdk.api._models import BaseModel as WaylayBaseModel
 import asyncio
+
+from waylay.sdk.auth.model import NoCredentials
+from waylay.sdk.config.model import WaylayConfig
 
 
 @pytest.fixture(name="event_loop", scope="session")
@@ -51,6 +55,21 @@ async def _app_transport_fixture(sse_app):
     transport = httpx.ASGITransport(app=sse_app)
     yield transport
     await transport.aclose()
+
+
+@pytest.fixture(name="config", scope="session")
+def _config_fixture():
+    yield WaylayConfig(NoCredentials())
+
+
+@pytest.fixture(name="client", scope="session")
+async def _client_fixture(config, app_transport):
+    http_opts: HttpClientOptions = {
+        "transport": app_transport,
+        "base_url": "http://test",
+        "auth": None,
+    }
+    yield ApiClient(config, http_opts)
 
 
 class EventData(WaylayBaseModel):
@@ -110,15 +129,14 @@ def list_to_async_iterator(lst):
     ids=[c[0] for c in CASES],
 )
 @pytest.mark.asyncio(scope="session")
-async def test_iter_event_stream(test_input, app_transport, snapshot):
-    async with httpx.AsyncClient(
-        transport=app_transport, base_url="http://test"
-    ) as client:
-        response = await client.get("/")
-        event_stream = iter_event_stream(
-            response,
+async def test_iter_event_stream(test_input, client, snapshot):
+    async with client:
+        event_stream = await client.request(
+            "GET",
+            "/",
             response_type=test_input.get("response_type"),
             select_path=test_input.get("select_path"),
+            stream=True,
         )
         async for event in event_stream:
             assert event == snapshot()

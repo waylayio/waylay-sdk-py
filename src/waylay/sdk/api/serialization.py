@@ -19,6 +19,7 @@ from typing import (
     Union,
     Iterable,
     Protocol,
+    cast,
     runtime_checkable,
 )
 from abc import abstractmethod
@@ -56,6 +57,13 @@ _MODEL_TYPE_ADAPTER = TypeAdapter(Model)
 log = logging.getLogger(__name__)
 
 DEFAULT_SERIALIZATION_ARGS = {"by_alias": True, "exclude_none": True}
+
+TEXT_EVENT_STREAM_CONTENT_TYPE = "text/event-stream"
+NDJSON_EVENT_STREAM_CONTENT_TYPE = "application/x-ndjson"
+EVENT_STREAM_CONTENT_TYPES = [
+    TEXT_EVENT_STREAM_CONTENT_TYPE,
+    NDJSON_EVENT_STREAM_CONTENT_TYPE,
+]
 
 
 class WithSerializationSupport:
@@ -176,38 +184,32 @@ class WithSerializationSupport:
             or a mapping per status code, including '2XX', '3XX', .. and
             '*' or 'default' wildcard keys.
         :param select_path: json path to be extracted from the json payload.
-        :return: An instance of the type specified in the mapping.
+        :param stream: Whether the response should be in streaming mode.
+            If the response is an event stream, this function will return an async iterator.
+        :return: An instance of the type specified in the mapping, or an async iterator for event stream responses when stream is True.
         """
-        if stream:
-            return response
         status_code = response.status_code
-        response_type = _response_type_for_status_code(status_code, response_type)
+        _response_type = _response_type_for_status_code(status_code, response_type)
 
-        # deserialize response data
-        return_data = None
-        try:
-            if response_type in _PRIMITIVE_BYTE_TYPES + tuple(
-                t.__name__ for t in _PRIMITIVE_BYTE_TYPES
-            ):
-                return_data = response.content
-            elif response_type is not None:
-                try:
-                    _data = response.json()
-                    if select_path:
-                        _data = _extract_selected(_data, select_path)
-                except ValueError:
-                    _data = response.text
-                if _data is not None:
-                    return_data = _deserialize(_data, response_type)
-                else:
-                    return_data = response.content
-        finally:
-            if not 200 <= status_code <= 299:
-                raise ApiError.from_response(
-                    response,
-                    return_data,
-                )
-        return return_data
+        if not 200 <= response.status_code <= 299:
+            raise ApiError.from_response(
+                response,
+                _deserialize_response(
+                    response, response_type=_response_type, select_path=select_path
+                ),
+            )
+        content_type = response.headers.get("content-type", "")
+        is_event_stream = any(
+            [content_type.startswith(ect) for ect in EVENT_STREAM_CONTENT_TYPES]
+        )
+        if stream and is_event_stream:
+            return _iter_event_stream(
+                response, response_type=_response_type, select_path=select_path
+            )
+        else:
+            return _deserialize_response(
+                response, response_type=_response_type, select_path=select_path
+            )
 
 
 _CHUNK_SIZE = 65_536
@@ -317,7 +319,7 @@ def _response_type_for_status_code(
     if rt_map is None:
         return _DEFAULT_RESPONSE_TYPE
     for key in [status_code_key, f"{status_code_key[0]}XX", "default", "*"]:
-        rt = rt_map.get(key)
+        rt: Type | None = rt_map.get(key)
         if rt is not None:
             return rt
     return _DEFAULT_RESPONSE_TYPE
@@ -336,19 +338,51 @@ def _extract_selected(data, select_path: str):
     return data
 
 
-TEXT_EVENT_STREAM_CONTENT_TYPE = "text/event-stream"
-NDJSON_EVENT_STREAM_CONTENT_TYPE = "application/x-ndjson"
-
 T = TypeVar("T")
 
 
-async def iter_event_stream(
+def _deserialize_response(
     response: Response,
-    response_type: Mapping[str, Type | None] | Type | None = None,
+    response_type: type[T],
+    select_path: str = "",
+) -> T:
+    return_data: T = None  # type: ignore
+    try:
+        if response_type in _PRIMITIVE_BYTE_TYPES + tuple(
+            t.__name__ for t in _PRIMITIVE_BYTE_TYPES
+        ):
+            _content = response.content
+            try:
+                return_data = cast(T, _content)
+            except (TypeError, ValueError):
+                return_data = _content  # type: ignore
+        elif response_type is not None:
+            try:
+                _data = response.json()
+                if select_path:
+                    _data = _extract_selected(_data, select_path)
+            except ValueError:
+                _data = response.text
+            if _data is not None:
+                try:
+                    return_data = _deserialize(_data, response_type)
+                except (TypeError, ValueError):
+                    return _data
+            else:
+                return_data = response.content  # type: ignore
+        elif response_type is None:
+            return_data = None
+    finally:
+        return return_data
+
+
+async def _iter_event_stream(
+    response: Response,
+    response_type: type[T],
     select_path: str = "",
     *,
     _ignore_retry_events: bool = True,
-) -> AsyncIterator[Any]:
+) -> AsyncIterator[T]:
     _response_type = _response_type_for_status_code(response.status_code, response_type)
     content_type = response.headers.get("content-type", "")
     try:
@@ -385,7 +419,5 @@ def __parse_event(event_str: str, content_type: str):
         except (ValueError, TypeError):
             log.warning("Cannot deserialize event\n%s", event_str, exc_info=True)
     else:
-        raise ApiValueError(
-            f"Expected content-type '{TEXT_EVENT_STREAM_CONTENT_TYPE}' or '{NDJSON_EVENT_STREAM_CONTENT_TYPE}', got '{content_type}'"
-        )
+        return event_str
     return event
