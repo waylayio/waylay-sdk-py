@@ -386,18 +386,24 @@ async def _iter_event_stream(
 ) -> AsyncIterator[T]:
     _response_type = _response_type_for_status_code(response.status_code, response_type)
     content_type = response.headers.get("content-type", "")
-    async for event_str in __iter_events_response(response, content_type):
-        event = __parse_event(event_str, content_type)
-        if not event:
-            continue
-        if _ignore_retry_events and len(event) == 1 and "retry" in event:
-            continue
-        _deserialized_event = _deserialize(
-            _extract_selected(event, select_path), _response_type
-        )
-        yield _deserialized_event
+    try:
+        async for event_str in __iter_events_response(response, content_type):
+            event = __parse_event(event_str, content_type)
+            if not event:
+                continue
+            if _ignore_retry_events and len(event) == 1 and "retry" in event:
+                continue
+            _deserialized_event = _deserialize(
+                _extract_selected(event, select_path), _response_type
+            )
+            yield _deserialized_event
+    finally:
+        await response.aclose()
 
-async def __iter_events_response(response: Response, content_type: str) -> AsyncGenerator[str]:
+
+async def __iter_events_response(
+    response: Response, content_type: str
+) -> AsyncGenerator[str, None]:
     if content_type.startswith(TEXT_EVENT_STREAM_CONTENT_TYPE):
         async for event_str_batch in response.aiter_text():
             for event_str in event_str_batch.split("\r\n\r"):
@@ -405,6 +411,7 @@ async def __iter_events_response(response: Response, content_type: str) -> Async
     else:
         async for event_str in response.aiter_lines():
             yield event_str
+
 
 def __parse_event(event_str: str, content_type: str):
     if content_type.startswith(TEXT_EVENT_STREAM_CONTENT_TYPE):
