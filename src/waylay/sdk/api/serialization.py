@@ -1,6 +1,8 @@
 """API client."""
 
 from __future__ import annotations
+import contextlib
+import json
 import logging
 import re
 import datetime
@@ -8,17 +10,20 @@ from urllib.parse import quote
 from inspect import isclass
 from typing import (
     Any,
+    AsyncGenerator,
+    AsyncIterator,
     Mapping,
     Optional,
     AsyncIterable,
     Type,
+    TypeVar,
     Union,
     Iterable,
     Protocol,
+    cast,
     runtime_checkable,
 )
 from abc import abstractmethod
-import warnings
 
 from pydantic import BaseModel, ConfigDict, TypeAdapter, ValidationError
 from pydantic_core import to_jsonable_python
@@ -53,6 +58,13 @@ _MODEL_TYPE_ADAPTER = TypeAdapter(Model)
 log = logging.getLogger(__name__)
 
 DEFAULT_SERIALIZATION_ARGS = {"by_alias": True, "exclude_none": True}
+
+TEXT_EVENT_STREAM_CONTENT_TYPE = "text/event-stream"
+NDJSON_EVENT_STREAM_CONTENT_TYPE = "application/x-ndjson"
+EVENT_STREAM_CONTENT_TYPES = [
+    TEXT_EVENT_STREAM_CONTENT_TYPE,
+    NDJSON_EVENT_STREAM_CONTENT_TYPE,
+]
 
 
 class WithSerializationSupport:
@@ -173,49 +185,32 @@ class WithSerializationSupport:
             or a mapping per status code, including '2XX', '3XX', .. and
             '*' or 'default' wildcard keys.
         :param select_path: json path to be extracted from the json payload.
-        :return: An instance of the type specified in the mapping.
+        :param stream: Whether the response should be in streaming mode.
+            If the response is an event stream, this function will return an async iterator.
+        :return: An instance of the type specified in the mapping, or an async iterator for event stream responses when stream is True.
         """
-        if stream:
-            warnings.warn(
-                "Using `stream=True` is currently only supported with `raw_response=True`."
-            )
-            return response
         status_code = response.status_code
-        response_type = _response_type_for_status_code(status_code, response_type)
+        _response_type = _response_type_for_status_code(status_code, response_type)
 
-        # deserialize response data
-        return_data = None
-        try:
-            if response_type in _PRIMITIVE_BYTE_TYPES + tuple(
-                t.__name__ for t in _PRIMITIVE_BYTE_TYPES
-            ):
-                return_data = response.content
-            elif response_type is not None:
-                try:
-                    _data = response.json()
-                    if select_path:
-                        jsonpath_expr = jsonpath_parse(select_path)
-                        match_values = [
-                            match.value for match in jsonpath_expr.find(_data)
-                        ]
-                        _data = (
-                            match_values[0]
-                            if not re.search(r"\[(\*|.*:.*|.*,.*)\]", select_path)
-                            else match_values
-                        )
-                except ValueError:
-                    _data = response.text
-                if _data is not None:
-                    return_data = _deserialize(_data, response_type)
-                else:
-                    return_data = response.content
-        finally:
-            if not 200 <= status_code <= 299:
-                raise ApiError.from_response(
-                    response,
-                    return_data,
-                )
-        return return_data
+        if not 200 <= response.status_code <= 299:
+            raise ApiError.from_response(
+                response,
+                _deserialize_response(
+                    response, response_type=_response_type, select_path=select_path
+                ),
+            )
+        content_type = response.headers.get("content-type", "")
+        is_event_stream = any(
+            [content_type.startswith(ect) for ect in EVENT_STREAM_CONTENT_TYPES]
+        )
+        if stream and is_event_stream:
+            return _iter_event_stream(
+                response, response_type=_response_type, select_path=select_path
+            )
+        else:
+            return _deserialize_response(
+                response, response_type=_response_type, select_path=select_path
+            )
 
 
 _CHUNK_SIZE = 65_536
@@ -325,7 +320,112 @@ def _response_type_for_status_code(
     if rt_map is None:
         return _DEFAULT_RESPONSE_TYPE
     for key in [status_code_key, f"{status_code_key[0]}XX", "default", "*"]:
-        rt = rt_map.get(key)
+        rt: Type | None = rt_map.get(key)
         if rt is not None:
             return rt
     return _DEFAULT_RESPONSE_TYPE
+
+
+def _extract_selected(data, select_path: str):
+    if not select_path:
+        return data
+    jsonpath_expr = jsonpath_parse(select_path)
+    match_values = [match.value for match in jsonpath_expr.find(data)]
+    data = (
+        match_values[0]
+        if not re.search(r"\[(\*|.*:.*|.*,.*)\]", select_path)
+        else match_values
+    )
+    return data
+
+
+T = TypeVar("T")
+
+
+def _deserialize_response(
+    response: Response,
+    response_type: type[T],
+    select_path: str = "",
+) -> T:
+    return_data: T = None  # type: ignore
+    try:
+        if response_type in _PRIMITIVE_BYTE_TYPES + tuple(
+            t.__name__ for t in _PRIMITIVE_BYTE_TYPES
+        ):
+            _content = response.content
+            try:
+                return_data = cast(T, _content)
+            except (TypeError, ValueError):
+                return_data = _content  # type: ignore
+        elif response_type is not None:
+            try:
+                _data = response.json()
+                if select_path:
+                    _data = _extract_selected(_data, select_path)
+            except ValueError:
+                _data = response.text
+            if _data is not None:
+                try:
+                    return_data = _deserialize(_data, response_type)
+                except (TypeError, ValueError):
+                    return _data
+            else:
+                return_data = response.content  # type: ignore
+        elif response_type is None:
+            return_data = None
+    finally:
+        return return_data
+
+
+async def _iter_event_stream(
+    response: Response,
+    response_type: type[T],
+    select_path: str = "",
+) -> AsyncIterator[T]:
+    _response_type = _response_type_for_status_code(response.status_code, response_type)
+    content_type = response.headers.get("content-type", "")
+    try:
+        async for event_str in __iter_events_response(response, content_type):
+            event = __parse_event(event_str, content_type)
+            if not event:
+                continue
+            _deserialized_event = _deserialize(
+                _extract_selected(event, select_path), _response_type
+            )
+            yield _deserialized_event
+    finally:
+        await response.aclose()
+
+
+async def __iter_events_response(
+    response: Response, content_type: str
+) -> AsyncGenerator[str, None]:
+    if content_type.startswith(TEXT_EVENT_STREAM_CONTENT_TYPE):
+        async for event_str_batch in response.aiter_text():
+            for event_str in event_str_batch.split("\r\n\r"):
+                yield event_str
+    else:
+        async for event_str in response.aiter_lines():
+            yield event_str
+
+
+def __parse_event(event_str: str, content_type: str):
+    if content_type.startswith(TEXT_EVENT_STREAM_CONTENT_TYPE):
+        event = {}
+        for line in event_str.split("\n"):
+            keyword, *data = line.split(": ", 1)
+            keyword = keyword.strip()
+            _data = data[0].strip() if data else ""
+            with contextlib.suppress(ValueError, TypeError):
+                _data = json.loads(_data)
+            if keyword or data:
+                event[keyword] = _data
+        return event
+    elif content_type == NDJSON_EVENT_STREAM_CONTENT_TYPE:
+        try:
+            event = json.loads(event_str)
+        except (ValueError, TypeError):
+            log.warning("Cannot deserialize event\n%s", event_str, exc_info=True)
+    else:
+        return event_str
+    return event

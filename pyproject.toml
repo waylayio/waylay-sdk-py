@@ -58,6 +58,7 @@ dev = [
     'types-python-dateutil',
     'docformatter',
     'pre-commit',
+    'sse-starlette',
 ]
 
 [tool.pytest.ini_options]

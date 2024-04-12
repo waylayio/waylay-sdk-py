@@ -1,0 +1,41 @@
+# serializer version: 1
+# name: test_iter_event_stream[dict_events]
+  dict({
+    'data': dict({
+      'type': 'build',
+    }),
+    'event': 'started',
+  })
+# ---
+# name: test_iter_event_stream[dict_events].1
+  dict({
+    'data': dict({
+      'returnvalue': 0,
+      'type': 'build',
+    }),
+    'event': 'completed',
+  })
+# ---
+# name: test_iter_event_stream[dict_events_select_path]
+  dict({
+    'type': 'build',
+  })
+# ---
+# name: test_iter_event_stream[dict_events_select_path].1
+  dict({
+    'returnvalue': 0,
+    'type': 'build',
+  })
+# ---
+# name: test_iter_event_stream[model_events]
+  EventModel(event='started', data=EventData(type='build'))
+# ---
+# name: test_iter_event_stream[model_events].1
+  EventModel(event='completed', data=EventData(type='build', returnvalue=0))
+# ---
+# name: test_iter_event_stream[model_events_select_path]
+  EventData(type='build')
+# ---
+# name: test_iter_event_stream[model_events_select_path].1
+  EventData(type='build', returnvalue=0)
+# ---
