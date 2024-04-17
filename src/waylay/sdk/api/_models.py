@@ -1,5 +1,7 @@
 from __future__ import annotations
 from abc import ABC
+import contextlib
+from copy import deepcopy
 from datetime import date, datetime
 from decimal import Decimal
 from inspect import isclass
@@ -66,7 +68,21 @@ class BaseModel(PydanticBaseModel, ABC):
                 model = cls.model_construct(**value)
                 if not model.model_fields_set:
                     raise
-                for field_name in model.model_fields_set:
+
+                # set missing fields to None
+                model_fields_set = deepcopy(model.model_fields_set)
+                model_fields_missing = [
+                    field_name
+                    for [field_name, field_info] in model.model_fields.items()
+                    if field_name not in model_fields_set and field_info.is_required()
+                ]
+                for field_name in model_fields_missing:
+                    with contextlib.suppress(ValueError, TypeError):
+                        setattr(model, field_name, None)
+
+                model.__pydantic_fields_set__ = model_fields_set
+                # recursively validate set fields
+                for field_name in model_fields_set:
                     field_value = getattr(model, field_name)
                     strict = (info.config or {}).get("strict")
                     try:

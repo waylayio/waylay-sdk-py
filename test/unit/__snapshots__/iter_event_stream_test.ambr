@@ -28,13 +28,13 @@
   })
 # ---
 # name: test_iter_event_stream[model_events]
-  EventModel(event='started', data=EventData(type='build'))
+  EventModel(event='started', data=EventData(type='build', returnvalue=None))
 # ---
 # name: test_iter_event_stream[model_events].1
   EventModel(event='completed', data=EventData(type='build', returnvalue=0))
 # ---
 # name: test_iter_event_stream[model_events_select_path]
-  EventData(type='build')
+  EventData(type='build', returnvalue=None)
 # ---
 # name: test_iter_event_stream[model_events_select_path].1
   EventData(type='build', returnvalue=0)
