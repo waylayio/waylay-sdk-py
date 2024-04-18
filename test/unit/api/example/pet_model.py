@@ -15,7 +15,6 @@ class PetList(BaseModel):
 
     model_config = {
         "populate_by_name": True,
-        "validate_assignment": True,
         "protected_namespaces": (),
     }
 
@@ -29,7 +28,6 @@ class Pet(BaseModel):
 
     model_config = {
         "populate_by_name": True,
-        "validate_assignment": True,
         "protected_namespaces": (),
     }
 
@@ -42,7 +40,6 @@ class PetOwner(BaseModel):
 
     model_config = {
         "populate_by_name": True,
-        "validate_assignment": True,
         "protected_namespaces": (),
     }
 
