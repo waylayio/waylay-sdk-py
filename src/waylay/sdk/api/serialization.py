@@ -381,6 +381,8 @@ async def _iter_event_stream(
     response: Response,
     response_type: type[T],
     select_path: str = "",
+    *,
+    _ignore_retry_events: bool = True,
 ) -> AsyncIterator[T]:
     _response_type = _response_type_for_status_code(response.status_code, response_type)
     content_type = response.headers.get("content-type", "")
@@ -388,6 +390,8 @@ async def _iter_event_stream(
         async for event_str in __iter_events_response(response, content_type):
             event = __parse_event(event_str, content_type)
             if not event:
+                continue
+            if _ignore_retry_events and "retry" in event and len(event) == 1:
                 continue
             _deserialized_event = _deserialize(
                 _extract_selected(event, select_path), _response_type
