@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, Literal, TypeVar, Union, overload
+from typing import Any, Dict, Literal, TypeVar, overload
 from pydantic import ConfigDict
-from typing_extensions import TypeAlias
 
 from waylay.sdk.api.client import ApiClient
 from waylay.sdk.api.http import HeaderTypes, QueryParamTypes, Response
@@ -146,7 +145,7 @@ class AboutApi(WithApiClient):
         )
 
 
-class GatewayResponseStatus(WaylayBaseModel):
+class GatewayResponse(WaylayBaseModel):
     """Gateway status response."""
 
     name: str
@@ -158,6 +157,3 @@ class GatewayResponseStatus(WaylayBaseModel):
         protected_namespaces=(),
         extra="allow",
     )
-
-
-GatewayResponse: TypeAlias = Union[GatewayResponseStatus, str]
