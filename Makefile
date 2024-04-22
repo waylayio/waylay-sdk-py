@@ -189,10 +189,10 @@ _exec_all_python_versions:
 	@for ver in ${PYTHON_VERSIONS}; do ${printMsg} "${TARGET}" "$$ver"; PYTHON_VERSION=$$ver make ${TARGET} || exit 1; done
 	@${printMsg} "${TARGET}" "DONE: ${PYTHON_VERSIONS}"
 
-freeze-deps-conda-all:
+freeze-deps-all:  ## freeze dependencies for all python versions
 	TARGET=freeze-deps-conda make _exec_all_python_versions
 
-test-conda-all:
+test-conda-all:  ## test on all python versions
 	TARGET=test-conda make _exec_all_python_versions
 
 install-conda-all:
