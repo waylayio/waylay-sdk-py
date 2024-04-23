@@ -1,6 +1,6 @@
 import pytest
 
-from .pet_model import PetOwner, Pet
+from .pet_model import PetOwner, Pet, PetWithAlias
 
 
 @pytest.fixture
@@ -20,6 +20,21 @@ def pet_instance_json(pet_instance: Pet) -> str:
 @pytest.fixture
 def pet_instance_dict(pet_instance: Pet) -> dict:
     return pet_instance.model_dump(by_alias=True, exclude_unset=True)
+
+
+@pytest.fixture
+def pet_with_alias_instance(pet_instance: Pet) -> dict:
+    return PetWithAlias(
+        name="Lord Biscuit, Master of Naps",
+        tag="doggo",
+        owner=PetOwner(id=123, name="Simon"),
+        id=1,
+    )
+
+
+@pytest.fixture
+def pet_with_alias_instance_dict(pet_with_alias_instance: PetWithAlias) -> dict:
+    return pet_with_alias_instance.to_dict()
 
 
 @pytest.fixture

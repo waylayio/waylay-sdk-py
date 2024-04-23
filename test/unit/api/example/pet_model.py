@@ -54,6 +54,17 @@ class PetType(str, Enum):
     CAT = "cat"
 
 
+class PetWithAlias(Pet):
+    """Pet with alias field."""
+
+    id: StrictInt = Field(alias="pet_id")
+
+    model_config = {
+        "populate_by_name": True,
+        "protected_namespaces": (),
+    }
+
+
 class CreatePetQuery(TypedDict):
     """create_pet query parameters."""
 

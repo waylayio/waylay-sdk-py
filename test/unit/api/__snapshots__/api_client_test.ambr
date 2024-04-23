@@ -258,6 +258,18 @@
     }),
   )
 # ---
+# name: test_deserialize[json_dict_model_with_alias_prop]
+  tuple(
+    b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo", "pet_id": 1}',
+    200,
+    dict({
+      '*': <class 'unit.api.example.pet_model.PetWithAlias'>,
+    }),
+    None,
+    'PetWithAlias',
+    PetWithAlias(name='Lord Biscuit, Master of Naps', owner=PetOwner(id=123, name='Simon'), tag='doggo', id=1),
+  )
+# ---
 # name: test_deserialize[json_dict_namespace]
   tuple(
     b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}',
@@ -1266,5 +1278,30 @@
       'host': 'api-example.io',
     }),
     b'"{\\"name\\":\\"Lord Biscuit, Master of Naps\\",\\"owner\\":{\\"id\\":123,\\"name\\":\\"Simon\\"},\\"tag\\":\\"doggo\\"}"',
+  )
+# ---
+# name: test_serialize_and_call[pet_with_alias_body]
+  tuple(
+    dict({
+      'extensions': dict({
+        'timeout': dict({
+          'connect': 5.0,
+          'pool': 5.0,
+          'read': 5.0,
+          'write': 5.0,
+        }),
+      }),
+      'method': 'PUT',
+      'url': URL('https://api-example.io/service/v1/%7Bparam1%7D/foo'),
+    }),
+    dict({
+      'accept': '*/*',
+      'accept-encoding': 'gzip, deflate',
+      'connection': 'keep-alive',
+      'content-length': '108',
+      'content-type': 'application/json',
+      'host': 'api-example.io',
+    }),
+    b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo", "pet_id": 1}',
   )
 # ---
