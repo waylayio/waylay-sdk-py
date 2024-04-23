@@ -133,11 +133,11 @@ class BaseModel(PydanticBaseModel, ABC):
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert the model instance to dict."""
-        return self.model_dump()
+        return self.model_dump(by_alias=True, exclude_none=True)
 
     def to_json(self) -> str:
         """Convert the model instance to a JSON-encoded string."""
-        return self.model_dump_json()
+        return self.model_dump_json(by_alias=True, exclude_unset=True)
 
     @classmethod
     def from_dict(cls, obj: dict) -> Self:

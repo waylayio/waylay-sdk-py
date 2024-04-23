@@ -20,12 +20,14 @@ from waylay.sdk.api._models import Model
 from waylay.sdk.api.http import Response, Request
 from waylay.sdk.api.exceptions import ApiError, ApiValueError
 
-from .example.pet_model import Pet, PetType, PetList, PetUnion
+from .example.pet_model import Pet, PetType, PetList, PetUnion, PetWithAlias
 from .example.pet_fixtures import (
     pet_instance,
     pet_instance_dict,
     pet_instance_json,
     pet_list_instance_dict,
+    pet_with_alias_instance,
+    pet_with_alias_instance_dict,
 )
 
 
@@ -100,6 +102,12 @@ SERIALIZE_CASES = {
         "resource_path": "/service/v1/{param1}/foo",
         "path_params": {"param1": "C"},
         "json": pet_instance,
+    },
+    "pet_with_alias_body": {
+        "method": "PUT",
+        "resource_path": "/service/v1/{param1}/foo",
+        "path_params": {},
+        "json": pet_with_alias_instance,
     },
     "pet_dict_body": {
         "method": "PUT",
@@ -509,6 +517,12 @@ DESERIALIZE_CASES = [
         "json_list_*_union",
         {"status_code": 200, "json": pet_list_instance_dict},
         {"*": PetUnion},
+        None,
+    ),
+    (
+        "json_dict_model_with_alias_prop",
+        {"status_code": 200, "json": pet_with_alias_instance_dict},
+        {"*": PetWithAlias},
         None,
     ),
     # Any response type (i.e. surpress deserialization)
