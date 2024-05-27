@@ -1,48 +1,51 @@
 """API client."""
 
 from __future__ import annotations
+
 import contextlib
+import datetime
 import json
 import logging
 import re
-import datetime
-from urllib.parse import quote
+from abc import abstractmethod
+from collections.abc import (
+    AsyncGenerator,
+    AsyncIterable,
+    AsyncIterator,
+    Iterable,
+    Mapping,
+)
 from inspect import isclass
 from typing import (
     Any,
-    AsyncGenerator,
-    AsyncIterator,
-    Mapping,
     Optional,
-    AsyncIterable,
+    Protocol,
     Type,
     TypeVar,
     Union,
-    Iterable,
-    Protocol,
     cast,
     runtime_checkable,
 )
-from abc import abstractmethod
+from urllib.parse import quote
 
+import httpx._client as httpxc
+from httpx import USE_CLIENT_DEFAULT, ResponseNotRead
+from jsonpath_ng import parse as jsonpath_parse  # type: ignore[import-untyped]
 from pydantic import BaseModel, ConfigDict, TypeAdapter, ValidationError
 from pydantic_core import to_jsonable_python
-from jsonpath_ng import parse as jsonpath_parse  # type: ignore[import-untyped]
-from httpx import USE_CLIENT_DEFAULT
-import httpx._client as httpxc
 
+from ._models import Model
+from .exceptions import ApiError, ApiValueError, RestResponseError
 from .http import (
     AsyncClient,
-    Request,
-    Response,
-    QueryParamTypes,
     HeaderTypes,
-    RequestFiles,
+    QueryParamTypes,
+    Request,
     RequestContent,
     RequestData,
+    RequestFiles,
+    Response,
 )
-from .exceptions import ApiValueError, ApiError
-from ._models import Model
 
 _DEFAULT_RESPONSE_TYPE = Model
 _PRIMITIVE_BYTE_TYPES = (bytes, bytearray)
@@ -186,14 +189,17 @@ class WithSerializationSupport:
             '*' or 'default' wildcard keys.
         :param select_path: json path to be extracted from the json payload.
         :param stream: Whether the response should be in streaming mode.
-            If the response is an event stream, this function will return an async iterator.
-        :return: An instance of the type specified in the mapping, or an async iterator for event stream responses when stream is True.
+            If the response is an event stream, this function
+            will return an async iterator.
+        :return: An instance of the type specified in the mapping, or an async iterator
+            for event stream responses when stream is True.
         """
         status_code = response.status_code
         _response_type = _response_type_for_status_code(status_code, response_type)
 
         if not 200 <= response.status_code <= 299:
             raise ApiError.from_response(
+                "Error response.",
                 response,
                 _deserialize_response(
                     response, response_type=_response_type, select_path=select_path
@@ -285,7 +291,8 @@ def _deserialize(data: Any, klass: Any):
                 data, strict=False, context={"skip_validation": True}
             )
             log.warning(
-                "Failed to deserialize response into class %s, using backup non-validating deserializer instead.",
+                "Failed to deserialize response into class %s, "
+                "using backup non-validating deserializer instead.",
                 klass,
                 exc_info=exc,
                 extra={"data": data, "class": klass},
@@ -295,7 +302,8 @@ def _deserialize(data: Any, klass: Any):
             try:
                 _deserialized = _MODEL_TYPE_ADAPTER.validate_python(data)
                 log.warning(
-                    "Failed to deserialize response into class %s, using backup generic model deserializer instead.",
+                    "Failed to deserialize response into class %s, "
+                    "using backup generic model deserializer instead.",
                     klass,
                     exc_info=exc,
                     extra={"data": data, "class": klass},
@@ -303,7 +311,8 @@ def _deserialize(data: Any, klass: Any):
                 return _deserialized
             except (TypeError, ValidationError) as exc2:
                 log.warning(
-                    "Failed to deserialize response as a generic Model, returning original data.",
+                    "Failed to deserialize response as a generic Model, "
+                    "returning original data.",
                     exc_info=exc2,
                 )
                 return data
@@ -373,8 +382,11 @@ def _deserialize_response(
                 return_data = response.content  # type: ignore
         elif response_type is None:
             return_data = None
-    finally:
-        return return_data
+    except ResponseNotRead as exc:
+        raise RestResponseError(
+            "Cannot deserialize streaming response as object.", response=response
+        ) from exc
+    return return_data
 
 
 async def _iter_event_stream(

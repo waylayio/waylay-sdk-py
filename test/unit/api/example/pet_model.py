@@ -1,9 +1,10 @@
 from __future__ import annotations
-from enum import Enum
 
-from typing import List, Optional, Union
-from typing_extensions import TypedDict, NotRequired, Annotated
+from enum import Enum
+from typing import Annotated, List, Optional, Union
+
 from pydantic import Field, StrictBool, StrictInt, StrictStr
+from typing_extensions import NotRequired, TypedDict
 
 from waylay.sdk.api._models import BaseModel
 

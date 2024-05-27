@@ -1,31 +1,36 @@
 """Client configuration."""
 
-from typing import Optional, Mapping, MutableMapping, Any, Type
-import os
-import re
-from pathlib import Path
+from __future__ import annotations
+
 import json
 import logging
+import os
+import re
+from collections.abc import Mapping, MutableMapping
+from pathlib import Path
+from typing import Any, Optional, Type
+
 import httpx
 from appdirs import user_config_dir
+
 from ..auth import (
-    WaylayCredentials,
+    AuthError,
     NoCredentials,
+    WaylayCredentials,
     WaylayToken,
     parse_credentials,
-    AuthError,
-)
-from ..auth.provider import (
-    WaylayTokenAuth,
-    CredentialsCallback,
 )
 from ..auth.interactive import (
     DEFAULT_GATEWAY_URL,
+    _root_url_for,
     ask_gateway,
     request_client_credentials_interactive,
     request_migrate_to_gateway_interactive,
     request_store_config_interactive,
-    _root_url_for,
+)
+from ..auth.provider import (
+    CredentialsCallback,
+    WaylayTokenAuth,
 )
 from ..exceptions import ConfigError
 
@@ -95,11 +100,11 @@ class WaylayConfig:
         self,
         config_key: str,
         *,
-        default_root_url: Optional[str] = None,
-        gateway_root_path: Optional[str] = None,
+        default_root_url: str | None = None,
+        gateway_root_path: str | None = None,
         default_root_path: str = "",
         resolve_settings: bool = True,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Get the root url for a waylay service."""
         config_key = _root_url_key_for(config_key)
         # only resolve remote settings if no gateway available
@@ -128,7 +133,7 @@ class WaylayConfig:
             return _root_url_for(default_url)
         return None
 
-    def set_root_url(self, config_key: str, root_url: Optional[str]):
+    def set_root_url(self, config_key: str, root_url: str | None):
         """Override the root url for the given server.
 
         Will persist on `save`.
@@ -139,7 +144,7 @@ class WaylayConfig:
         self.set_local_settings(**{config_key: root_url})
 
     @property
-    def accounts_url(self) -> Optional[str]:
+    def accounts_url(self) -> str | None:
         """Get the accounts url."""
         url = self.credentials.accounts_url
         return _root_url_for(url) if url else None
@@ -183,7 +188,7 @@ class WaylayConfig:
         """
         return self._local_settings
 
-    def set_local_settings(self, **settings: Optional[str]) -> TenantSettings:
+    def set_local_settings(self, **settings: str | None) -> TenantSettings:
         """Set a local endpoint url override for a service."""
         for config_key, value in settings.items():
             if value is None and config_key in self._local_settings:
@@ -282,13 +287,14 @@ class WaylayConfig:
         """Load a stored waylay configuration."""
         profile = DEFAULT_PROFILE if profile is None else profile
         try:
-            with open(
-                cls.config_file_path(profile), mode="r", encoding="utf-8"
-            ) as config_file:
+            with open(cls.config_file_path(profile), encoding="utf-8") as config_file:
                 config_json = json.load(config_file)
             waylay_config = cls.from_dict(config_json)
             if not waylay_config.gateway_url:
-                msg = f"WaylayConfig profile '{profile}' uses a legacy accounts endpoint {waylay_config.accounts_url}."
+                msg = (
+                    f"WaylayConfig profile '{profile}' uses a "
+                    f"legacy accounts endpoint {waylay_config.accounts_url}."
+                )
                 if interactive:
                     if request_migrate_to_gateway_interactive(profile, msg):
                         gateway_url = ask_gateway(waylay_config.accounts_url)

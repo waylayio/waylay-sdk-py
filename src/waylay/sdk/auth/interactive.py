@@ -1,14 +1,15 @@
 """Interactive authentication callback for client credentials."""
 
-from typing import Optional
+from __future__ import annotations
+
 import logging
 import re
 import urllib.parse
-
 from getpass import getpass
+
 import httpx
 
-from .model import WaylayCredentials, ClientCredentials, AuthError
+from .model import AuthError, ClientCredentials, WaylayCredentials
 
 DEFAULT_GATEWAY_URL = "https://api.waylay.io"
 DEFAULT_ACCOUNTS_URL = "https://accounts-api.waylay.io"
@@ -33,7 +34,7 @@ def ask_secret(prompt: str) -> str:
     return getpass(prompt=prompt)
 
 
-def ask_yes_no(prompt: str, default: Optional[bool] = None) -> bool:
+def ask_yes_no(prompt: str, default: bool | None = None) -> bool:
     """Keep prompting the user until response starts with a true or false character."""
     while True:
         resp = ask(prompt)
@@ -61,7 +62,8 @@ def ask_gateway(default_gateway_url: str):
         )
         gateway_url = (
             ask(
-                f"> Press enter to confirm, or specify an alternate gateway [{gateway_url}]: "
+                "> Press enter to confirm, "
+                f"or specify an alternate gateway [{gateway_url}]: "
             )
             or gateway_url
         )

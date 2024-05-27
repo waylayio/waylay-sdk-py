@@ -1,9 +1,9 @@
 """Integration tests for waylay.sdk.auth module."""
 
-from typing import Mapping
-from waylay.sdk import WaylayClient
+from collections.abc import Mapping
 
 import waylay.sdk.auth.interactive
+from waylay.sdk import WaylayClient
 from waylay.sdk.config import DEFAULT_PROFILE
 
 # Matches versions like v1.2.3, v1.2, v1 or 0+untagged.1.gd418139

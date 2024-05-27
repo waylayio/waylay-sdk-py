@@ -1,10 +1,11 @@
 """Exceptions."""
 
-from typing import Any, Optional
+from __future__ import annotations
 
+from typing import Any
+
+from ..exceptions import RequestError, RestResponseError, WaylayError
 from .http import Response
-
-from ..exceptions import WaylayError, RequestError, RestResponseError
 
 
 class ApiValueError(RequestError, ValueError):
@@ -14,9 +15,11 @@ class ApiValueError(RequestError, ValueError):
         """Raise a value error.
 
         Args:
+        ----
             msg (str): the exception message
 
         Keyword Args:
+        ------------
             path_to_item (list) the path to the exception in the
                 received_data dict. None if unset
 
@@ -32,25 +35,27 @@ class ApiValueError(RequestError, ValueError):
 class ApiError(RestResponseError):
     """Exception class wrapping the response data of a REST call."""
 
-    data: Optional[Any]
+    data: Any | None
 
     def __init__(
         self,
+        *args,
         response: Response,
-        data: Optional[Any],
+        data: Any | None,
     ) -> None:
         """Create an instance."""
-        super().__init__(response)
+        super().__init__(*args, response=response)
         self.data = data
 
     @classmethod
     def from_response(
         cls,
+        message: str,
         response: Response,
-        data: Optional[Any],
+        data: Any | None,
     ):
         """Create an instance from a REST exception response."""
-        return cls(response, data)
+        return cls(message, response=response, data=data)
 
     def __str__(self):
         """Get the string representation of the exception."""

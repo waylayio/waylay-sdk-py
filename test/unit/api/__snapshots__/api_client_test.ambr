@@ -806,7 +806,7 @@
 # name: test_deserialize_error_responses[response_kwargs0-response_type0][{'404': typing.Dict[str, str]}]
   tuple(
     '''
-      ApiError
+      ApiError('Error response.')
       Status: 404
       Reason: Not Found
       Response headers: Headers({'content-length': '67', 'content-type': 'application/json'})
@@ -823,7 +823,7 @@
 # name: test_deserialize_error_responses[response_kwargs1-response_type1][{'4XX': <class 'dict'>}]
   tuple(
     '''
-      ApiError
+      ApiError('Error response.')
       Status: 404
       Reason: Not Found
       Response headers: Headers({'content-length': '67', 'content-type': 'application/json'})
@@ -840,7 +840,7 @@
 # name: test_deserialize_error_responses[response_kwargs2-response_type2][{'4XX': typing.Any}]
   tuple(
     '''
-      ApiError
+      ApiError('Error response.')
       Status: 404
       Reason: Not Found
       Response headers: Headers({'content-length': '67', 'content-type': 'application/json'})
@@ -857,7 +857,7 @@
 # name: test_deserialize_error_responses[response_kwargs3-response_type3][{'4XX': typing.Any}]
   tuple(
     '''
-      ApiError
+      ApiError('Error response.')
       Status: 404
       Reason: Not Found
       Response headers: Headers({'content-length': '22', 'content-type': 'text/plain; charset=utf-8'})
@@ -871,7 +871,7 @@
 # name: test_deserialize_error_responses[response_kwargs4-response_type4][{}]
   tuple(
     '''
-      ApiError
+      ApiError('Error response.')
       Status: 404
       Reason: Not Found
       Response headers: Headers({'content-length': '67', 'content-type': 'application/json'})
@@ -885,7 +885,7 @@
 # name: test_deserialize_error_responses[response_kwargs5-response_type5][{'400': <class 'unit.api.example.pet_model.Pet'>}]
   tuple(
     '''
-      ApiError
+      ApiError('Error response.')
       Status: 400
       Reason: Bad Request
       Response headers: Headers({'content-length': '95', 'content-type': 'application/json'})
@@ -899,7 +899,7 @@
 # name: test_deserialize_error_responses[response_kwargs6-response_type6][{'default': typing.Any}]
   tuple(
     '''
-      ApiError
+      ApiError('Error response.')
       Status: 400
       Reason: Bad Request
       Response headers: Headers({'content-length': '87'})
@@ -920,7 +920,7 @@
 # name: test_deserialize_error_responses[response_kwargs7-response_type7][{}]
   tuple(
     '''
-      ApiError
+      ApiError('Error response.')
       Status: 400
       Reason: Bad Request
       Response headers: Headers({'content-length': '95', 'content-type': 'application/json'})
@@ -934,30 +934,26 @@
 # name: test_deserialize_error_responses[response_kwargs8-response_type8][{}]
   tuple(
     '''
-      ApiError
-      Request: GET http://all?debug=true
-      Request headers: Headers({'host': 'all', 'x-feature': 'flagged'})
-      Request content: <bytes: len=0>
+      ApiError('Error response.')
       Status: 400
       Reason: Bad Request
       Response headers: Headers({'content-length': '3'})
-      Response content: <streaming: len=0>
+      Response content: <bytes: len=3>
+      Response data: abc
     ''',
-    'NoneType',
-    None,
+    'str',
+    'abc',
   )
 # ---
 # name: test_deserialize_partially_fetched_error_stream
   tuple(
     '''
-      ApiError
+      RestResponseError('Cannot deserialize streaming response as object.')
       Status: 400
       Reason: Bad Request
       Response headers: Headers({'content-length': '3'})
       Response content: <streaming: len=1>
     ''',
-    'NoneType',
-    None,
   )
 # ---
 # name: test_serialize_and_call[binary_async_iterable]

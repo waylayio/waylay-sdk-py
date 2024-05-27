@@ -1,9 +1,12 @@
 """Base classes for Waylay SDK Plugins."""
 
-from typing import Iterator, Optional, Generic, Type, TypeVar, Mapping
+from __future__ import annotations
+
+from collections.abc import Iterator, Mapping
+from typing import Generic, Optional, Type, TypeVar
+
 from ..api import ApiClient, HttpClientOptions
 from ..api.exceptions import SyncCtxMgtNotSupportedError
-
 
 P = TypeVar("P", bound="WaylayPlugin")
 PI = TypeVar("PI", bound="WaylayPlugin")
@@ -104,7 +107,7 @@ class PluginAccess(Mapping[str, P], Generic[P]):
         """Select the first SDK plugin that satifies the class and name requirements."""
         return next(self.iter(item_class, name), None)
 
-    def require(self, item_class: Type[PI], name: Optional[str] = None) -> PI:
+    def require(self, item_class: Type[PI], name: str | None = None) -> PI:
         """Get the SDK plugin for the given class or raise a ConfigError."""
         item = self.select(item_class, name)
         if item is None:

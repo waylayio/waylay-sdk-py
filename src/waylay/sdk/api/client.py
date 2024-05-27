@@ -1,14 +1,15 @@
 """API client."""
 
 from __future__ import annotations
-from typing import Mapping, Optional, Tuple, Union
+
+from collections.abc import Mapping
+from typing import Optional, Tuple, Union
 
 from .._version import __version__
 from ..config import WaylayConfig
-
 from .exceptions import SyncCtxMgtNotSupportedError
-from .serialization import WithSerializationSupport
 from .http import AsyncClient, HttpClientOptions, Request, Response
+from .serialization import WithSerializationSupport
 
 RESTTimeout = Union[
     Optional[float],

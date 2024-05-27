@@ -1,6 +1,7 @@
 """Base exception class hierarchy for errors in the waylay client."""
 
-from typing import Optional
+from __future__ import annotations
+
 from .api.http import Request, Response
 
 
@@ -21,7 +22,7 @@ class RequestError(WaylayError):
 
 
 class RestConnectionError(RequestError):
-    """Exception class for request errors that are caused by client connection errors."""
+    """Exception class for request errors caused by client connection errors."""
 
 
 class RestError(WaylayError):
@@ -31,18 +32,20 @@ class RestError(WaylayError):
 class RestRequestError(RestError):
     """Exception class for failures to prepare a REST call."""
 
-    request: Optional[Request]
+    request: Request | None
 
     def __init__(
         self,
-        request: Optional[Request],
+        *args,
+        request: Request | None = None,
     ):
         """Create an instance."""
+        super().__init__(*args)
         self.request = request
 
     def __str__(self):
         """Get the string representation of the exception."""
-        error_message = f"{self.__class__.__name__}"
+        error_message = super().__str__()
         if self.request is None:
             return error_message
         req = self.request
@@ -63,15 +66,16 @@ class RestResponseError(RestRequestError):
 
     def __init__(
         self,
+        *args,
         response: Response,
     ) -> None:
         """Create an instance."""
-        super().__init__(response._request)
+        super().__init__(*args, request=response._request)
         self.response = response
 
     def __str__(self):
         """Get the string representation of the exception."""
-        error_message = super().__str__()
+        error_message = super().__repr__()
         resp = self.response
         error_message += f"\nStatus: {resp.status_code}"
         error_message += f"\nReason: {resp.reason_phrase}"
@@ -87,4 +91,4 @@ class RestResponseError(RestRequestError):
 
 
 class RestResponseParseError(RestResponseError):
-    """Exception raised when a successfull http request (2XX) could not be parsed succesfully."""
+    """Exception raised when a successfull http request (2XX) could not be parsed."""

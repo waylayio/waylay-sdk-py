@@ -1,20 +1,22 @@
 """Httpx Authentication provider."""
+
 from __future__ import annotations
-from typing import Optional, Callable, AsyncGenerator
+
+from collections.abc import AsyncGenerator
+from typing import Callable, Optional
 
 import httpx
 
+from .exceptions import AuthError
 from .model import (
-    WaylayCredentials,
-    WaylayToken,
-    TokenString,
-    TokenCredentials,
-    NoCredentials,
     ApplicationCredentials,
     ClientCredentials,
+    NoCredentials,
+    TokenCredentials,
+    TokenString,
+    WaylayCredentials,
+    WaylayToken,
 )
-from .exceptions import AuthError
-
 
 CredentialsCallback = Callable[[Optional[str]], WaylayCredentials]
 
@@ -97,7 +99,8 @@ class WaylayTokenAuth(httpx.Auth):
 
         if isinstance(self.credentials, ApplicationCredentials):
             raise AuthError(
-                f"credentials of type {self.credentials.credentials_type} are not supported yet"
+                f"credentials of type {self.credentials.credentials_type} "
+                "are not supported."
             )
 
         if isinstance(self.credentials, ClientCredentials):
@@ -123,7 +126,8 @@ class WaylayTokenAuth(httpx.Auth):
                 token_resp = httpx.post(url=token_url, json=token_req)
             if token_resp.status_code != 200:
                 raise AuthError(
-                    f"could not obtain waylay token: {token_resp.content!r} [{token_resp.status_code}]"
+                    f"could not obtain waylay token: {token_resp.content!r} "
+                    f"[{token_resp.status_code}]"
                 )
             token_resp_json = token_resp.json()
         except httpx.HTTPError as exc:

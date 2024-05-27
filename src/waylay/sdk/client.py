@@ -1,15 +1,15 @@
 """REST client for the Waylay Platform."""
 
 from __future__ import annotations
+
 from typing import TYPE_CHECKING, Optional
 
 from waylay.sdk.services.gateway import GatewayService
 
-from .plugin.client import WithServicesAndTools
-from .config.client import WaylayConfig, WithConfig, HttpClientOptions
 from .api import ApiClient
 from .api.http import AsyncClient
-
+from .config.client import HttpClientOptions, WaylayConfig, WithConfig
+from .plugin.client import WithServicesAndTools
 
 if TYPE_CHECKING:
     from .plugin.type_stubs import (
@@ -26,12 +26,12 @@ class WaylayClient(WithConfig, WithServicesAndTools):
     """REST client for the Waylay Platform."""
 
     gateway: GatewayService
-    alarms: "AlarmsService"
-    data: "DataService"
-    registry: "RegistryService"
-    resources: "ResourcesService"
-    rules: "RulesService"
-    storage: "StorageService"
+    alarms: AlarmsService
+    data: DataService
+    registry: RegistryService
+    resources: ResourcesService
+    rules: RulesService
+    storage: StorageService
 
     def __init__(
         self,

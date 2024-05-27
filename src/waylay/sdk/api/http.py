@@ -1,22 +1,22 @@
 """Aliases for the http client."""
 
 from __future__ import annotations
-from typing import (
-    TypedDict,
-    Mapping,
-    Optional,
-    Callable,
-    Any,
-    Union,
-    Sequence,
-    Tuple,
-    List,
-    IO,
-)
-from typing_extensions import Required  # >=3.11
 
-import httpx._client as httpx_types
+from collections.abc import Mapping, Sequence
+from typing import (
+    IO,
+    Any,
+    Callable,
+    List,
+    Optional,
+    Tuple,
+    TypedDict,
+    Union,
+)
+
 import httpx
+import httpx._client as httpx_types
+from typing_extensions import Required  # >=3.11
 
 AsyncClient = httpx.AsyncClient
 Response = httpx.Response

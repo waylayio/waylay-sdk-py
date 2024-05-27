@@ -1,9 +1,10 @@
 """Test plugin system."""
 
 import re
+
 import pytest
 
-from waylay.sdk import WaylayService, WaylayTool, WaylayClient
+from waylay.sdk import WaylayClient, WaylayService, WaylayTool
 
 sdk_test = pytest.importorskip("waylay.sdk_test", reason="Test plugin not installed.")
 ExampleService = sdk_test.ExampleService

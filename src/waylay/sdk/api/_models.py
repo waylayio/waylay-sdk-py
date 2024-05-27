@@ -1,14 +1,23 @@
 from __future__ import annotations
-from abc import ABC
+
 import contextlib
+from abc import ABC
 from copy import deepcopy
 from datetime import date, datetime
 from decimal import Decimal
 from inspect import isclass
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Union, get_type_hints
+from typing import (
+    TYPE_CHECKING,
+    Annotated,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Union,
+    get_type_hints,
+)
 
 from typing_extensions import (
-    Annotated,  # >=3.9
     Self,  # >=3.12
     TypeAliasType,  # >=3.12
 )
@@ -18,6 +27,8 @@ if TYPE_CHECKING:
 
 from pydantic import (
     BaseModel as PydanticBaseModel,
+)
+from pydantic import (
     ConfigDict,
     SerializationInfo,
     StrictStr,
@@ -33,7 +44,9 @@ from pydantic.functional_validators import ModelWrapValidatorHandler
 
 
 class BaseModel(PydanticBaseModel, ABC):
-    """Waylay base model class that adds some additional methods to Pydantic's `BaseModel`, including a custom validator and serializer."""
+    """Waylay base model class that adds additional methods to Pydantic's `BaseModel`.
+
+    Includes a custom validator and serializer."""
 
     @model_serializer(mode="wrap")
     def _model_serializer(
@@ -56,8 +69,11 @@ class BaseModel(PydanticBaseModel, ABC):
     ):
         """The default validator of the model.
 
-        When validation is called with a `skip_validation=True` context (e.g. `cls.model_validate(data, context={"skip_validation": True})`), the model is constructed without validation.
-        Any fields with a `Model` type will be constructed from their dict representation recursively.
+        When validation is called with a `skip_validation=True` context
+        (e.g. `cls.model_validate(data, context={"skip_validation": True})`),
+        the model is constructed without validation.
+        Any fields with a `Model` type will be constructed
+        from their dict representation recursively.
         """
         context = info.context or {}
         try:
@@ -105,8 +121,10 @@ class BaseModel(PydanticBaseModel, ABC):
     ):
         """The default field validator of the model.
 
-        When validation is called with a `skip_validation=True` context, the field is assigned without validation.
-        If the field is a `Model` type, the model will be constructed from its dict representation recursively.
+        When validation is called with a `skip_validation=True` context,
+        the field is assigned without validation.
+        If the field is a `Model` type, the model will be constructed
+        from its dict representation recursively.
         """
         context = info.context or {}
         try:
@@ -180,6 +198,7 @@ Model: TypeAlias = TypeAliasType(  # type: ignore[valid-type]  #(https://github.
     "Model",
     Annotated[
         Union[List["Model"], "_Model", Primitive],  # type: ignore[misc,possible cyclic definition]
-        "A basic model that acts like a `simpleNamespace`, or a collection over such models.",
+        "A basic model that acts like a `simpleNamespace` "
+        "or a collection over such models.",
     ],
 )

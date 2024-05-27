@@ -1,6 +1,6 @@
 import pytest
 
-from .pet_model import PetOwner, Pet, PetWithAlias
+from .pet_model import Pet, PetOwner, PetWithAlias
 
 
 @pytest.fixture

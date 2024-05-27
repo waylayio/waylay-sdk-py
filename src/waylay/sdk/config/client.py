@@ -1,22 +1,22 @@
 """Config mixin for the SDK client."""
 
 from __future__ import annotations
+
 from typing import Optional
 
+from ..api import AsyncClient, HttpClientOptions
 from ..auth import (
-    WaylayCredentials,
     ClientCredentials,
     TokenCredentials,
+    WaylayCredentials,
 )
-
 from .model import (
-    WaylayConfig,
-    TenantSettings,
     DEFAULT_PROFILE,
-    SERVICE_KEY_GATEWAY,
     SERVICE_KEY_ACCOUNTS,
+    SERVICE_KEY_GATEWAY,
+    TenantSettings,
+    WaylayConfig,
 )
-from ..api import HttpClientOptions, AsyncClient
 
 
 class WithConfig:

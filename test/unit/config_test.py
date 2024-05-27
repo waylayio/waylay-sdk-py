@@ -3,19 +3,18 @@
 from datetime import datetime
 
 import pytest
+from httpx import Request, Response
 
-from httpx import Response, Request
-
-from waylay.sdk import WaylayConfig
-from waylay.sdk.exceptions import ConfigError
-from waylay.sdk.auth.provider import (
-    WaylayTokenAuth,
-    TokenCredentials,
-    NoCredentials,
-    ClientCredentials,
-)
-import waylay.sdk.config
 import waylay.sdk.auth.interactive
+import waylay.sdk.config
+from waylay.sdk import WaylayConfig
+from waylay.sdk.auth.provider import (
+    ClientCredentials,
+    NoCredentials,
+    TokenCredentials,
+    WaylayTokenAuth,
+)
+from waylay.sdk.exceptions import ConfigError
 
 from .fixtures import MOCK_API_URL, MOCK_DOMAIN, MOCK_TENANT_SETTINGS, WaylayTokenStub
 
@@ -50,7 +49,7 @@ def mock_httpx_accounts(mocker):
 
 @pytest.fixture
 def mock_httpx_no_accounts(mocker):
-    """Mock the httpx module to fail to authenticate an accounts settings http request."""
+    """Mock the httpx module to fail the accounts settings http request."""
     mocker.patch(
         "httpx._client.Client._send_single_request",
         _mock_send_single_request_no_accounts,
@@ -200,7 +199,7 @@ def test_representations(mock_httpx_accounts, mock_token):
     assert '"a": "b"' in repr(cfg)
     assert '"token": "***' in repr(cfg)
     assert "***" in cfg.to_dict()["credentials"]["token"]
-    assert "_" == cfg.to_dict(obfuscate=False)["credentials"]["token"]
+    assert cfg.to_dict(obfuscate=False)["credentials"]["token"] == "_"
 
 
 def test_save_load_delete_profile(mock_token, monkeypatch, mocker):

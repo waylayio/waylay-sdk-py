@@ -1,6 +1,7 @@
 """Type imports for known services."""
 
 from typing import TYPE_CHECKING
+
 from .base import WaylayService
 
 
