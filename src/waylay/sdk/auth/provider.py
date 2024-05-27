@@ -28,7 +28,7 @@ class WaylayTokenAuth(httpx.Auth):
 
     current_token: Optional[WaylayToken]
     credentials: WaylayCredentials
-    http_client: httpx.AsyncClient | None
+    http_client: Optional[httpx.AsyncClient]
 
     def __init__(
         self,
