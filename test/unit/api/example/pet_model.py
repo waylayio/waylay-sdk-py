@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Annotated, List, Union
+from typing import Annotated, List, Optional, Union
 
 from pydantic import Field, StrictBool, StrictInt, StrictStr
 from typing_extensions import NotRequired, TypedDict
@@ -25,7 +25,11 @@ class Pet(BaseModel):
 
     name: StrictStr
     owner: PetOwner
-    tag: StrictStr | None = None
+    # workaround: on python 3.9, when using 
+    #   tag: StrictStr | None = None
+    # {"skip_validation": True} does not work in type_adapter.validate_python
+    # leading to other snapshots (_Model i.o Pet)
+    tag: Optional[StrictStr] = None  # noqa: UP007
 
     model_config = {
         "populate_by_name": True,
