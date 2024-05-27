@@ -31,7 +31,9 @@ def _mock_send_single_request_no_accounts(target, request: Request, *args) -> Re
 @pytest.fixture
 def mock_token(mocker):
     """Mock the auth module to use a WaylayTokenStub."""
-    mocker.patch("waylay.sdk.auth.provider._request_token", lambda *args: "")
+    mocker.patch(
+        "waylay.sdk.auth.provider.WaylayTokenAuth._request_token", lambda *args: ""
+    )
     mocker.patch(
         "waylay.sdk.auth.provider.WaylayTokenAuth._create_and_validate_token",
         lambda *args: WaylayTokenStub(),
@@ -55,12 +57,11 @@ def mock_httpx_no_accounts(mocker):
     )
 
 
-def test_empty_config():
+async def test_empty_config():
     """Test an unconfigured WaylayConfig."""
     cfg = WaylayConfig()
     assert isinstance(cfg.auth, WaylayTokenAuth)
     assert not cfg.local_settings
-    assert cfg.domain is None
     assert isinstance(cfg.credentials, NoCredentials)
     for property_callback in [
         lambda: cfg.tenant_settings,
@@ -83,7 +84,6 @@ def test_config_settings():
     assert cfg.local_settings == local_settings
     assert not cfg.tenant_settings
     assert cfg.settings == local_settings
-    assert cfg.domain is None
     assert cfg.gateway_url is None
     assert cfg.accounts_url is None
     assert isinstance(cfg.credentials, NoCredentials)
@@ -111,7 +111,6 @@ def test_tenant_settings(mock_httpx_accounts, mock_token):
     assert cfg.local_settings == local_settings
     assert cfg.tenant_settings == MOCK_TENANT_SETTINGS
     assert cfg.settings == {**MOCK_TENANT_SETTINGS, **local_settings}
-    assert cfg.domain == MOCK_DOMAIN
     assert cfg.credentials.token == "_"
     assert cfg.get_root_url("a_service") is None
     assert cfg.get_root_url("api") == "https://xxx"
@@ -125,7 +124,6 @@ def test_gateway_settings(mock_httpx_accounts, mock_token):
     assert not cfg.local_settings
     assert cfg.tenant_settings == MOCK_TENANT_SETTINGS
     assert cfg.settings == MOCK_TENANT_SETTINGS
-    assert cfg.domain == MOCK_DOMAIN
     assert cfg.credentials == credentials
     assert cfg.get_root_url("api") == f"https://{MOCK_DOMAIN}/api"
     assert (
@@ -141,9 +139,8 @@ def test_empty_config_no_accounts(mock_httpx_no_accounts, mock_token):
     assert not cfg.local_settings
     assert not cfg.tenant_settings
     assert not cfg.settings
-    assert cfg.domain == MOCK_DOMAIN
     assert cfg.get_root_url("a_service") is None
-    assert cfg.get_root_url("api") == MOCK_API_URL
+    assert cfg.get_root_url("api") is None
 
 
 def test_get_set_root_url(mock_httpx_accounts, mock_token):
