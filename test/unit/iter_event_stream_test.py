@@ -9,21 +9,12 @@ from starlette.applications import Starlette
 from starlette.routing import Route as StarletteRoute
 from starlette.requests import Request as StarletteRequest
 
-
 from waylay.sdk.api.client import ApiClient
 from waylay.sdk.api.http import HttpClientOptions
 from waylay.sdk.api._models import BaseModel as WaylayBaseModel
-import asyncio
 
 from waylay.sdk.auth.model import NoCredentials
 from waylay.sdk.config.model import WaylayConfig
-
-
-@pytest.fixture(name="event_loop", scope="session")
-def _event_loop_fixture():
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
 
 
 @pytest.fixture(name="events", scope="session")
@@ -35,7 +26,7 @@ def _events_fixture() -> list:
 
 
 @pytest.fixture(name="sse_app", scope="session")
-def _sse_app_fixture(events: list, event_loop):
+def _sse_app_fixture(events: list):
     async def event_generator(events: list) -> AsyncIterator:
         for event in events:
             await sleep(0.3)

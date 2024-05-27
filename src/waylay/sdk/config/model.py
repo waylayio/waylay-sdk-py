@@ -44,7 +44,6 @@ TenantSettings = Mapping[str, str]
 Settings = MutableMapping[str, str]
 
 DEFAULT_PROFILE = "_default_"
-SERVICE_KEY_API = "waylay_api"
 SERVICE_KEY_GATEWAY = "waylay_gateway"
 SERVICE_KEY_ACCOUNTS = "waylay_accounts"
 DEFAULT_DOC_URL: str = "https://docs.waylay.io/#"
@@ -115,7 +114,7 @@ class WaylayConfig:
             resolve_settings = (
                 resolve_settings
                 # do not lookup settings for the bootstrap services
-                and config_key not in (SERVICE_KEY_ACCOUNTS, SERVICE_KEY_API)
+                and config_key not in (SERVICE_KEY_ACCOUNTS)
             )
             settings = self.get_settings(resolve=resolve_settings)
         url_override = settings.get(config_key)
@@ -127,10 +126,6 @@ class WaylayConfig:
                 return f"{url_override}{default_root_path}"
         if default_url is not None:
             return _root_url_for(default_url)
-        if config_key == SERVICE_KEY_API:
-            domain = self.get_valid_token().domain
-            if domain:
-                return f"{_root_url_for(domain)}/api"
         return None
 
     def set_root_url(self, config_key: str, root_url: Optional[str]):
@@ -215,11 +210,11 @@ class WaylayConfig:
             **self.local_settings,
         }
 
-    def get_valid_token(self) -> WaylayToken:
+    async def get_valid_token(self) -> WaylayToken:
         """Get the current valid authentication token or fail."""
         if isinstance(self.auth, WaylayTokenAuth):
             try:
-                return self.auth.assure_valid_token()
+                return await self.auth.assure_valid_token()
             except AuthError as exc:
                 raise ConfigError(f"Cannot get valid token: {exc}") from exc
         raise ConfigError("not using token authentication")  # pragma: no cover
@@ -228,14 +223,6 @@ class WaylayConfig:
     def auth(self) -> _http.Auth:
         """Get the current http authentication interceptor."""
         return self._auth
-
-    @property
-    def domain(self) -> Optional[str]:
-        """Get the Waylay domain of the current user."""
-        try:
-            return self.get_valid_token().domain
-        except ConfigError:
-            return None
 
     @property
     def global_settings_url(self) -> str:

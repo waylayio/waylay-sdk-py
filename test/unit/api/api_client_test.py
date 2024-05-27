@@ -680,7 +680,7 @@ def test_deserialize(
     ) == snapshot()
 
 
-class TestResponseStream(httpx.AsyncByteStream):
+class BytesResponseStream(httpx.AsyncByteStream):
     def __init__(self, chunks: List[bytes]):
         self.chunks_iter = iter(chunks)
 
@@ -747,7 +747,7 @@ ERROR_RESP_CASES = [
                 params={"debug": "true"},
                 headers={"x-feature": "flagged"},
             ),
-            "stream": TestResponseStream([b"a", b"b", b"c"]),
+            "stream": BytesResponseStream([b"a", b"b", b"c"]),
         },
         {},
     ),
@@ -780,7 +780,7 @@ async def test_deserialize_partially_fetched_error_stream(
 ):
     resp = Response(
         status_code=400,
-        stream=TestResponseStream([b"a", b"b", b"c"]),
+        stream=BytesResponseStream([b"a", b"b", b"c"]),
         headers={"content-length": "3"},
     )
     await resp.aiter_raw(chunk_size=1).__anext__()

@@ -6,7 +6,6 @@ from .model import (
     DEFAULT_PROFILE,
     SERVICE_KEY_GATEWAY,
     SERVICE_KEY_ACCOUNTS,
-    SERVICE_KEY_API,
 )
 
 __all__ = [
@@ -15,5 +14,4 @@ __all__ = [
     "DEFAULT_PROFILE",
     "SERVICE_KEY_GATEWAY",
     "SERVICE_KEY_ACCOUNTS",
-    "SERVICE_KEY_API",
 ]
