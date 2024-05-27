@@ -1,5 +1,5 @@
 """Httpx Authentication provider."""
-
+from __future__ import annotations
 from typing import Optional, Callable, AsyncGenerator
 
 import httpx
@@ -28,7 +28,7 @@ class WaylayTokenAuth(httpx.Auth):
 
     current_token: Optional[WaylayToken]
     credentials: WaylayCredentials
-    http_client: Optional[httpx.AsyncClient]
+    http_client: httpx.AsyncClient | None
 
     def __init__(
         self,
