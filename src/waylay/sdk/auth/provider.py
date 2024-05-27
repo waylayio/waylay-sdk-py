@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 from collections.abc import AsyncGenerator
 from typing import Callable, Optional
 
@@ -48,10 +49,8 @@ class WaylayTokenAuth(httpx.Auth):
             initial_token = initial_token or credentials.token
 
         if initial_token:
-            try:
+            with contextlib.suppress(AuthError):
                 self.current_token = self._create_and_validate_token(initial_token)
-            except AuthError:
-                pass
 
         self.credentials_callback = credentials_callback
 

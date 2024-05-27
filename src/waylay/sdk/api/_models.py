@@ -101,7 +101,7 @@ class BaseModel(PydanticBaseModel, ABC):
                 for field_name in model_fields_set:
                     field_value = getattr(model, field_name)
                     strict = (info.config or {}).get("strict")
-                    try:
+                    with contextlib.suppress(BaseException):
                         cls.__pydantic_validator__.validate_assignment(
                             model,
                             field_name,
@@ -109,8 +109,6 @@ class BaseModel(PydanticBaseModel, ABC):
                             strict=strict,
                             context=context,
                         )
-                    except BaseException:
-                        pass
                 return model
             else:
                 raise

@@ -178,12 +178,10 @@ async def test_client_ctx(my_client: WaylayClient):
 def test_fail_sync_context_mgmt(my_client: WaylayClient):
     """Test error when using sync context management."""
     use_async = "Use async context management instead"
-    with pytest.raises(TypeError, match=use_async):
-        with my_client:
-            raise AssertionError()
-    with pytest.raises(TypeError, match=use_async):
-        with my_client.api_client:
-            raise AssertionError()
+    with pytest.raises(TypeError, match=use_async), my_client:
+        raise AssertionError()
+    with pytest.raises(TypeError, match=use_async), my_client.api_client:
+        raise AssertionError()
     with pytest.raises(TypeError, match=use_async):
         my_client.__exit__(None, None, None)
     with pytest.raises(TypeError, match=use_async):

@@ -38,7 +38,6 @@ def test_service_access(client: WaylayClient):
     assert srv == client.services.require(WaylayService, name=name)
     assert srv in client.services.values()
     assert name in client.services
-    assert name in client.services.keys()
 
 
 def test_tool_access(client: WaylayClient):
@@ -56,7 +55,6 @@ def test_tool_access(client: WaylayClient):
     assert tool == client.tools.require(WaylayTool, name=name)
     assert tool in client.tools.values()
     assert name in client.tools
-    assert name in client.tools.keys()
 
 
 class MyService(WaylayService):
