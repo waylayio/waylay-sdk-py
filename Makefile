@@ -183,7 +183,7 @@ install-conda:
 	@${CONDA_INIT} && conda activate waylay-sdk-${PYTHON_VERSION} && make exec-dev-install
 
 test-conda:
-	@${CONDA_INIT} && conda activate waylay-sdk-${PYTHON_VERSION} && make exec-test
+	@${CONDA_INIT} && conda activate waylay-sdk-${PYTHON_VERSION} && pytest ${PYTEST_ARGS} test/unit test/integration
 
 TARGET?=test-conda
 _exec_all_python_versions:
