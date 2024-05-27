@@ -32,12 +32,12 @@ class ApiClient(WithSerializationSupport):
     config: WaylayConfig
     http_options: HttpClientOptions
     base_url: str
-    _http_client: Optional[AsyncClient]
+    _http_client: AsyncClient | None
 
     def __init__(
         self,
         config: WaylayConfig,
-        http_options: Optional[HttpClientOptions | AsyncClient] = None,
+        http_options: HttpClientOptions | AsyncClient | None = None,
     ) -> None:
         """Create an instance."""
         self.config = config
@@ -56,7 +56,7 @@ class ApiClient(WithSerializationSupport):
         elif isinstance(http_options, Mapping):
             self.http_options = http_options
 
-    def clone(self, http_options: Optional[HttpClientOptions] = None):
+    def clone(self, http_options: HttpClientOptions | None = None):
         """Clone api client without http client."""
         http_options = (
             self.http_options

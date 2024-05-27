@@ -29,16 +29,16 @@ class WaylayTokenAuth(httpx.Auth):
 
     """
 
-    current_token: Optional[WaylayToken]
+    current_token: WaylayToken | None
     credentials: WaylayCredentials
     http_client: httpx.AsyncClient | None
 
     def __init__(
         self,
         credentials: WaylayCredentials,
-        initial_token: Optional[TokenString] = None,
-        credentials_callback: Optional[CredentialsCallback] = None,
-        http_client: Optional[httpx.AsyncClient] = None,
+        initial_token: TokenString | None = None,
+        credentials_callback: CredentialsCallback | None = None,
+        http_client: httpx.AsyncClient | None = None,
     ):
         """Create a Waylay Token authentication provider."""
         self.credentials = credentials

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator, Mapping
-from typing import Generic, Optional, Type, TypeVar
+from typing import Generic, Type, TypeVar
 
 from ..api import ApiClient, HttpClientOptions
 from ..api.exceptions import SyncCtxMgtNotSupportedError
@@ -27,7 +27,7 @@ class WithApiClient:
         self.api_client = await self.api_client.__aenter__()
         return self
 
-    def __call__(self, http_options: Optional[HttpClientOptions] = None):
+    def __call__(self, http_options: HttpClientOptions | None = None):
         """Initialize the http client."""
         if self.api_client.is_closed:
             self.api_client.set_options(http_options)
@@ -55,7 +55,7 @@ class WaylayPlugin(WithApiClient):
 
     name: str = "__NO_NAME__"
     title: str = "__NO_TITLE__"
-    description: Optional[str] = None
+    description: str | None = None
 
     def __str__(self):
         """Get a plugin descripton."""
@@ -92,7 +92,7 @@ class PluginAccess(Mapping[str, P], Generic[P]):
         """Count registred SDK plugin."""
         return self._items.__len__()
 
-    def iter(self, item_class: Type[PI], name: Optional[str] = None) -> Iterator[PI]:
+    def iter(self, item_class: Type[PI], name: str | None = None) -> Iterator[PI]:
         """Iterate over the plugins that satisfy the requirements."""
         if name:
             plug = self._items.get(name, None)
@@ -103,7 +103,7 @@ class PluginAccess(Mapping[str, P], Generic[P]):
             if isinstance(plug, item_class):
                 yield plug
 
-    def select(self, item_class: Type[PI], name: Optional[str] = None) -> Optional[PI]:
+    def select(self, item_class: Type[PI], name: str | None = None) -> PI | None:
         """Select the first SDK plugin that satifies the class and name requirements."""
         return next(self.iter(item_class, name), None)
 

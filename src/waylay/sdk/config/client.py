@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 from ..api import AsyncClient, HttpClientOptions
 from ..auth import (
     ClientCredentials,
@@ -36,7 +34,7 @@ class WithConfig:
         *,
         interactive=True,
         gateway_url=None,
-        options: Optional[HttpClientOptions | AsyncClient] = None,
+        options: HttpClientOptions | AsyncClient | None = None,
     ):
         """Create a WaylayClient named profile.
 
@@ -59,8 +57,8 @@ class WithConfig:
         *,
         gateway_url=None,
         accounts_url=None,
-        settings: Optional[TenantSettings] = None,
-        options: Optional[HttpClientOptions | AsyncClient] = None,
+        settings: TenantSettings | None = None,
+        options: HttpClientOptions | AsyncClient | None = None,
     ):
         """Create a WaylayClient using the given client credentials."""
         credentials = ClientCredentials(
@@ -75,8 +73,8 @@ class WithConfig:
         *,
         gateway_url=None,
         accounts_url=None,
-        settings: Optional[TenantSettings] = None,
-        options: Optional[HttpClientOptions | AsyncClient] = None,
+        settings: TenantSettings | None = None,
+        options: HttpClientOptions | AsyncClient | None = None,
     ):
         """Create a WaylayClient using a waylay token."""
         credentials = TokenCredentials(
@@ -88,8 +86,8 @@ class WithConfig:
     def from_credentials(
         cls,
         credentials: WaylayCredentials,
-        settings: Optional[TenantSettings] = None,
-        options: Optional[HttpClientOptions | AsyncClient] = None,
+        settings: TenantSettings | None = None,
+        options: HttpClientOptions | AsyncClient | None = None,
     ):
         """Create a WaylayClient using the given client credentials."""
         return cls(
@@ -102,7 +100,7 @@ class WithConfig:
 
 
 def _auth_urls(
-    gateway_url=None, accounts_url=None, settings: Optional[TenantSettings] = None
+    gateway_url=None, accounts_url=None, settings: TenantSettings | None = None
 ):
     if settings:
         gateway_url = gateway_url or settings.get(SERVICE_KEY_GATEWAY)

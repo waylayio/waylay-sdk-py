@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from waylay.sdk.services.gateway import GatewayService
 
@@ -37,7 +37,7 @@ class WaylayClient(WithConfig, WithServicesAndTools):
         self,
         config: WaylayConfig | ApiClient,
         /,
-        options: Optional[HttpClientOptions | AsyncClient] = None,
+        options: HttpClientOptions | AsyncClient | None = None,
     ):
         """Create a WaylayConfig instance."""
         client_config: WaylayConfig

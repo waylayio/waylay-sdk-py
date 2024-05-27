@@ -68,7 +68,7 @@ asyncio_mode = "auto"
 include = ["pyproject.toml", "src/**/*.py", "test/**/*.py"]
 
 [tool.ruff.lint]
-select = ["E", "F", "B", "SIM", "FA", "D"]
+select = ["E", "F", "B", "SIM", "FA", "D", "UP007", "I001", "PIE790"]
 ignore = ["D203", "D213"]
 
 [tool.ruff.lint.isort]

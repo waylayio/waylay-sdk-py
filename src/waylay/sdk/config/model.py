@@ -8,7 +8,7 @@ import os
 import re
 from collections.abc import Mapping, MutableMapping
 from pathlib import Path
-from typing import Any, Optional, Type
+from typing import Any, Type
 
 import httpx
 from appdirs import user_config_dir
@@ -63,16 +63,16 @@ class WaylayConfig:
     profile: str
     _auth: WaylayTokenAuth
     _local_settings: Settings
-    _tenant_settings: Optional[TenantSettings] = None
+    _tenant_settings: TenantSettings | None = None
     _token_auth_provider: Type[WaylayTokenAuth] = WaylayTokenAuth
 
     def __init__(
         self,
-        credentials: Optional[WaylayCredentials] = None,
+        credentials: WaylayCredentials | None = None,
         profile: str = DEFAULT_PROFILE,
-        settings: Optional[TenantSettings] = None,
+        settings: TenantSettings | None = None,
         fetch_tenant_settings=True,
-        credentials_callback: Optional[CredentialsCallback] = None,
+        credentials_callback: CredentialsCallback | None = None,
     ):
         """Create a WaylayConfig."""
         self.profile = profile
