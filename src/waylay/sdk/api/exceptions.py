@@ -11,12 +11,13 @@ from .http import Response
 class ApiValueError(RequestError, ValueError):
     """Inappropriate argument value (of correct type) in a Waylay API request."""
 
-    def __init__(self, msg, path_to_item=None) -> None:
+    def __init__(self, msg: str, path_to_item=None) -> None:
         """Raise a value error.
 
         Args:
         ----
             msg (str): the exception message
+            path_to_item (str): path into the request object
 
         Keyword Args:
         ------------
@@ -24,7 +25,6 @@ class ApiValueError(RequestError, ValueError):
                 received_data dict. None if unset
 
         """
-
         self.path_to_item = path_to_item
         full_msg = msg
         if path_to_item:

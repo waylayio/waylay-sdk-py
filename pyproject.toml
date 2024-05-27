@@ -68,11 +68,15 @@ asyncio_mode = "auto"
 include = ["pyproject.toml", "src/**/*.py", "test/**/*.py"]
 
 [tool.ruff.lint]
-select = ["E", "F", "B", "SIM", "FA"]
+select = ["E", "F", "B", "SIM", "FA", "D"]
+ignore = ["D203", "D213"]
 
 [tool.ruff.lint.isort]
 from-first = false
 known-first-party = ["waylay*"]
+
+[tool.ruff.lint.per-file-ignores]
+"test/**/*.py" = ["D"] # no docstyle required
 
 [tool.coverage.report]
 exclude_also = [

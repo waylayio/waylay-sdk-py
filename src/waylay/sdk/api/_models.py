@@ -46,13 +46,14 @@ from pydantic.functional_validators import ModelWrapValidatorHandler
 class BaseModel(PydanticBaseModel, ABC):
     """Waylay base model class that adds additional methods to Pydantic's `BaseModel`.
 
-    Includes a custom validator and serializer."""
+    Includes a custom validator and serializer.
+    """
 
     @model_serializer(mode="wrap")
     def _model_serializer(
         self, handler: Callable, info: SerializationInfo
     ) -> Dict[StrictStr, Any]:
-        """The default serializer of the model.
+        """Get the default serializer of the model.
 
         * Excludes `None` fields that were not set at model initialization.
         """
@@ -67,7 +68,7 @@ class BaseModel(PydanticBaseModel, ABC):
     def _model_validator(
         cls, value: Any, handler: ModelWrapValidatorHandler, info: ValidationInfo
     ):
-        """The default validator of the model.
+        """Get the default validator of the model.
 
         When validation is called with a `skip_validation=True` context
         (e.g. `cls.model_validate(data, context={"skip_validation": True})`),
@@ -117,7 +118,7 @@ class BaseModel(PydanticBaseModel, ABC):
     def _field_validator(
         cls, value: Any, handler: ValidatorFunctionWrapHandler, info: ValidationInfo
     ):
-        """The default field validator of the model.
+        """Get the default field validator of the model.
 
         When validation is called with a `skip_validation=True` context,
         the field is assigned without validation.

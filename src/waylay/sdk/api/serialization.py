@@ -104,7 +104,6 @@ class WithSerializationSupport:
         **kwargs,
     ) -> Response | Any:
         """Perform a request with serialization and deserialization support."""
-
         # set aside send args
         send_args = {}
         for key in ["stream", "follow_redirects", "auth"]:
@@ -227,7 +226,7 @@ class Readable(Protocol):
     """Anything with a binary read method."""
 
     def read(self, n: int = -1) -> bytes:
-        """Read a binary chunk"""
+        """Read a binary chunk."""
 
 
 def _convert_content(content: Any):
