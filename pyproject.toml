@@ -58,7 +58,6 @@ dev = [
     'types-python-jose',
     'types-appdirs',
     'types-python-dateutil',
-    'docformatter',
     'pre-commit',
     'sse-starlette',
 ]
