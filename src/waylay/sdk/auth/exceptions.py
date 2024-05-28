@@ -1,6 +1,7 @@
 """Auth exception utilities."""
 
 import jose.exceptions as jwt_exc
+
 from ..exceptions import WaylayError
 
 _AUTH_MESSAGE_FOR_EXCEPTON_CLASS = [

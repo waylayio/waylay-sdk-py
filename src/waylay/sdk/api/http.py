@@ -1,22 +1,22 @@
 """Aliases for the http client."""
 
 from __future__ import annotations
-from typing import (
-    TypedDict,
-    Mapping,
-    Optional,
-    Callable,
-    Any,
-    Union,
-    Sequence,
-    Tuple,
-    List,
-    IO,
-)
-from typing_extensions import Required  # >=3.11
 
-import httpx._client as httpx_types
+from collections.abc import Mapping, Sequence
+from typing import (
+    IO,
+    Any,
+    Callable,
+    List,
+    Optional,
+    Tuple,
+    TypedDict,
+    Union,
+)
+
 import httpx
+import httpx._client as httpx_types
+from typing_extensions import Required  # >=3.11
 
 AsyncClient = httpx.AsyncClient
 Response = httpx.Response
@@ -64,7 +64,7 @@ class HttpRequestArguments(TypedDict, total=False):
 class HttpClientOptions(TypedDict, total=False):
     """Options passed to the httpx client."""
 
-    auth: Optional[httpx_types.AuthTypes]  # explicit None do disable auth
+    auth: httpx_types.AuthTypes | None  # explicit None do disable auth
     params: httpx_types.QueryParamTypes
     headers: HeaderTypes
     cookies: httpx_types.CookieTypes
@@ -74,7 +74,7 @@ class HttpClientOptions(TypedDict, total=False):
     http2: bool
     proxy: httpx_types.ProxyTypes
     proxies: httpx_types.ProxiesTypes
-    mounts: Mapping[str, Optional[httpx_types.AsyncBaseTransport]]
+    mounts: Mapping[str, httpx_types.AsyncBaseTransport | None]
     timeout: httpx_types.TimeoutTypes
     follow_redirects: bool
     limits: httpx_types.Limits

@@ -5,8 +5,7 @@ from datetime import datetime
 import pytest
 
 from waylay.sdk import WaylayClient, WaylayConfig
-from waylay.sdk.auth import NoCredentials
-from waylay.sdk.auth import WaylayToken
+from waylay.sdk.auth import NoCredentials, WaylayToken
 
 MOCK_DOMAIN = "unittest.waylay.io"
 MOCK_API_URL = f"https://{MOCK_DOMAIN}/api"

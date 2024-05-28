@@ -1,9 +1,10 @@
 from __future__ import annotations
-from enum import Enum
 
-from typing import List, Optional, Union
-from typing_extensions import TypedDict, NotRequired, Annotated
+from enum import Enum
+from typing import Annotated, List, Optional, Union
+
 from pydantic import Field, StrictBool, StrictInt, StrictStr
+from typing_extensions import NotRequired, TypedDict
 
 from waylay.sdk.api._models import BaseModel
 
@@ -24,7 +25,11 @@ class Pet(BaseModel):
 
     name: StrictStr
     owner: PetOwner
-    tag: Optional[StrictStr] = None
+    # workaround: on python 3.9, when using 
+    #   tag: StrictStr | None = None
+    # {"skip_validation": True} does not work in type_adapter.validate_python
+    # leading to other snapshots (_Model i.o Pet)
+    tag: Optional[StrictStr] = None  # noqa: UP007
 
     model_config = {
         "populate_by_name": True,
@@ -70,10 +75,10 @@ class CreatePetQuery(TypedDict):
 
     limit: NotRequired[
         Annotated[
-            Optional[Annotated[int, Field(le=100, strict=True)]],
+            Annotated[int, Field(le=100, strict=True)] | None,
             Field(description="How many biscuits?"),
         ]
     ]
     good_boy: NotRequired[
-        Annotated[Optional[StrictBool], Field(description="Is the pet a good boy?")]
+        Annotated[StrictBool | None, Field(description="Is the pet a good boy?")]
     ]

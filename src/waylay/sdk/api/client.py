@@ -1,14 +1,15 @@
 """API client."""
 
 from __future__ import annotations
-from typing import Mapping, Optional, Tuple, Union
+
+from collections.abc import Mapping
+from typing import Optional, Tuple, Union
 
 from .._version import __version__
 from ..config import WaylayConfig
-
 from .exceptions import SyncCtxMgtNotSupportedError
-from .serialization import WithSerializationSupport
 from .http import AsyncClient, HttpClientOptions, Request, Response
+from .serialization import WithSerializationSupport
 
 RESTTimeout = Union[
     Optional[float],
@@ -31,12 +32,12 @@ class ApiClient(WithSerializationSupport):
     config: WaylayConfig
     http_options: HttpClientOptions
     base_url: str
-    _http_client: Optional[AsyncClient]
+    _http_client: AsyncClient | None
 
     def __init__(
         self,
         config: WaylayConfig,
-        http_options: Optional[HttpClientOptions | AsyncClient] = None,
+        http_options: HttpClientOptions | AsyncClient | None = None,
     ) -> None:
         """Create an instance."""
         self.config = config
@@ -55,7 +56,7 @@ class ApiClient(WithSerializationSupport):
         elif isinstance(http_options, Mapping):
             self.http_options = http_options
 
-    def clone(self, http_options: Optional[HttpClientOptions] = None):
+    def clone(self, http_options: HttpClientOptions | None = None):
         """Clone api client without http client."""
         http_options = (
             self.http_options

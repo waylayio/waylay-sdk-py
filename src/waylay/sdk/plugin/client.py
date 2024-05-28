@@ -1,12 +1,14 @@
 """Client mixin for plugins."""
 
-import sys
-from typing import Type, Dict, Optional
-from importlib.metadata import entry_points
-import warnings
+from __future__ import annotations
 
-from .base import WaylayService, WaylayTool, WithApiClient, WaylayPlugin, PluginAccess
+import sys
+import warnings
+from importlib.metadata import entry_points
+from typing import Dict, Type
+
 from ..api import ApiClient
+from .base import PluginAccess, WaylayPlugin, WaylayService, WaylayTool, WithApiClient
 
 
 class WithServicesAndTools(WithApiClient):
@@ -39,7 +41,7 @@ class WithServicesAndTools(WithApiClient):
             for plugin_class in ep.load():
                 self.register(plugin_class)
 
-    def register(self, plugin_class: Type[WaylayPlugin]) -> Optional[WaylayPlugin]:
+    def register(self, plugin_class: Type[WaylayPlugin]) -> WaylayPlugin | None:
         """Register and instantiate plugin class."""
         if issubclass(plugin_class, WaylayService):
             service = plugin_class(self.api_client)
@@ -53,7 +55,7 @@ class WithServicesAndTools(WithApiClient):
             )
             self._tools[tool.name] = tool
             return tool
-        warnings.warn(f"Invalid plug class: {plugin_class}")
+        warnings.warn(message=f"Invalid plug class: {plugin_class}", stacklevel=1)
         return None
 
     def __getattr__(self, name: str):

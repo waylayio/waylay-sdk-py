@@ -1,14 +1,15 @@
 """Test http client context managment."""
 
-from typing import Optional
+from __future__ import annotations
+
 import json
 
-import pytest
 import httpx
+import pytest
 from starlette.requests import Request as StarletteRequest
 from starlette.responses import Response as StarletteResponse
 
-from waylay.sdk import WaylayClient, WaylayService, WaylayTool, WaylayConfig
+from waylay.sdk import WaylayClient, WaylayConfig, WaylayService, WaylayTool
 from waylay.sdk.api import AsyncClient
 from waylay.sdk.api._models import Model, _Model
 
@@ -132,7 +133,7 @@ async def test_lazy_init(my_client: WaylayClient):
     assert my_client.tst2.api_client is init_client
 
     # lazy create http client
-    http_client: Optional[AsyncClient] = my_client.api_client.http_client
+    http_client: AsyncClient | None = my_client.api_client.http_client
     assert my_client.api_client is init_client
     assert my_client.tst.api_client is init_client
     assert my_client.tst2.api_client is init_client
@@ -177,12 +178,10 @@ async def test_client_ctx(my_client: WaylayClient):
 def test_fail_sync_context_mgmt(my_client: WaylayClient):
     """Test error when using sync context management."""
     use_async = "Use async context management instead"
-    with pytest.raises(TypeError, match=use_async):
-        with my_client:
-            assert False
-    with pytest.raises(TypeError, match=use_async):
-        with my_client.api_client:
-            assert False
+    with pytest.raises(TypeError, match=use_async), my_client:
+        raise AssertionError()
+    with pytest.raises(TypeError, match=use_async), my_client.api_client:
+        raise AssertionError()
     with pytest.raises(TypeError, match=use_async):
         my_client.__exit__(None, None, None)
     with pytest.raises(TypeError, match=use_async):
@@ -253,7 +252,7 @@ async def test_api_client_ctx(my_client: WaylayClient):
     # an open api client itself is single use!
     with pytest.raises(ValueError, match="already in use"):
         async with api_client as a:
-            assert False
+            raise AssertionError()
     assert not api_client.is_closed
 
     # close the http client:

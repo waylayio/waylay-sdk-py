@@ -95,12 +95,13 @@ exec-typecheck:
 	@${printMsg} typecheck OK
 
 exec-format:
-	@ruff format
+	@ruff format && ruff check --fix && ruff check --fix --select I
+
 
 exec-code-qa: exec-lint exec-typecheck
 
 exec-test: exec-code-qa
-	pytest ${PYTEST_ARGS} test/unit
+	pytest ${PYTEST_ARGS} test/unit test/integration
 
 format: install
 	${VENV_ACTIVATE} && make exec-format exec-lint-fix

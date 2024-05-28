@@ -1,17 +1,19 @@
 """Utilities to handle waylay authentication."""
 
-from datetime import datetime
-from enum import Enum
-from dataclasses import dataclass
-from typing import Optional, ClassVar, Dict, Any, List
-import json
-import abc
+from __future__ import annotations
 
+import abc
 import base64
 import binascii
-from jose import jwt, JWTError
+import json
+from dataclasses import dataclass
+from datetime import datetime
+from enum import Enum
+from typing import Any, ClassVar, Dict, List
 
-from .exceptions import TokenParseError, AuthError
+from jose import JWTError, jwt
+
+from .exceptions import AuthError, TokenParseError
 
 
 class CredentialsType(str, Enum):
@@ -39,18 +41,18 @@ TokenString = str
 class WaylayCredentials(abc.ABC):
     """Base class for the representation of credentials to the waylay platform."""
 
-    gateway_url: Optional[str] = None
+    gateway_url: str | None = None
     credentials_type: ClassVar[CredentialsType] = CredentialsType.CALLBACK
 
     # legacy
-    accounts_url: Optional[str] = None
+    accounts_url: str | None = None
 
     @abc.abstractmethod
     def to_dict(self, obfuscate=True) -> Dict[str, Any]:
         """Convert the credentials to a json-serialisable representation."""
 
     @abc.abstractproperty
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         """Get the main identifier for this credential."""
         return None
 
@@ -76,8 +78,8 @@ class WaylayCredentials(abc.ABC):
 class AccountsUrlMixin:
     """Dataclass mixin for the 'gateway_url' (legacy 'accounts_url') property."""
 
-    gateway_url: Optional[str] = None
-    accounts_url: Optional[str] = None
+    gateway_url: str | None = None
+    accounts_url: str | None = None
 
 
 @dataclass(repr=False, init=False)
@@ -92,8 +94,8 @@ class ApiKeySecretMixin(AccountsUrlMixin):
         api_key: str,
         api_secret: str,
         *,
-        gateway_url: Optional[str] = None,
-        accounts_url: Optional[str] = None,
+        gateway_url: str | None = None,
+        accounts_url: str | None = None,
     ):
         """Initialise with the api_key and api_secret."""
         super().__init__(gateway_url=gateway_url, accounts_url=accounts_url)
@@ -101,7 +103,7 @@ class ApiKeySecretMixin(AccountsUrlMixin):
         self.api_secret = api_secret
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         """Get the main identifier for this credential."""
         return self.api_key
 
@@ -111,8 +113,8 @@ class ApiKeySecretMixin(AccountsUrlMixin):
         api_key: str,
         api_secret: str,
         *,
-        gateway_url: Optional[str] = None,
-        accounts_url: Optional[str] = None,
+        gateway_url: str | None = None,
+        accounts_url: str | None = None,
     ):
         """Create a client credentials object."""
         return cls(
@@ -158,7 +160,7 @@ class ApiKeySecretMixin(AccountsUrlMixin):
 
 @dataclass(repr=False, init=False)
 class NoCredentials(AccountsUrlMixin, WaylayCredentials):
-    """Represents credentials which be asked via (interactive) callback when required."""
+    """Credentials that be resolved via (interactive) callback when required."""
 
     credentials_type: ClassVar[CredentialsType] = CredentialsType.CALLBACK
 
@@ -175,7 +177,7 @@ class NoCredentials(AccountsUrlMixin, WaylayCredentials):
         return True
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         """Get the main identifier for this credential."""
         return None
 
@@ -206,15 +208,15 @@ class TokenCredentials(AccountsUrlMixin, WaylayCredentials):
         self,
         token: TokenString,
         *,
-        gateway_url: Optional[str] = None,
-        accounts_url: Optional[str] = None,
+        gateway_url: str | None = None,
+        accounts_url: str | None = None,
     ):
         """Create a TokenCredentials from a token string."""
         super().__init__(gateway_url=gateway_url, accounts_url=accounts_url)
         self.token = token
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         """Get the main identifier for this credential."""
         try:
             token = WaylayToken(self.token)
@@ -243,7 +245,7 @@ class TokenCredentials(AccountsUrlMixin, WaylayCredentials):
 class WaylayToken:
     """Holds a Waylay JWT token."""
 
-    def __init__(self, token_string: str, token_data: Optional[Dict] = None):
+    def __init__(self, token_string: str, token_data: Dict | None = None):
         """Create a Waylay Token holder object from given token string or data."""
         self.token_string = token_string
         if token_data is None:
@@ -277,17 +279,17 @@ class WaylayToken:
         return self
 
     @property
-    def tenant(self) -> Optional[str]:
+    def tenant(self) -> str | None:
         """Get the tenant id asserted by the token."""
         return self.token_data.get("tenant", None)
 
     @property
-    def domain(self) -> Optional[str]:
+    def domain(self) -> str | None:
         """Get the waylay domain asserted by the token."""
         return self.token_data.get("domain", None)
 
     @property
-    def subject(self) -> Optional[str]:
+    def subject(self) -> str | None:
         """Get the subject asserted by the token."""
         return self.token_data.get("sub", None)
 
@@ -307,13 +309,13 @@ class WaylayToken:
         return self.token_data.get("permissions", [])
 
     @property
-    def expires_at(self) -> Optional[datetime]:
+    def expires_at(self) -> datetime | None:
         """Get the token expiry timestamp."""
         exp = self.token_data.get("exp", None)
         return None if exp is None else datetime.fromtimestamp(exp)
 
     @property
-    def issued_at(self) -> Optional[datetime]:
+    def issued_at(self) -> datetime | None:
         """Get the token issuance timestamp."""
         iat = self.token_data.get("iat", None)
         return None if iat is None else datetime.fromtimestamp(iat)

@@ -2,25 +2,24 @@
 
 from __future__ import annotations
 
-from types import SimpleNamespace
-from typing import Any, Dict, List, Union, AsyncIterator
-from datetime import datetime, date
+from collections.abc import AsyncIterator
+from datetime import date, datetime
 from pathlib import Path
+from types import SimpleNamespace
+from typing import Any, Dict, List, Union
 
-import pytest
-from syrupy.filters import paths
 import httpx
+import pytest
 from pytest_httpx import HTTPXMock
+from syrupy.filters import paths
 
-from waylay.sdk.auth import TokenCredentials
-from waylay.sdk.config import WaylayConfig
 from waylay.sdk.api import ApiClient
 from waylay.sdk.api._models import Model
+from waylay.sdk.api.exceptions import ApiError, ApiValueError, RestResponseError
+from waylay.sdk.api.http import Request, Response
+from waylay.sdk.auth import TokenCredentials
+from waylay.sdk.config import WaylayConfig
 
-from waylay.sdk.api.http import Response, Request
-from waylay.sdk.api.exceptions import ApiError, ApiValueError
-
-from .example.pet_model import Pet, PetType, PetList, PetUnion, PetWithAlias
 from .example.pet_fixtures import (
     pet_instance,
     pet_instance_dict,
@@ -29,6 +28,7 @@ from .example.pet_fixtures import (
     pet_with_alias_instance,
     pet_with_alias_instance_dict,
 )
+from .example.pet_model import Pet, PetList, PetType, PetUnion, PetWithAlias
 
 
 @pytest.fixture(name="waylay_credentials")
@@ -413,7 +413,7 @@ DESERIALIZE_CASES = [
         "text_str_invalid_date",
         {
             "status_code": 200,
-            "text": str("2023/12/25:12.02.20"),
+            "text": "2023/12/25:12.02.20",
         },  # invalid date should result in str
         {"2XX": date},
         None,
@@ -755,7 +755,7 @@ ERROR_RESP_CASES = [
 
 
 @pytest.mark.parametrize("response_kwargs,response_type", ERROR_RESP_CASES)
-def test_deserialize_error_responses(
+async def test_deserialize_error_responses(
     snapshot,
     waylay_api_client: ApiClient,
     response_kwargs: Dict[str, Any],
@@ -765,9 +765,9 @@ def test_deserialize_error_responses(
     """Test REST param deserializer when error response."""
     response_kwargs = _retrieve_fixture_values(request, response_kwargs)
     with pytest.raises(ApiError) as excinfo:
-        waylay_api_client.deserialize(
-            Response(**response_kwargs), response_type=response_type
-        )
+        resp = Response(**response_kwargs)
+        await resp.aread()
+        waylay_api_client.deserialize(resp, response_type=response_type)
     assert (
         str(excinfo.value),
         type(excinfo.value.data).__name__,
@@ -784,13 +784,9 @@ async def test_deserialize_partially_fetched_error_stream(
         headers={"content-length": "3"},
     )
     await resp.aiter_raw(chunk_size=1).__anext__()
-    with pytest.raises(ApiError) as excinfo:
+    with pytest.raises(RestResponseError) as excinfo:
         waylay_api_client.deserialize(resp, response_type={})
-    assert (
-        str(excinfo.value),
-        type(excinfo.value.data).__name__,
-        excinfo.value.data,
-    ) == snapshot()
+    assert (str(excinfo.value),) == snapshot()
 
 
 def _retrieve_fixture_values(request, kwargs: Dict[str, Any]) -> Dict[str, Any]:
@@ -799,7 +795,7 @@ def _retrieve_fixture_values(request, kwargs: Dict[str, Any]) -> Dict[str, Any]:
         def _update_fixture_value(x):
             if callable(x):
                 _arg_value = request.getfixturevalue(x.__name__)
-                kwargs.update({arg_key: _arg_value})
+                kwargs.update({arg_key: _arg_value})  # noqa: B023
 
         if isinstance(arg_value, list):
             for x in arg_value:

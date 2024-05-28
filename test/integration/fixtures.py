@@ -1,16 +1,16 @@
 """Reusable test fixtures."""
 
+from __future__ import annotations
+
 import os
-from typing import Optional
 
 import pytest
 
 from waylay.sdk import ClientCredentials, WaylayClient, WaylayCredentials
-
 from waylay.sdk.auth.provider import WaylayTokenAuth
 
 
-def get_test_env(key: str, default: Optional[str] = None) -> str:
+def get_test_env(key: str, default: str | None = None) -> str:
     """Get an environment variable."""
     test_var = os.getenv(key, default)
     if not test_var:

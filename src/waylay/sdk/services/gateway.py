@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 from typing import Any, Dict, Literal, TypeVar, overload
+
 from pydantic import ConfigDict
 
+from waylay.sdk.api._models import BaseModel as WaylayBaseModel
+from waylay.sdk.api._models import Model
 from waylay.sdk.api.client import ApiClient
 from waylay.sdk.api.http import HeaderTypes, QueryParamTypes, Response
 from waylay.sdk.plugin.base import WaylayService, WithApiClient
-from waylay.sdk.api._models import BaseModel as WaylayBaseModel, Model
 
 T = TypeVar("T")
 
@@ -104,10 +106,13 @@ class AboutApi(WithApiClient):
 
         :param query: URL Query parameters.
         :type query: QueryParamTypes, optional
-        :param raw_response: If true, return the http Response object instead of returning an api model object, or throwing an ApiError.
-        :param select_path: Denotes the json path applied to the response object before returning it.
-                Set it to the empty string `""` to receive the full response object.
-        :param response_type: If specified, the response is parsed into an instance of the specified type.
+        :param raw_response: If true, return the http Response object instead of
+            returning an api model object, or throwing an ApiError.
+        :param select_path: Denotes the json path applied to the response
+            object before returning it.
+            Set it to the empty string `""` to receive the full response object.
+        :param response_type: If specified, the response is parsed into
+            an instance of the specified type.
         :param headers: Header parameters for this request
         :type headers: dict, optional
         :param `**kwargs`: Additional parameters passed on to the http client.
@@ -121,9 +126,10 @@ class AboutApi(WithApiClient):
             * auth
             * follow_redirects: bool
 
-        :return: Returns the result object if the http request succeeded with status code '2XX'.
-        :raises APIError: If the http request has a status code different from `2XX`. This
-            object wraps both the http Response and any parsed data.
+        :return: Returns the result object if the http request succeeded
+            with status code '2XX'.
+        :raises APIError: If the http request has a status code different from `2XX`.
+            This object wraps both the http Response and any parsed data.
         """
         response_type_map: Dict[str, Any] = (
             {"2XX": response_type}

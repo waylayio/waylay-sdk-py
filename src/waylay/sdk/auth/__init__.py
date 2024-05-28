@@ -1,17 +1,16 @@
 """Waylay SDK authentication."""
 
+from .exceptions import AuthError
 from .model import (
-    WaylayCredentials,
-    ClientCredentials,
     ApplicationCredentials,
-    TokenCredentials,
+    ClientCredentials,
     NoCredentials,
+    TokenCredentials,
+    WaylayCredentials,
     WaylayToken,
 )
-from .provider import WaylayTokenAuth
 from .parse import parse_credentials
-
-from .exceptions import AuthError
+from .provider import WaylayTokenAuth
 
 __all__ = [
     "WaylayCredentials",

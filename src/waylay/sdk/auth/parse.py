@@ -1,19 +1,19 @@
 """Parse credentials."""
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 from .model import (
-    NoCredentials,
-    ClientCredentials,
-    WaylayCredentials,
     ApplicationCredentials,
+    ClientCredentials,
+    NoCredentials,
     TokenCredentials,
+    WaylayCredentials,
 )
 
 
 def parse_credentials(json_obj: Dict[str, Any]) -> WaylayCredentials:
     """Convert a parsed json representation to a WaylayCredentials object."""
-    cred_type = json_obj.get("type", None)
+    cred_type = json_obj.get("type")
     if cred_type is None:
         raise ValueError("invalid json for credentials: missing type")
 

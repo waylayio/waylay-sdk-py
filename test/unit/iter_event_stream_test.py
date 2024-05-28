@@ -1,18 +1,17 @@
-from asyncio import sleep
 import json
-from typing import AsyncIterator
+from asyncio import sleep
+from collections.abc import AsyncIterator
+
 import httpx
 import pytest
-
 from sse_starlette.sse import EventSourceResponse as EventSourceStarletteResponse
 from starlette.applications import Starlette
-from starlette.routing import Route as StarletteRoute
 from starlette.requests import Request as StarletteRequest
+from starlette.routing import Route as StarletteRoute
 
+from waylay.sdk.api._models import BaseModel as WaylayBaseModel
 from waylay.sdk.api.client import ApiClient
 from waylay.sdk.api.http import HttpClientOptions
-from waylay.sdk.api._models import BaseModel as WaylayBaseModel
-
 from waylay.sdk.auth.model import NoCredentials
 from waylay.sdk.config.model import WaylayConfig
 
