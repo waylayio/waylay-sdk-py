@@ -193,10 +193,10 @@ class _Model(BaseModel):
 Primitive: TypeAlias = Union[
     str, bool, int, float, Decimal, bytes, datetime, date, object, None
 ]
-Model: TypeAlias = TypeAliasType(  # type: ignore[valid-type]  #(https://github.com/python/mypy/issues/16614)
+Model: TypeAlias = TypeAliasType(  # type: ignore[misc]  #(https://github.com/python/mypy/issues/16614)
     "Model",
     Annotated[
-        Union[List["Model"], "_Model", Primitive],  # type: ignore[misc,possible cyclic definition]
+        Union[List["Model"], "_Model", Primitive], # type: ignore[misc]
         "A basic model that acts like a `simpleNamespace` "
         "or a collection over such models.",
     ],

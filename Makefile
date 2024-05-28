@@ -127,7 +127,7 @@ test-integration: install
 test-integration-coverage-report: install ### generate html coverage report for the integration tests
 	${PYTEST_CMD} --cov-report html:cov_report/integration --cov=src test/integration
 
-test: format test-unit ### perform all quality checks and tests, except for integration tests
+test: format code-qa test-unit ### perform all quality checks and tests, except for integration tests
 
 
 ci-install:
