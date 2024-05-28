@@ -66,7 +66,9 @@ def fixture_waylay_test_client_credentials(
 @pytest.fixture(scope="session", name="waylay_test_token_string")
 async def fixture_waylay_test_token_string(waylay_test_client_credentials):
     """Get a valid token string."""
-    token = await WaylayTokenAuth(waylay_test_client_credentials).assure_valid_token()
+    token = await WaylayTokenAuth(
+        waylay_test_client_credentials
+    ).assure_valid_token_async()
     return token.token_string
 
 

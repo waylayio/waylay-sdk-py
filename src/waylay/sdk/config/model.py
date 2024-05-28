@@ -219,7 +219,7 @@ class WaylayConfig:
         """Get the current valid authentication token or fail."""
         if isinstance(self.auth, WaylayTokenAuth):
             try:
-                return await self.auth.assure_valid_token()
+                return await self.auth.assure_valid_token_async()
             except AuthError as exc:
                 raise ConfigError(f"Cannot get valid token: {exc}") from exc
         raise ConfigError("not using token authentication")  # pragma: no cover

@@ -51,7 +51,8 @@ class WaylayCredentials(abc.ABC):
     def to_dict(self, obfuscate=True) -> Dict[str, Any]:
         """Convert the credentials to a json-serialisable representation."""
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def id(self) -> str | None:
         """Get the main identifier for this credential."""
         return None
@@ -195,6 +196,27 @@ class ApplicationCredentials(ApiKeySecretMixin, WaylayCredentials):
 
     credentials_type: ClassVar[CredentialsType] = CredentialsType.APPLICATION
     tenant_id: str = ""
+
+    def __init__(
+        self,
+        api_key: str,
+        api_secret: str,
+        tenant_id: str,
+        *,
+        gateway_url: str | None = None,
+        accounts_url: str | None = None,
+    ):
+        """Initialise with the api_key and api_secret."""
+        super().__init__(
+            api_key, api_secret, gateway_url=gateway_url, accounts_url=accounts_url
+        )
+        self.tenant_id = tenant_id
+
+    def to_dict(self, obfuscate=True):
+        """Get the dict representation."""
+        _dict = super().to_dict(obfuscate)
+        _dict["tenant_id"] = self.tenant_id
+        return _dict
 
 
 @dataclass(repr=False, init=False)
