@@ -196,7 +196,7 @@ Primitive: TypeAlias = Union[
 Model: TypeAlias = TypeAliasType(  # type: ignore[misc]  #(https://github.com/python/mypy/issues/16614)
     "Model",
     Annotated[
-        Union[List["Model"], "_Model", Primitive], # type: ignore[misc]
+        Union[List["Model"], "_Model", Primitive],  # type: ignore[misc]
         "A basic model that acts like a `simpleNamespace` "
         "or a collection over such models.",
     ],

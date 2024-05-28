@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools", "setuptools-git-versioning"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "waylay-sdk-core"
-version = "0.2.1"
+dynamic = ["version"]
 description = "Waylay Python SDK."
 requires-python = ">=3.9"
 keywords = ["waylay", "sdk"]
@@ -32,6 +32,8 @@ Repository = "https://github.com/waylayio/waylay-sdk-py.git"
 [project.entry-points.dynamic]
 "waylay_sdk_plugins"= "waylay.sdk.plugin.loader:PLUGINS"
 
+[tool.setuptools-git-versioning]
+enabled = true
 
 [tool.setuptools.package-data]
 waylay = ["py.typed"]
@@ -56,7 +58,6 @@ dev = [
     'types-python-jose',
     'types-appdirs',
     'types-python-dateutil',
-    'docformatter',
     'pre-commit',
     'sse-starlette',
 ]

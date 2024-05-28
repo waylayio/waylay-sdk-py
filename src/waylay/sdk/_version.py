@@ -1,3 +1,5 @@
 """Release version of waylay-sdk-core."""
 
-__version__ = "0.2.1"
+import importlib.metadata
+
+__version__ = importlib.metadata.version("waylay-sdk-core")
