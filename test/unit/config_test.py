@@ -31,10 +31,19 @@ def _mock_send_single_request_no_accounts(target, request: Request, *args) -> Re
 def mock_token(mocker):
     """Mock the auth module to use a WaylayTokenStub."""
     mocker.patch(
-        "waylay.sdk.auth.provider.WaylayTokenAuth._request_token", lambda *args: ""
+        "waylay.sdk.auth.provider.WaylayTokenAuth._request_token_async",
+        lambda *args: "",
     )
     mocker.patch(
-        "waylay.sdk.auth.provider.WaylayTokenAuth._create_and_validate_token",
+        "waylay.sdk.auth.provider.WaylayTokenAuth._create_and_validate_token_async",
+        lambda *args: WaylayTokenStub(),
+    )
+    mocker.patch(
+        "waylay.sdk.auth.provider.WaylayTokenAuth._request_token_sync",
+        lambda *args: "",
+    )
+    mocker.patch(
+        "waylay.sdk.auth.provider.WaylayTokenAuth._create_and_validate_token_sync",
         lambda *args: WaylayTokenStub(),
     )
 

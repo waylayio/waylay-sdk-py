@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-import contextlib
 from collections.abc import AsyncGenerator
-from typing import Callable, Optional
+from typing import Callable, Generator, Optional
 
 import httpx
 
 from .exceptions import AuthError
 from .model import (
+    ApiKeySecretMixin,
     ApplicationCredentials,
     ClientCredentials,
     NoCredentials,
@@ -31,57 +31,75 @@ class WaylayTokenAuth(httpx.Auth):
 
     current_token: WaylayToken | None
     credentials: WaylayCredentials
-    http_client: httpx.AsyncClient | None
+    http_client_sync: httpx.Client
+    http_client_async: httpx.AsyncClient
 
     def __init__(
         self,
         credentials: WaylayCredentials,
-        initial_token: TokenString | None = None,
         credentials_callback: CredentialsCallback | None = None,
-        http_client: httpx.AsyncClient | None = None,
+        http_client: httpx.AsyncClient | httpx.Client | None = None,
     ):
         """Create a Waylay Token authentication provider."""
         self.credentials = credentials
         self.current_token = None
-        self.http_client = http_client
-
-        if isinstance(credentials, TokenCredentials):
-            initial_token = initial_token or credentials.token
-
-        if initial_token:
-            with contextlib.suppress(AuthError):
-                self.current_token = self._create_and_validate_token(initial_token)
-
+        self.http_client_sync = (
+            http_client if isinstance(http_client, httpx.Client) else httpx.Client()
+        )
+        self.http_client_async = (
+            http_client
+            if isinstance(http_client, httpx.AsyncClient)
+            else httpx.AsyncClient()
+        )
         self.credentials_callback = credentials_callback
 
     async def async_auth_flow(
         self, request: httpx.Request
     ) -> AsyncGenerator[httpx.Request, httpx.Response]:
-        """Authenticate a http request.
-
-        Implements the authentication callback for the http client.
-
-        """
-        token = await self.assure_valid_token()
+        """Authenticate a http request asynchronously."""
+        token = await self.assure_valid_token_async()
         request.headers["Authorization"] = f"Bearer {token}"
         yield request
 
-    async def assure_valid_token(self) -> WaylayToken:
-        """Validate the current token and request a new one if invalid."""
-        if self.current_token:
-            # token exists and is valid
-            return self.current_token
+    def sync_auth_flow(
+        self, request: httpx.Request
+    ) -> Generator[httpx.Request, httpx.Response, None]:
+        """Authenticate a http request synchronously."""
+        token = self.assure_valid_token()
+        request.headers["Authorization"] = f"Bearer {token}"
+        yield request
 
-        self.current_token = self._create_and_validate_token(
-            await self._request_token_string()
-        )
+    def assure_valid_token(self) -> WaylayToken:
+        """Validate the current token and request a new one if invalid."""
+        if self.current_token and self.current_token.is_valid:
+            return self.current_token
+        credentials = self._validate_credentials()
+        if isinstance(credentials, TokenCredentials):
+            token_str = credentials.token
+        else:
+            token_str = self._request_token_sync(credentials)
+        self.current_token = self._create_and_validate_token_sync(token_str)
         return self.current_token
 
-    def _create_and_validate_token(self, token: TokenString) -> WaylayToken:
+    async def assure_valid_token_async(self) -> WaylayToken:
+        """Validate the current token and request a new one if invalid."""
+        if self.current_token and self.current_token.is_valid:
+            return self.current_token
+        credentials = self._validate_credentials()
+        if isinstance(credentials, TokenCredentials):
+            token_str = credentials.token
+        else:
+            token_str = await self._request_token_async(credentials)
+        self.current_token = await self._create_and_validate_token_async(token_str)
+        return self.current_token
+
+    def _create_and_validate_token_sync(self, token: TokenString) -> WaylayToken:
         return WaylayToken(token).validate()
 
-    async def _request_token_string(self) -> TokenString:
-        """Request a token."""
+    async def _create_and_validate_token_async(self, token: TokenString) -> WaylayToken:
+        return self._create_and_validate_token_sync(token)
+
+    def _validate_credentials(self) -> ApiKeySecretMixin | TokenCredentials:
         if isinstance(self.credentials, NoCredentials):
             if self.credentials_callback is not None:
                 self.credentials = self.credentials_callback(
@@ -89,46 +107,62 @@ class WaylayTokenAuth(httpx.Auth):
                 )
             else:
                 raise AuthError("No credentials or credentials_callback provided.")
-
-        if isinstance(self.credentials, TokenCredentials):
-            raise AuthError(
-                f"cannot refresh expired token with credentials "
-                f"of type '{self.credentials.credentials_type}'"
-            )
-
-        if isinstance(self.credentials, ApplicationCredentials):
-            raise AuthError(
-                f"credentials of type {self.credentials.credentials_type} "
-                "are not supported."
-            )
-
-        if isinstance(self.credentials, ClientCredentials):
-            return await self._request_token(self.credentials)
-
+        if isinstance(self.credentials, (ApiKeySecretMixin, TokenCredentials)):
+            return self.credentials
         raise AuthError(
             f"credentials of type {self.credentials.credentials_type} are not supported"
         )
 
-    async def _request_token(self, credentials: ClientCredentials) -> str:
+    def _token_request(self, credentials: ApiKeySecretMixin) -> httpx.Request:
+        http_client = self.http_client_async or self.http_client_sync
         token_url_prefix = (
             credentials.accounts_url or f"{credentials.gateway_url}/accounts/v1"
         )
-        token_url = f"{token_url_prefix}/tokens?grant_type=client_credentials"
-        token_req = {
-            "clientId": credentials.api_key,
-            "clientSecret": credentials.api_secret,
-        }
+        if isinstance(credentials, ClientCredentials):
+            url = f"{token_url_prefix}/tokens"
+            params = {"grant_type": "client_credentials"}
+            json = {
+                "clientId": credentials.api_key,
+                "clientSecret": credentials.api_secret,
+            }
+            return http_client.build_request("POST", url, params=params, json=json)
+        if isinstance(credentials, ApplicationCredentials):
+            url = f"{token_url_prefix}/tokens"
+            params = {
+                "grant_type": "application_credentials",
+                "tenant": credentials.tenant_id,
+            }
+            json = {
+                "applicationId": credentials.api_key,
+                "applicationSecret": credentials.api_secret,
+            }
+            return http_client.build_request("POST", url, params=params, json=json)
+        raise AuthError(
+            f"credentials of type {self.credentials.credentials_type} "
+            "are not supported."
+        )
+
+    def _parse_token_response(self, response: httpx.Response) -> str:
+        if response.status_code != 200:
+            raise AuthError(
+                f"could not obtain waylay token: {response.content!r} "
+                f"[{response.status_code}]"
+            )
+        token_resp_json = response.json()
+        return token_resp_json["token"]
+
+    def _request_token_sync(self, credentials: ApiKeySecretMixin) -> str:
         try:
-            if self.http_client:
-                token_resp = await self.http_client.post(url=token_url, json=token_req)
-            else:
-                token_resp = httpx.post(url=token_url, json=token_req)
-            if token_resp.status_code != 200:
-                raise AuthError(
-                    f"could not obtain waylay token: {token_resp.content!r} "
-                    f"[{token_resp.status_code}]"
-                )
-            token_resp_json = token_resp.json()
+            return self._parse_token_response(
+                self.http_client_sync.send(self._token_request(credentials))
+            )
         except httpx.HTTPError as exc:
             raise AuthError(f"could not obtain waylay token: {exc}") from exc
-        return token_resp_json["token"]
+
+    async def _request_token_async(self, credentials: ApiKeySecretMixin) -> str:
+        try:
+            return self._parse_token_response(
+                await self.http_client_async.send(self._token_request(credentials))
+            )
+        except httpx.HTTPError as exc:
+            raise AuthError(f"could not obtain waylay token: {exc}") from exc

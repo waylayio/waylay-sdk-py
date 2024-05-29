@@ -10,7 +10,7 @@ from waylay.sdk.config import DEFAULT_PROFILE
 VERSION_STRING_PATTERN = r"(v\d+(\.\d+)?(\.\d+)?(\+.*)?|\d+\+[^.]+\.\d+\.\w+)"
 
 
-def test_create_client_from_credentials(
+async def test_create_client_from_credentials(
     waylay_test_user_id, waylay_test_user_secret, waylay_test_gateway_url
 ):
     """Test authentication with client credentials."""
@@ -31,9 +31,11 @@ def test_create_client_from_credentials(
     assert cred.accounts_url is None
 
     assert isinstance(waylay_client.services, Mapping)
+    gateway_version = await waylay_client.gateway.about.get()
+    assert gateway_version is not None
 
 
-def test_create_client_from_profile(
+async def test_create_client_from_profile(
     waylay_test_user_id, waylay_test_user_secret, waylay_test_gateway_url, monkeypatch
 ):
     """Test profile creation dialog."""
@@ -67,3 +69,5 @@ def test_create_client_from_profile(
         "example", gateway_url=waylay_test_gateway_url
     )
     assert waylay_test_gateway_url == waylay_client.config.gateway_url
+    gateway_version = await waylay_client.gateway.about.get()
+    assert gateway_version is not None
