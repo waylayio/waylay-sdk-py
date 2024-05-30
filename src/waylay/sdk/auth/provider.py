@@ -9,9 +9,9 @@ import httpx
 
 from .exceptions import AuthError
 from .model import (
-    ApiKeySecretMixin,
     ApplicationCredentials,
     ClientCredentials,
+    KeySecretCredentials,
     NoCredentials,
     TokenCredentials,
     TokenString,
@@ -99,7 +99,7 @@ class WaylayTokenAuth(httpx.Auth):
     async def _create_and_validate_token_async(self, token: TokenString) -> WaylayToken:
         return self._create_and_validate_token_sync(token)
 
-    def _validate_credentials(self) -> ApiKeySecretMixin | TokenCredentials:
+    def _validate_credentials(self) -> KeySecretCredentials | TokenCredentials:
         if isinstance(self.credentials, NoCredentials):
             if self.credentials_callback is not None:
                 self.credentials = self.credentials_callback(
@@ -107,13 +107,13 @@ class WaylayTokenAuth(httpx.Auth):
                 )
             else:
                 raise AuthError("No credentials or credentials_callback provided.")
-        if isinstance(self.credentials, (ApiKeySecretMixin, TokenCredentials)):
+        if isinstance(self.credentials, (KeySecretCredentials, TokenCredentials)):
             return self.credentials
         raise AuthError(
             f"credentials of type {self.credentials.credentials_type} are not supported"
         )
 
-    def _token_request(self, credentials: ApiKeySecretMixin) -> httpx.Request:
+    def _token_request(self, credentials: KeySecretCredentials) -> httpx.Request:
         http_client = self.http_client_async or self.http_client_sync
         token_url_prefix = (
             credentials.accounts_url or f"{credentials.gateway_url}/accounts/v1"
@@ -151,7 +151,7 @@ class WaylayTokenAuth(httpx.Auth):
         token_resp_json = response.json()
         return token_resp_json["token"]
 
-    def _request_token_sync(self, credentials: ApiKeySecretMixin) -> str:
+    def _request_token_sync(self, credentials: KeySecretCredentials) -> str:
         try:
             return self._parse_token_response(
                 self.http_client_sync.send(self._token_request(credentials))
@@ -159,7 +159,7 @@ class WaylayTokenAuth(httpx.Auth):
         except httpx.HTTPError as exc:
             raise AuthError(f"could not obtain waylay token: {exc}") from exc
 
-    async def _request_token_async(self, credentials: ApiKeySecretMixin) -> str:
+    async def _request_token_async(self, credentials: KeySecretCredentials) -> str:
         try:
             return self._parse_token_response(
                 await self.http_client_async.send(self._token_request(credentials))

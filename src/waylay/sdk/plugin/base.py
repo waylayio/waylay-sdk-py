@@ -133,6 +133,7 @@ class WaylayTool(WaylayPlugin):
     def __init__(
         self,
         api_client: ApiClient,
+        *,
         services: PluginAccess[WaylayService],
         tools: "PluginAccess[WaylayTool]",
     ):

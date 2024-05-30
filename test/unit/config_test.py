@@ -1,6 +1,7 @@
 """Test suite for package `waylay.sdk.config`."""
 
 from datetime import datetime
+from typing import Iterator, Mapping
 
 import pytest
 from httpx import Request, Response
@@ -213,7 +214,7 @@ def test_representations(mock_httpx_accounts, mock_token):
 
 def test_save_load_delete_profile(mock_token, monkeypatch, mocker):
     """Test saving, loading and deletion of config profiles."""
-    responses = iter(
+    responses: Iterator[Mapping] = iter(
         [
             dict(status_code=400),
             dict(status_code=401),

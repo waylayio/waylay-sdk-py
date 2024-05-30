@@ -31,6 +31,9 @@ from httpx import USE_CLIENT_DEFAULT, ResponseNotRead
 from jsonpath_ng import parse as jsonpath_parse  # type: ignore[import-untyped]
 from pydantic import BaseModel, ConfigDict, TypeAdapter, ValidationError
 from pydantic_core import to_jsonable_python
+from typing_extensions import (
+    TypeAlias,  # >=3.9
+)
 
 from ._models import Model
 from .exceptions import ApiError, ApiValueError, RestResponseError
@@ -58,21 +61,19 @@ _MODEL_TYPE_ADAPTER = TypeAdapter(Model)
 
 log = logging.getLogger(__name__)
 
-DEFAULT_SERIALIZATION_ARGS = {"by_alias": True, "exclude_none": True}
-
 TEXT_EVENT_STREAM_CONTENT_TYPE = "text/event-stream"
 NDJSON_EVENT_STREAM_CONTENT_TYPE = "application/x-ndjson"
 EVENT_STREAM_CONTENT_TYPES = [
     TEXT_EVENT_STREAM_CONTENT_TYPE,
     NDJSON_EVENT_STREAM_CONTENT_TYPE,
 ]
+TypeMapping: TypeAlias = Mapping[str, type[Any] | None] | type[Any] | None
 
 
 class WithSerializationSupport:
     """Serialization support for the SDK client."""
 
     base_url: str
-    serialization_args = DEFAULT_SERIALIZATION_ARGS
 
     @property
     @abstractmethod
@@ -168,13 +169,13 @@ class WithSerializationSupport:
 
     def serialize(self, data):
         """Serialize to a jsonable python data structure."""
-        return to_jsonable_python(data, **self.serialization_args)
+        return to_jsonable_python(data, by_alias=True, exclude_none=True)
 
     def deserialize(
         self,
         response: Response,
         *,
-        response_type: Mapping[str, Type | None] | Type | None = None,
+        response_type: TypeMapping = None,
         select_path: str = "",
         stream: bool = False,
     ) -> Any:
@@ -317,7 +318,7 @@ def _deserialize(data: Any, klass: Any):
 
 def _response_type_for_status_code(
     status_code,
-    response_type: Mapping[str, Type | None] | Type | None,
+    response_type: TypeMapping,
 ):
     status_code_key = str(status_code)
     rt_map = (
