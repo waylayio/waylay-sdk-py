@@ -90,8 +90,8 @@ exec-lint:
 	@ruff check
 
 exec-typecheck:
-	@mypy -p waylay.sdk
-	@mypy test/*/*.py
+	@mypy --check-untyped-defs -p waylay.sdk
+	@mypy --check-untyped-defs test/*/*.py
 	@${printMsg} typecheck OK
 
 exec-format:

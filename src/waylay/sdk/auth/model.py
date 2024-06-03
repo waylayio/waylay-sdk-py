@@ -76,7 +76,7 @@ class WaylayCredentials(abc.ABC):
 
 
 @dataclass(repr=False)
-class AccountsUrlMixin:
+class CredentialsBase(WaylayCredentials):
     """Dataclass mixin for the 'gateway_url' (legacy 'accounts_url') property."""
 
     gateway_url: str | None = None
@@ -84,7 +84,7 @@ class AccountsUrlMixin:
 
 
 @dataclass(repr=False, init=False)
-class ApiKeySecretMixin(AccountsUrlMixin):
+class KeySecretCredentials(CredentialsBase):
     """Dataclass mixin for the 'api_key' and 'api_secret'."""
 
     api_key: str = ""
@@ -128,7 +128,7 @@ class ApiKeySecretMixin(AccountsUrlMixin):
     def to_dict(self, obfuscate=True):
         """Convert the credentials to a json-serialisable representation."""
         return dict(
-            type=self.credentials_type.value,
+            type=self.credentials_type.value,  # type: ignore
             api_key=self.api_key,
             api_secret="********" if obfuscate else self.api_secret,
             gateway_url=self.gateway_url,
@@ -160,7 +160,7 @@ class ApiKeySecretMixin(AccountsUrlMixin):
 
 
 @dataclass(repr=False, init=False)
-class NoCredentials(AccountsUrlMixin, WaylayCredentials):
+class NoCredentials(CredentialsBase):
     """Credentials that be resolved via (interactive) callback when required."""
 
     credentials_type: ClassVar[CredentialsType] = CredentialsType.CALLBACK
@@ -184,14 +184,14 @@ class NoCredentials(AccountsUrlMixin, WaylayCredentials):
 
 
 @dataclass(repr=False, init=False)
-class ClientCredentials(ApiKeySecretMixin, WaylayCredentials):
+class ClientCredentials(KeySecretCredentials):
     """Waylay Credentials: api key and secret of type 'client_credentials'."""
 
     credentials_type: ClassVar[CredentialsType] = CredentialsType.CLIENT
 
 
 @dataclass(repr=False, init=False)
-class ApplicationCredentials(ApiKeySecretMixin, WaylayCredentials):
+class ApplicationCredentials(KeySecretCredentials):
     """Waylay Credentials: api key and secret of type 'application_credentials'."""
 
     credentials_type: ClassVar[CredentialsType] = CredentialsType.APPLICATION
@@ -220,7 +220,7 @@ class ApplicationCredentials(ApiKeySecretMixin, WaylayCredentials):
 
 
 @dataclass(repr=False, init=False)
-class TokenCredentials(AccountsUrlMixin, WaylayCredentials):
+class TokenCredentials(CredentialsBase):
     """Waylay JWT Token credentials."""
 
     credentials_type: ClassVar[CredentialsType] = CredentialsType.TOKEN

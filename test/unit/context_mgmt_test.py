@@ -27,7 +27,11 @@ class MyService(WaylayService):
         if with_http_info:
             return resp
         return self.api_client.deserialize(
-            resp, response_type={"*": Model}, select_path=select_path
+            resp,
+            # my complains that 'Model' is a <typing special form>,
+            # can't find a correct typing of this argument to allow it as a value.
+            response_type={"*": Model},  # type: ignore
+            select_path=select_path,
         )
 
 

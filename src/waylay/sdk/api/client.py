@@ -115,7 +115,7 @@ class ApiClient(WithSerializationSupport):
 
     async def aclose(self):
         """Close the client."""
-        if not self.is_closed:
+        if self._http_client and not self.is_closed:
             await self._http_client.aclose()
             self._http_client = None
 
