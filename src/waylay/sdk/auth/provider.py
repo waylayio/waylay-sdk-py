@@ -26,9 +26,9 @@ class WaylayTokenAuth(httpx.Auth):
     """Authentication flow with a waylay token.
 
     Will automatically refresh an expired token.
-
     """
 
+    AUTH_EXCEPTION = AuthError
     current_token: WaylayToken | None
     credentials: WaylayCredentials
     http_client_sync: httpx.Client
@@ -106,10 +106,12 @@ class WaylayTokenAuth(httpx.Auth):
                     self.credentials.accounts_url or self.credentials.gateway_url
                 )
             else:
-                raise AuthError("No credentials or credentials_callback provided.")
+                raise self.AUTH_EXCEPTION(
+                    "No credentials or credentials_callback provided."
+                )
         if isinstance(self.credentials, (KeySecretCredentials, TokenCredentials)):
             return self.credentials
-        raise AuthError(
+        raise self.AUTH_EXCEPTION(
             f"credentials of type {self.credentials.credentials_type} are not supported"
         )
 
@@ -137,32 +139,25 @@ class WaylayTokenAuth(httpx.Auth):
                 "applicationSecret": credentials.api_secret,
             }
             return http_client.build_request("POST", url, params=params, json=json)
-        raise AuthError(
+        raise self.AUTH_EXCEPTION(
             f"credentials of type {self.credentials.credentials_type} "
             "are not supported."
         )
 
     def _parse_token_response(self, response: httpx.Response) -> str:
-        if response.status_code != 200:
-            raise AuthError(
-                f"could not obtain waylay token: {response.content!r} "
-                f"[{response.status_code}]"
-            )
-        token_resp_json = response.json()
-        return token_resp_json["token"]
+        try:
+            response.raise_for_status()
+            token_resp_json = response.json()
+            return token_resp_json["token"]
+        except httpx.HTTPError as exc:
+            raise self.AUTH_EXCEPTION("Could not obtain waylay token") from exc
 
     def _request_token_sync(self, credentials: KeySecretCredentials) -> str:
-        try:
-            return self._parse_token_response(
-                self.http_client_sync.send(self._token_request(credentials))
-            )
-        except httpx.HTTPError as exc:
-            raise AuthError(f"could not obtain waylay token: {exc}") from exc
+        return self._parse_token_response(
+            self.http_client_sync.send(self._token_request(credentials))
+        )
 
     async def _request_token_async(self, credentials: KeySecretCredentials) -> str:
-        try:
-            return self._parse_token_response(
-                await self.http_client_async.send(self._token_request(credentials))
-            )
-        except httpx.HTTPError as exc:
-            raise AuthError(f"could not obtain waylay token: {exc}") from exc
+        return self._parse_token_response(
+            await self.http_client_async.send(self._token_request(credentials))
+        )
