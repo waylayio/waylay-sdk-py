@@ -18,9 +18,11 @@ from collections.abc import (
 from inspect import isclass
 from typing import (
     Any,
+    Optional,
     Protocol,
     Type,
     TypeVar,
+    Union,
     cast,
     runtime_checkable,
 )
@@ -67,7 +69,9 @@ EVENT_STREAM_CONTENT_TYPES = [
     TEXT_EVENT_STREAM_CONTENT_TYPE,
     NDJSON_EVENT_STREAM_CONTENT_TYPE,
 ]
-TypeMapping: TypeAlias = Mapping[str, type[Any] | None] | type[Any] | None
+TypeMapping: TypeAlias = Union[
+    Mapping[str, Optional[Type[Any]]], Type[Any], None
+]
 
 
 class WithSerializationSupport:
