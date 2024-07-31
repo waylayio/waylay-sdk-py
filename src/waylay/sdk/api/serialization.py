@@ -59,7 +59,7 @@ _CLASS_MAPPING = {
 }
 _ALLOWED_METHODS = ["GET", "HEAD", "DELETE", "POST", "PUT", "PATCH", "OPTIONS"]
 
-_MODEL_TYPE_ADAPTER = TypeAdapter(Model)
+_MODEL_TYPE_ADAPTER: Any = TypeAdapter(Model)
 
 log = logging.getLogger(__name__)
 
@@ -69,9 +69,7 @@ EVENT_STREAM_CONTENT_TYPES = [
     TEXT_EVENT_STREAM_CONTENT_TYPE,
     NDJSON_EVENT_STREAM_CONTENT_TYPE,
 ]
-TypeMapping: TypeAlias = Union[
-    Mapping[str, Optional[Type[Any]]], Type[Any], None
-]
+TypeMapping: TypeAlias = Union[Mapping[str, Optional[Type[Any]]], Type[Any], None]
 
 
 class WithSerializationSupport:
@@ -331,7 +329,7 @@ def _response_type_for_status_code(
     if rt_map is None:
         return _DEFAULT_RESPONSE_TYPE
     for key in [status_code_key, f"{status_code_key[0]}XX", "default", "*"]:
-        rt: Type | None = rt_map.get(key)
+        rt = rt_map.get(key)
         if rt is not None:
             return rt
     return _DEFAULT_RESPONSE_TYPE

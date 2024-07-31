@@ -21,7 +21,7 @@ dependencies = [
     "jsonpath-ng",
     "pydantic >= 2.6.0",
     "eval-type-backport ~= 0.1.3; python_version < '3.10'",
-    "waylay-beta==9.9.9b9",
+    "waylay-beta==0.0.999",
 ]
 
 [project.urls]
@@ -54,7 +54,7 @@ dev = [
     "starlette",
     "syrupy",
     "ruff",
-    'mypy',
+    'mypy!=1.11.*',
     'types-python-jose',
     'types-appdirs',
     'types-python-dateutil',
