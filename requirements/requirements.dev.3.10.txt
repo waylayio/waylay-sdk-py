@@ -20,7 +20,7 @@ pytest-mock==3.14.0
 pytest==8.3.2
 ruff==0.5.5
 sse-starlette==2.1.2
-starlette==0.38.2
+starlette==0.40.0
 syrupy==4.6.1
 types-appdirs==1.4.3.5
 types-pyasn1==0.6.0.20240402
