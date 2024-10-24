@@ -15,8 +15,9 @@ from typing import (
 )
 
 import httpx
-import httpx._client as httpx_types
 from typing_extensions import Required  # >=3.11
+
+from . import httpx_types
 
 AsyncClient = httpx.AsyncClient
 Response = httpx.Response
