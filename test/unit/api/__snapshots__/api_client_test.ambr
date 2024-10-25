@@ -1163,7 +1163,7 @@
         }),
       }),
       'method': 'PATCH',
-      'url': URL('https://api-example.io/service/v1/A/bar/%7Bmissing_param%7D'),
+      'url': URL('https://api-example.io/service/v1/A/bar/{missing_param}'),
     }),
     dict({
       'accept': '*/*',
@@ -1288,7 +1288,7 @@
         }),
       }),
       'method': 'PUT',
-      'url': URL('https://api-example.io/service/v1/%7Bparam1%7D/foo'),
+      'url': URL('https://api-example.io/service/v1/{param1}/foo'),
     }),
     dict({
       'accept': '*/*',

@@ -1,41 +1,44 @@
 """Types from the httpx library."""
 
-from typing import TYPE_CHECKING, Any
+from typing import IO, List, Mapping, Optional, Sequence, Tuple, Union
 
-if TYPE_CHECKING:
-    from httpx._client import (
-        AsyncBaseTransport,
-        AuthTypes,
-        CertTypes,
-        CookieTypes,
-        Limits,
-        ProxiesTypes,
-        ProxyTypes,
-        QueryParamTypes,
-        RequestContent,
-        RequestData,
-        RequestExtensions,
-        RequestFiles,
-        TimeoutTypes,
-        URLTypes,
-        VerifyTypes,
-    )
-else:
-    AuthTypes = Any
-    RequestContent = Any
-    RequestData = Any
-    RequestFiles = Any
-    TimeoutTypes = Any
-    URLTypes = Any
-    CookieTypes = Any
-    QueryParamType = Any
-    AsyncBaseTransport = Any
-    ProxiesTypes = Any
-    Limits = Any
-    RequestExtensions = Any
-    VerifyTypes = Any
-    CertTypes = Any
-    ProxyTypes = Any
+from httpx._client import (
+    AsyncBaseTransport,
+    AuthTypes,
+    CertTypes,
+    CookieTypes,
+    Limits,
+    ProxiesTypes,
+    ProxyTypes,
+    RequestData,
+    RequestExtensions,
+    RequestFiles,
+    TimeoutTypes,
+    VerifyTypes,
+)
+from httpx._client import (
+    RequestContent as _RequestContent,
+)
+
+URLTypes = str
+# allow any IO as request content, converted to an AsyncIterable at
+#  waylay.sdk.api.serialization._convert_content
+RequestContent = Union[_RequestContent, IO[bytes]]
+HeaderTypes = Union[
+    Mapping[str, str],
+    Mapping[bytes, bytes],
+    Sequence[Tuple[str, str]],
+    Sequence[Tuple[bytes, bytes]],
+]
+
+PrimitiveData = Optional[Union[str, int, float, bool]]
+QueryParamTypes = Union[
+    Mapping[str, Union[PrimitiveData, Sequence[PrimitiveData]]],
+    List[Tuple[str, PrimitiveData]],
+    Tuple[Tuple[str, PrimitiveData], ...],
+    str,
+    bytes,
+]
 
 __all__ = [
     "RequestFiles",
