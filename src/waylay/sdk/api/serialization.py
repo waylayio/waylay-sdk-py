@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import contextlib
 import datetime
-import json
+import json as json_lib
 import logging
 import re
 from abc import abstractmethod
@@ -433,13 +433,13 @@ def __parse_event(event_str: str, content_type: str):
             keyword = keyword.strip()
             _data = data[0].strip() if data else ""
             with contextlib.suppress(ValueError, TypeError):
-                _data = json.loads(_data)
+                _data = json_lib.loads(_data)
             if keyword or data:
                 event[keyword] = _data
         return event
     elif content_type == NDJSON_EVENT_STREAM_CONTENT_TYPE:
         try:
-            event = json.loads(event_str)
+            event = json_lib.loads(event_str)
         except (ValueError, TypeError):
             log.warning("Cannot deserialize event\n%s", event_str, exc_info=True)
     else:
