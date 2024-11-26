@@ -1,13 +1,13 @@
 """Auth exception utilities."""
 
-import jose.exceptions as jwt_exc
+import jwt.exceptions as jwt_exc
 
 from ..exceptions import WaylayError
 
 _AUTH_MESSAGE_FOR_EXCEPTON_CLASS = [
-    (jwt_exc.JWTClaimsError, "invalid token"),
     (jwt_exc.ExpiredSignatureError, "token expired"),
-    (jwt_exc.JWTError, "invalid token"),
+    (jwt_exc.InvalidTokenError, "invalid token"),
+    (jwt_exc.PyJWTError, "invalid token"),
     (TypeError, "could not decode token"),
     (ValueError, "could not decode token"),
 ]
