@@ -11,8 +11,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, ClassVar, Dict, List
 
-import jwt
-from jwt.exceptions import PyJWTError
+from jose import JWTError, jwt
 
 from .exceptions import AuthError, TokenParseError
 
@@ -274,9 +273,9 @@ class WaylayToken:
         if token_data is None:
             try:
                 token_data = jwt.decode(
-                    token_string, options=dict(verify_signature=False)
+                    token_string, "", options=dict(verify_signature=False)
                 )
-            except (TypeError, ValueError, PyJWTError) as exc:
+            except (TypeError, ValueError, JWTError) as exc:
                 raise TokenParseError(exc) from exc
         self.token_data = token_data
 

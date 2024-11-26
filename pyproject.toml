@@ -14,7 +14,7 @@ license={file = "LICENSE.txt"}
 dependencies = [
     "httpx",
     "appdirs",
-    "pyjwt",
+    "python-jose",
     "python_dateutil",
     "typing_extensions >= 4.10.0",
     "typeguard",
@@ -55,7 +55,7 @@ dev = [
     "syrupy",
     "ruff",
     'mypy!=1.11.*',
-    'pyjwt',
+    'types-python-jose',
     'types-appdirs',
     'types-python-dateutil',
     'pre-commit',
