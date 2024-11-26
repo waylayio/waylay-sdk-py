@@ -1,4 +1,4 @@
-# -e git+https://github.com/waylayio/waylay-py-core.git@108a0dcd6fa506d2494970d6a762b1d990e12601#egg=waylay_sdk_plugin_example&subdirectory=test/plugin
+# -e git+https://github.com/waylayio/waylay-py-core.git@02249801f16a68fc3719b908bbc9f4a4a1b2901f#egg=waylay_sdk_plugin_example&subdirectory=test/plugin
 PyYAML==6.0.2
 cfgv==3.4.0
 click==8.1.7
@@ -13,6 +13,7 @@ nodeenv==1.9.1
 platformdirs==4.3.6
 pluggy==1.5.0
 pre_commit==4.0.1
+pyproject_hooks==1.2.0
 pytest-asyncio==0.24.0
 pytest-cov==6.0.0
 pytest-httpx==0.34.0
