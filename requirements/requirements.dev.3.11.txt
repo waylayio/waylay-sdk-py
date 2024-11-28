@@ -1,4 +1,4 @@
-# -e git+https://github.com/waylayio/waylay-py-core.git@02249801f16a68fc3719b908bbc9f4a4a1b2901f#egg=waylay_sdk_plugin_example&subdirectory=test/plugin
+# -e git+https://github.com/waylayio/waylay-py-core.git@e1905bb892afd1b081add6273f5e684e3596b7b6#egg=waylay_sdk_plugin_example&subdirectory=test/plugin
 PyYAML==6.0.2
 cfgv==3.4.0
 click==8.1.7

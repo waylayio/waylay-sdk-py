@@ -1,5 +1,5 @@
-# -e git+https://github.com/waylayio/waylay-py-core.git@02249801f16a68fc3719b908bbc9f4a4a1b2901f#egg=waylay_sdk_core
-PyJWT==2.10.0
+# -e git+https://github.com/waylayio/waylay-py-core.git@e1905bb892afd1b081add6273f5e684e3596b7b6#egg=waylay_sdk_core
+PyJWT==2.10.1
 annotated-types==0.7.0
 anyio==4.6.2.post1
 appdirs==1.4.4
@@ -10,7 +10,7 @@ httpx==0.27.2
 idna==3.10
 jsonpath-ng==1.7.0
 ply==3.11
-pydantic==2.10.1
+pydantic==2.10.2
 pydantic_core==2.27.1
 python-dateutil==2.9.0.post0
 six==1.16.0

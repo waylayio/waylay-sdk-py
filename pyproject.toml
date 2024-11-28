@@ -12,7 +12,7 @@ readme = "README.md"
 authors = [{name = "Waylay", email = "info@waylay.io"}]
 license={file = "LICENSE.txt"}
 dependencies = [
-    "httpx",
+    "httpx == 0.27.*",
     "appdirs",
     "pyjwt",
     "python_dateutil",
