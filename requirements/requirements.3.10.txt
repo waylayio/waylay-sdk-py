@@ -1,5 +1,5 @@
 # -e git+https://github.com/waylayio/waylay-py-core.git@02249801f16a68fc3719b908bbc9f4a4a1b2901f#egg=waylay_sdk_core
-PyJWT==2.10.0
+PyJWT==2.10.1
 annotated-types==0.7.0
 anyio==4.6.2.post1
 appdirs==1.4.4
