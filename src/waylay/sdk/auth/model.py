@@ -7,7 +7,7 @@ import base64
 import binascii
 import json
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, ClassVar, Dict, List
 
@@ -334,26 +334,24 @@ class WaylayToken:
     @property
     def expires_at(self) -> datetime | None:
         """Get the token expiry timestamp."""
-        exp = self.token_data.get("exp", None)
-        return None if exp is None else datetime.fromtimestamp(exp)
+        return _utc_datetime(self.token_data.get("exp", None))
 
     @property
     def issued_at(self) -> datetime | None:
         """Get the token issuance timestamp."""
-        iat = self.token_data.get("iat", None)
-        return None if iat is None else datetime.fromtimestamp(iat)
+        return _utc_datetime(self.token_data.get("iat", None))
 
     @property
     def expires_seconds(self) -> int:
         """Get seconds until expiry."""
-        exp = self.token_data.get("exp", None)
-        return 0 if exp is None else exp - datetime.now().timestamp()
+        now = _now_ts()
+        exp = self.token_data.get("exp", now)
+        return exp - now
 
     @property
     def age(self) -> int:
         """Get seconds sinds issuance."""
-        iat = self.token_data.get("iat", 0)
-        return int(datetime.now().timestamp() - iat)
+        return int(_now_ts() - self.token_data.get("iat", 0))
 
     @property
     def is_expired(self) -> bool:
@@ -364,8 +362,7 @@ class WaylayToken:
         """
         if not isinstance(self.token_data, dict):
             return True
-        exp = self.expires_at
-        return exp is None or exp < datetime.now()
+        return self.expires_seconds < 0
 
     @property
     def is_valid(self) -> bool:
@@ -402,3 +399,15 @@ class WaylayToken:
     def __bool__(self) -> bool:
         """Get the validity of the token."""
         return self.is_valid
+
+
+def _utc_datetime(posix_ts: float | int | None) -> datetime | None:
+    """Parse posix seconds to an utc datetime."""
+    if posix_ts is None:
+        return None
+    return datetime.fromtimestamp(posix_ts, tz=timezone.utc)
+
+
+def _now_ts() -> int:
+    """Return current posix seconds timestamp."""
+    return int(datetime.now(tz=timezone.utc).timestamp())
