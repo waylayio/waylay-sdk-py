@@ -408,6 +408,6 @@ def _utc_datetime(posix_ts: float | int | None) -> datetime | None:
     return datetime.fromtimestamp(posix_ts, tz=timezone.utc)
 
 
-def _now_ts() -> datetime:
+def _now_ts() -> int:
     """Return current posix seconds timestamp."""
-    return datetime.now(tz=timezone.utc).timestamp()
+    return int(datetime.now(tz=timezone.utc).timestamp())
