@@ -171,7 +171,7 @@ CONDA_INIT=source $$(conda info --base)/etc/profile.d/conda.sh
 
 
 PYTHON_VERSION?=3.11
-PYTHON_VERSIONS=3.9 3.10 3.11 3.12
+PYTHON_VERSIONS=3.9 3.10 3.11 3.12 3.13
 
 freeze-deps-conda:
 	@-conda env remove -n waylay-sdk-${PYTHON_VERSION}
