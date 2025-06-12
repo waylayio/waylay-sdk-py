@@ -1,22 +1,23 @@
 """Types from the httpx library."""
 
+import ssl
 from typing import IO, List, Mapping, Optional, Sequence, Tuple, Union
 
 from httpx._client import (
     AsyncBaseTransport,
+    Limits,
+)
+from httpx._types import (
     AuthTypes,
     CertTypes,
     CookieTypes,
-    Limits,
-    ProxiesTypes,
     ProxyTypes,
     RequestData,
     RequestExtensions,
     RequestFiles,
     TimeoutTypes,
-    VerifyTypes,
 )
-from httpx._client import (
+from httpx._types import (
     RequestContent as _RequestContent,
 )
 
@@ -39,6 +40,7 @@ QueryParamTypes = Union[
     str,
     bytes,
 ]
+VerifyTypes = Union[ssl.SSLContext, str, bool]
 
 __all__ = [
     "RequestFiles",
@@ -51,7 +53,7 @@ __all__ = [
     "QueryParamTypes",
     "RequestExtensions",
     "VerifyTypes",
-    "ProxiesTypes",
+    "ProxyTypes",
     "AsyncBaseTransport",
     "Limits",
     "CertTypes",
