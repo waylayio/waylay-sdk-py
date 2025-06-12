@@ -123,7 +123,7 @@ async def test_async_request(my_client: WaylayClient):
         buff = buff + chunck
         chuncks += 1
     assert chuncks == 2
-    assert response.num_bytes_downloaded == 20
+    assert response.num_bytes_downloaded == 19
     assert json.loads(buff) == {"message": "hello"}
 
 

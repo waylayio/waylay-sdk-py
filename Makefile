@@ -174,7 +174,7 @@ PYTHON_VERSION?=3.11
 PYTHON_VERSIONS=3.9 3.10 3.11 3.12 3.13
 
 freeze-deps-conda:
-	@-conda env remove -n waylay-sdk-${PYTHON_VERSION}
+	@-conda env remove -y -n waylay-sdk-${PYTHON_VERSION}
 	@conda create -y -n waylay-sdk-${PYTHON_VERSION} python=${PYTHON_VERSION} 
 	@${CONDA_INIT} && conda activate waylay-sdk-${PYTHON_VERSION} && make exec-freeze-deps
 
