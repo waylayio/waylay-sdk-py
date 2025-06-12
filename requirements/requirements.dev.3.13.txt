@@ -1,4 +1,4 @@
-# -e git+https://github.com/waylayio/waylay-py-core.git@72c4435346ff46cb2f5aec7d7fa624401492f2fe#egg=waylay_sdk_plugin_example&subdirectory=test/plugin
+# -e git+https://github.com/waylayio/waylay-py-core.git@a15096c2e225bd36ae6c452f0b904dcf9cf64155#egg=waylay_sdk_plugin_example&subdirectory=test/plugin
 cfgv==3.4.0
 coverage==7.8.2
 distlib==0.3.9
@@ -6,20 +6,22 @@ filelock==3.18.0
 identify==2.6.12
 iniconfig==2.1.0
 mypy_extensions==1.1.0
-mypy==1.15.0
+mypy==1.16.0
 nodeenv==1.9.1
+pathspec==0.12.1
 platformdirs==4.3.8
 pluggy==1.6.0
 pre_commit==4.2.0
+Pygments==2.19.1
 pytest-asyncio==1.0.0
 pytest-cov==6.1.1
 pytest-httpx==0.34.0
 pytest-mock==3.14.1
-pytest==8.3.5
+pytest==8.4.0
 PyYAML==6.0.2
-ruff==0.11.11
-sse-starlette==2.3.5
-starlette==0.46.2
+ruff==0.11.13
+sse-starlette==2.3.6
+starlette==0.47.0
 syrupy==4.9.1
 types-appdirs==1.4.3.5
 types-python-dateutil==2.9.0.20250516
