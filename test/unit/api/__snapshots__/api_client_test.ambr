@@ -72,7 +72,7 @@
 # ---
 # name: test_deserialize[dict_with_self_model]
   tuple(
-    b'{"self": "me"}',
+    b'{"self":"me"}',
     200,
     dict({
       '*': Model,
@@ -107,7 +107,7 @@
 # ---
 # name: test_deserialize[json_dict0]
   tuple(
-    b'{"hello": "world", "key": [1, 2, 3]}',
+    b'{"hello":"world","key":[1,2,3]}',
     200,
     dict({
     }),
@@ -118,7 +118,7 @@
 # ---
 # name: test_deserialize[json_dict1]
   tuple(
-    b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
+    b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}',
     200,
     dict({
     }),
@@ -129,7 +129,7 @@
 # ---
 # name: test_deserialize[json_dict_*_dummy_union]
   tuple(
-    b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
+    b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}',
     200,
     dict({
       '*': <class 'unit.api.example.pet_model.Pet'>,
@@ -141,7 +141,7 @@
 # ---
 # name: test_deserialize[json_dict_*_union]
   tuple(
-    b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
+    b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}',
     200,
     dict({
       '*': typing.Union[unit.api.example.pet_model.PetList, unit.api.example.pet_model.Pet],
@@ -153,7 +153,7 @@
 # ---
 # name: test_deserialize[json_dict_2XX_dict]
   tuple(
-    b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}',
+    b'{"message":"some not found message","code":"RESOURCE_NOT_FOUND"}',
     201,
     dict({
       '2XX': typing.Dict[str, str],
@@ -168,7 +168,7 @@
 # ---
 # name: test_deserialize[json_dict_any]
   tuple(
-    b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
+    b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}',
     200,
     dict({
       '200': typing.Any,
@@ -187,7 +187,7 @@
 # ---
 # name: test_deserialize[json_dict_any_model]
   tuple(
-    b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
+    b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}',
     200,
     dict({
       '200': Model,
@@ -199,7 +199,7 @@
 # ---
 # name: test_deserialize[json_dict_default_dict]
   tuple(
-    b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}',
+    b'{"message":"some not found message","code":"RESOURCE_NOT_FOUND"}',
     201,
     dict({
       'default': <class 'dict'>,
@@ -214,7 +214,7 @@
 # ---
 # name: test_deserialize[json_dict_dict]
   tuple(
-    b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}',
+    b'{"message":"some not found message","code":"RESOURCE_NOT_FOUND"}',
     201,
     dict({
       '201': typing.Dict[str, str],
@@ -229,7 +229,7 @@
 # ---
 # name: test_deserialize[json_dict_model]
   tuple(
-    b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
+    b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}',
     200,
     dict({
       '200': <class 'unit.api.example.pet_model.Pet'>,
@@ -241,7 +241,7 @@
 # ---
 # name: test_deserialize[json_dict_model_any]
   tuple(
-    b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
+    b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}',
     200,
     dict({
       '200': typing.Any,
@@ -260,7 +260,7 @@
 # ---
 # name: test_deserialize[json_dict_model_with_alias_prop]
   tuple(
-    b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo", "pet_id": 1}',
+    b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo","pet_id":1}',
     200,
     dict({
       '*': <class 'unit.api.example.pet_model.PetWithAlias'>,
@@ -272,7 +272,7 @@
 # ---
 # name: test_deserialize[json_dict_namespace]
   tuple(
-    b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}',
+    b'{"message":"some not found message","code":"RESOURCE_NOT_FOUND"}',
     201,
     dict({
       '2XX': <class 'types.SimpleNamespace'>,
@@ -284,7 +284,7 @@
 # ---
 # name: test_deserialize[json_dict_no_mapping]
   tuple(
-    b'{"message": "some not found message", "code": "RESOURCE_NOT_FOUND"}',
+    b'{"message":"some not found message","code":"RESOURCE_NOT_FOUND"}',
     201,
     dict({
       '4XX': typing.Dict[str, str],
@@ -296,7 +296,7 @@
 # ---
 # name: test_deserialize[json_dict_none]
   tuple(
-    b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
+    b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}',
     200,
     dict({
       '200': None,
@@ -308,7 +308,7 @@
 # ---
 # name: test_deserialize[json_dict_object]
   tuple(
-    b'{"hello": "world", "key": [1, 2, 3]}',
+    b'{"hello":"world","key":[1,2,3]}',
     200,
     dict({
       '200': <class 'object'>,
@@ -327,7 +327,7 @@
 # ---
 # name: test_deserialize[json_dict_str_path_name]
   tuple(
-    b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
+    b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}',
     200,
     dict({
       '200': <class 'str'>,
@@ -339,7 +339,7 @@
 # ---
 # name: test_deserialize[json_dict_union]
   tuple(
-    b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
+    b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}',
     200,
     dict({
       '200': typing.Union[str, list[unit.api.example.pet_model.Pet], unit.api.example.pet_model.Pet],
@@ -351,7 +351,7 @@
 # ---
 # name: test_deserialize[json_list]
   tuple(
-    b'["hello", "world", 123, {"key": "value"}]',
+    b'["hello","world",123,{"key":"value"}]',
     200,
     dict({
     }),
@@ -367,7 +367,7 @@
 # ---
 # name: test_deserialize[json_list_*_union]
   tuple(
-    b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}',
+    b'{"pets":[{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"},{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}]}',
     200,
     dict({
       '*': typing.Union[unit.api.example.pet_model.PetList, unit.api.example.pet_model.Pet],
@@ -379,7 +379,7 @@
 # ---
 # name: test_deserialize[json_list_XX_list_int]
   tuple(
-    b'["11", "22", 33]',
+    b'["11","22",33]',
     200,
     dict({
       '2XX': typing.List[int],
@@ -395,7 +395,7 @@
 # ---
 # name: test_deserialize[json_list_X_union]
   tuple(
-    b'["hello", "world", 123, {"key": "value"}]',
+    b'["hello","world",123,{"key":"value"}]',
     200,
     dict({
       '2XX': typing.List[typing.Union[str, int, typing.Dict[str, typing.Any]]],
@@ -414,7 +414,7 @@
 # ---
 # name: test_deserialize[json_list_any_model]
   tuple(
-    b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}',
+    b'{"pets":[{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"},{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}]}',
     200,
     dict({
       '*': Model,
@@ -426,7 +426,7 @@
 # ---
 # name: test_deserialize[json_list_any_model_path_pets]
   tuple(
-    b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}',
+    b'{"pets":[{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"},{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}]}',
     200,
     dict({
       '200': typing.List[Model],
@@ -441,7 +441,7 @@
 # ---
 # name: test_deserialize[json_list_list_path_[*].name]
   tuple(
-    b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
+    b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}',
     200,
     dict({
       '200': typing.List[ForwardRef('str')],
@@ -455,7 +455,7 @@
 # ---
 # name: test_deserialize[json_list_list_path_pets[*].name]
   tuple(
-    b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}',
+    b'{"pets":[{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"},{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}]}',
     200,
     dict({
       '200': typing.List[str],
@@ -470,7 +470,7 @@
 # ---
 # name: test_deserialize[json_list_list_path_pets[0].name]
   tuple(
-    b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}',
+    b'{"pets":[{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"},{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}]}',
     200,
     dict({
       '200': <class 'str'>,
@@ -482,7 +482,7 @@
 # ---
 # name: test_deserialize[json_list_list_path_pets[1:].name]
   tuple(
-    b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}',
+    b'{"pets":[{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"},{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}]}',
     200,
     dict({
       '200': typing.List[str],
@@ -496,7 +496,7 @@
 # ---
 # name: test_deserialize[json_list_model]
   tuple(
-    b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}',
+    b'{"pets":[{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"},{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}]}',
     200,
     dict({
       '200': <class 'unit.api.example.pet_model.PetList'>,
@@ -508,7 +508,7 @@
 # ---
 # name: test_deserialize[json_list_model_path_pets]
   tuple(
-    b'{"pets": [{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}, {"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}]}',
+    b'{"pets":[{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"},{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}]}',
     200,
     dict({
       '200': typing.List[unit.api.example.pet_model.Pet],
@@ -523,7 +523,7 @@
 # ---
 # name: test_deserialize[json_list_x_list]
   tuple(
-    b'["hello", "world", 123, {"key": "value"}]',
+    b'["hello","world",123,{"key":"value"}]',
     200,
     dict({
       '2XX': <class 'list'>,
@@ -542,7 +542,7 @@
 # ---
 # name: test_deserialize[json_model_invalid_field]
   tuple(
-    b'{"name": 111, "owner": {"id": 456, "name": "Simon"}}',
+    b'{"name":111,"owner":{"id":456,"name":"Simon"}}',
     200,
     dict({
       '200': <class 'unit.api.example.pet_model.Pet'>,
@@ -554,7 +554,7 @@
 # ---
 # name: test_deserialize[json_model_invalid_submodel_field]
   tuple(
-    b'{"name": 111, "owner": {"id": "invalidId", "name": "Simon"}}',
+    b'{"name":111,"owner":{"id":"invalidId","name":"Simon"}}',
     200,
     dict({
       '200': <class 'unit.api.example.pet_model.Pet'>,
@@ -566,7 +566,7 @@
 # ---
 # name: test_deserialize[json_model_invalid_submodel_list_field]
   tuple(
-    b'{"pets": [{"name": 111, "owner": {"id": "invalidId", "name": "Simon"}}, {"name": "Chop"}]}',
+    b'{"pets":[{"name":111,"owner":{"id":"invalidId","name":"Simon"}},{"name":"Chop"}]}',
     200,
     dict({
       '200': <class 'unit.api.example.pet_model.PetList'>,
@@ -578,7 +578,7 @@
 # ---
 # name: test_deserialize[json_model_invalid_submodule_list]
   tuple(
-    b'[{"name": 111, "owner": {"id": "invalidId", "name": "Simon"}}, {"name": "Chop"}]',
+    b'[{"name":111,"owner":{"id":"invalidId","name":"Simon"}},{"name":"Chop"}]',
     200,
     dict({
       '200': typing.List[unit.api.example.pet_model.Pet],
@@ -593,7 +593,7 @@
 # ---
 # name: test_deserialize[json_model_missing_field]
   tuple(
-    b'{"owner": {"id": 456, "name": "Simontis"}}',
+    b'{"owner":{"id":456,"name":"Simontis"}}',
     200,
     dict({
       '200': <class 'unit.api.example.pet_model.Pet'>,
@@ -605,7 +605,7 @@
 # ---
 # name: test_deserialize[json_model_missing_submodel_field]
   tuple(
-    b'{"name": "Chop"}',
+    b'{"name":"Chop"}',
     200,
     dict({
       '200': <class 'unit.api.example.pet_model.Pet'>,
@@ -809,8 +809,8 @@
       ApiError('Error response.')
       Status: 404
       Reason: Not Found
-      Response headers: Headers({'content-length': '67', 'content-type': 'application/json'})
-      Response content: <bytes: len=67>
+      Response headers: Headers({'content-length': '64', 'content-type': 'application/json'})
+      Response content: <bytes: len=64>
       Response data: {'message': 'some not found message', 'code': 'RESOURCE_NOT_FOUND'}
     ''',
     'dict',
@@ -826,8 +826,8 @@
       ApiError('Error response.')
       Status: 404
       Reason: Not Found
-      Response headers: Headers({'content-length': '67', 'content-type': 'application/json'})
-      Response content: <bytes: len=67>
+      Response headers: Headers({'content-length': '64', 'content-type': 'application/json'})
+      Response content: <bytes: len=64>
       Response data: {'message': 'some not found message', 'code': 'RESOURCE_NOT_FOUND'}
     ''',
     'dict',
@@ -843,8 +843,8 @@
       ApiError('Error response.')
       Status: 404
       Reason: Not Found
-      Response headers: Headers({'content-length': '67', 'content-type': 'application/json'})
-      Response content: <bytes: len=67>
+      Response headers: Headers({'content-length': '64', 'content-type': 'application/json'})
+      Response content: <bytes: len=64>
       Response data: {'message': 'some not found message', 'code': 'RESOURCE_NOT_FOUND'}
     ''',
     'dict',
@@ -874,8 +874,8 @@
       ApiError('Error response.')
       Status: 404
       Reason: Not Found
-      Response headers: Headers({'content-length': '67', 'content-type': 'application/json'})
-      Response content: <bytes: len=67>
+      Response headers: Headers({'content-length': '64', 'content-type': 'application/json'})
+      Response content: <bytes: len=64>
       Response data: message='some not found message' code='RESOURCE_NOT_FOUND'
     ''',
     '_Model',
@@ -888,8 +888,8 @@
       ApiError('Error response.')
       Status: 400
       Reason: Bad Request
-      Response headers: Headers({'content-length': '95', 'content-type': 'application/json'})
-      Response content: <bytes: len=95>
+      Response headers: Headers({'content-length': '87', 'content-type': 'application/json'})
+      Response content: <bytes: len=87>
       Response data: name='Lord Biscuit, Master of Naps' owner=PetOwner(id=123, name='Simon') tag='doggo'
     ''',
     'Pet',
@@ -923,8 +923,8 @@
       ApiError('Error response.')
       Status: 400
       Reason: Bad Request
-      Response headers: Headers({'content-length': '95', 'content-type': 'application/json'})
-      Response content: <bytes: len=95>
+      Response headers: Headers({'content-length': '87', 'content-type': 'application/json'})
+      Response content: <bytes: len=87>
       Response data: name='Lord Biscuit, Master of Naps' owner=_Model(id=123, name='Simon') tag='doggo'
     ''',
     '_Model',
@@ -1163,18 +1163,18 @@
         }),
       }),
       'method': 'PATCH',
-      'url': URL('https://api-example.io/service/v1/A/bar/{missing_param}'),
+      'url': URL('https://api-example.io/service/v1/A/bar/%7Bmissing_param%7D'),
     }),
     dict({
       'accept': '*/*',
       'accept-encoding': 'gzip, deflate',
       'connection': 'keep-alive',
-      'content-length': '119',
+      'content-length': '109',
       'content-type': 'application/json',
       'host': 'api-example.io',
       'x-my-header': 'header_value',
     }),
-    b'{"array_key": ["val1", "val2"], "tuple_key": ["val3", 123, {"key": "value"}, null], "timestamp": "1999-09-28T12:30:59"}',
+    b'{"array_key":["val1","val2"],"tuple_key":["val3",123,{"key":"value"},null],"timestamp":"1999-09-28T12:30:59"}',
   )
 # ---
 # name: test_serialize_and_call[path_and_query_params]
@@ -1219,11 +1219,11 @@
       'accept': '*/*',
       'accept-encoding': 'gzip, deflate',
       'connection': 'keep-alive',
-      'content-length': '95',
+      'content-length': '87',
       'content-type': 'application/json',
       'host': 'api-example.io',
     }),
-    b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
+    b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}',
   )
 # ---
 # name: test_serialize_and_call[pet_dict_body]
@@ -1244,11 +1244,11 @@
       'accept': '*/*',
       'accept-encoding': 'gzip, deflate',
       'connection': 'keep-alive',
-      'content-length': '95',
+      'content-length': '87',
       'content-type': 'application/json',
       'host': 'api-example.io',
     }),
-    b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo"}',
+    b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}',
   )
 # ---
 # name: test_serialize_and_call[pet_json_body]
@@ -1288,16 +1288,16 @@
         }),
       }),
       'method': 'PUT',
-      'url': URL('https://api-example.io/service/v1/{param1}/foo'),
+      'url': URL('https://api-example.io/service/v1/%7Bparam1%7D/foo'),
     }),
     dict({
       'accept': '*/*',
       'accept-encoding': 'gzip, deflate',
       'connection': 'keep-alive',
-      'content-length': '108',
+      'content-length': '98',
       'content-type': 'application/json',
       'host': 'api-example.io',
     }),
-    b'{"name": "Lord Biscuit, Master of Naps", "owner": {"id": 123, "name": "Simon"}, "tag": "doggo", "pet_id": 1}',
+    b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo","pet_id":1}',
   )
 # ---

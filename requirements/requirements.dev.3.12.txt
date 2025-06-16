@@ -1,6 +1,6 @@
-# -e git+https://github.com/waylayio/waylay-py-core.git@a15096c2e225bd36ae6c452f0b904dcf9cf64155#egg=waylay_sdk_plugin_example&subdirectory=test/plugin
+# -e git+https://github.com/waylayio/waylay-py-core.git@5051d9b82ad6d0e93dfd411a8f5c36d81029536f#egg=waylay_sdk_plugin_example&subdirectory=test/plugin
 cfgv==3.4.0
-coverage==7.8.2
+coverage==7.9.0
 distlib==0.3.9
 filelock==3.18.0
 identify==2.6.12
@@ -14,8 +14,8 @@ pluggy==1.6.0
 pre_commit==4.2.0
 Pygments==2.19.1
 pytest-asyncio==1.0.0
-pytest-cov==6.1.1
-pytest-httpx==0.34.0
+pytest-cov==6.2.1
+pytest-httpx==0.35.0
 pytest-mock==3.14.1
 pytest==8.4.0
 PyYAML==6.0.2

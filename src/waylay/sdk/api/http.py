@@ -56,7 +56,6 @@ class HttpClientOptions(TypedDict, total=False):
     http1: bool
     http2: bool
     proxy: httpx_types.ProxyTypes
-    proxies: httpx_types.ProxiesTypes
     mounts: Mapping[str, httpx_types.AsyncBaseTransport | None]
     timeout: httpx_types.TimeoutTypes
     follow_redirects: bool
@@ -65,6 +64,5 @@ class HttpClientOptions(TypedDict, total=False):
     event_hooks: Mapping[str, list[Callable[..., Any]]]
     base_url: str
     transport: httpx_types.AsyncBaseTransport
-    app: Callable[..., Any]
     trust_env: bool
     default_encoding: str | Callable[[bytes], str]
