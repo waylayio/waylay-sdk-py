@@ -52,6 +52,7 @@ dev = [
     "pytest-httpx",
     "pytest-asyncio",
     "starlette",
+    "numpy",
     "syrupy",
     "ruff",
     'mypy!=1.11.*',
