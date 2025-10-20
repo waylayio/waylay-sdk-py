@@ -111,8 +111,9 @@ class AboutApi(WithApiClient):
         :param select_path: Denotes the json path applied to the response
             object before returning it.
             Set it to the empty string `""` to receive the full response object.
-        :param response_type: If specified, the response is parsed into
-            an instance of the specified type.
+        :param response_type: If specified and a `type`, the response is parsed into
+            an instance of the specified type. If otherwise callable, it will be
+            applied to the json representation to construct the response.
         :param headers: Header parameters for this request
         :type headers: dict, optional
         :param `**kwargs`: Additional parameters passed on to the http client.
