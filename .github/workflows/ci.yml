@@ -9,7 +9,7 @@ on:
 
 jobs:
   unit_test:
-    name: Validate Python ${{ matrix.python-version }}
+    name: Unit Test Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     strategy:
         matrix:
@@ -25,5 +25,26 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
           cache-dependency-path: '**/requirements*.txt'
-      - run: make exec-dev-install
-      - run: make ci-validate
+      - run: make ci-install
+      - run: make ci-code-qa
+      - run: make ci-test-unit
+  
+  integration_test:
+    name: Unit and Integration Test Python 3.11
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Git with token to access other private repositories
+        run: git config --global url."https://${{ secrets.OTOMATOR_PAT }}@github".insteadOf https://github
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: '**/requirements*.txt'
+      - run: make ci-install-latest
+      - run: make ci-test-unit
+      - run: make ci-test-integration
+        env:
+          WAYLAY_TEST_USER_ID: ${{vars.WAYLAY_TEST_USER_ID}}
+          WAYLAY_TEST_USER_SECRET: ${{secrets.WAYLAY_TEST_USER_SECRET}}
