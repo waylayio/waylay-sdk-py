@@ -9,6 +9,7 @@ from types import SimpleNamespace
 from typing import Any, Dict, List, Union
 
 import httpx
+import numpy as np
 import pytest
 from pytest_httpx import HTTPXMock
 from syrupy.filters import paths
@@ -646,6 +647,24 @@ DESERIALIZE_CASES = [
             ],
         },  # 0: id type is str instead of int, 1: missing owner
         {"200": List[Pet]},
+        None,
+    ),
+    (
+        "custom serialization function",
+        {"status_code": 200, "json": {"name": "Simon"}},
+        lambda r: {"the_response_is": str(r)},
+        None,
+    ),
+    (
+        "numpy serialization",
+        {"status_code": 200, "json": [[3, 4, 5], [4, 5, 6]]},
+        np.array,
+        None,
+    ),
+    (
+        "python repr",
+        {"status_code": 200, "json": [[3, 4, 5], [4, 5, 6]]},
+        repr,
         None,
     ),
 ]

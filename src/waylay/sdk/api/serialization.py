@@ -186,7 +186,8 @@ class WithSerializationSupport:
         :param response_data: Response object to be deserialized.
         :param response_type: Response type to use for 2XX status codes,
             or a mapping per status code, including '2XX', '3XX', .. and
-            '*' or 'default' wildcard keys.
+            '*' or 'default' wildcard keys. The values can be a (pydantic) type, or
+            any function that creates an instance from the json representation.
         :param select_path: json path to be extracted from the json payload.
         :param stream: Whether the response should be in streaming mode.
             If the response is an event stream, this function
@@ -273,16 +274,22 @@ def _interpolate_resource_path(
     return resource_path
 
 
-def _deserialize(data: Any, klass: Any):
+def _deserialize(data: Any, constructor: Any):
     """Deserializes response content into a `klass` instance."""
-    if isinstance(klass, str) and klass in _CLASS_MAPPING:
-        klass = _CLASS_MAPPING[klass]
+    if isinstance(constructor, str) and constructor in _CLASS_MAPPING:
+        constructor = _CLASS_MAPPING[constructor]
+    if callable(constructor) and type(constructor).__name__ in (
+        "method",
+        "function",
+        "builtin_function_or_method",
+    ):
+        return constructor(data)
     config = (
         ConfigDict(arbitrary_types_allowed=True)
-        if not isclass(klass) or not issubclass(klass, BaseModel)
+        if not isclass(constructor) or not issubclass(constructor, BaseModel)
         else None
     )
-    type_adapter = TypeAdapter(klass, config=config)
+    type_adapter = TypeAdapter(constructor, config=config)
     try:
         return type_adapter.validate_python(data)
     except (TypeError, ValidationError) as exc:
@@ -293,9 +300,9 @@ def _deserialize(data: Any, klass: Any):
             log.warning(
                 "Failed to deserialize response into class %s, "
                 "using backup non-validating deserializer instead.",
-                klass,
+                constructor,
                 exc_info=exc,
-                extra={"data": data, "class": klass},
+                extra={"data": data, "class": constructor},
             )
             return _deserialized
         except (TypeError, ValidationError):
@@ -304,9 +311,9 @@ def _deserialize(data: Any, klass: Any):
                 log.warning(
                     "Failed to deserialize response into class %s, "
                     "using backup generic model deserializer instead.",
-                    klass,
+                    constructor,
                     exc_info=exc,
-                    extra={"data": data, "class": klass},
+                    extra={"data": data, "class": constructor},
                 )
                 return _deserialized
             except (TypeError, ValidationError) as exc2:

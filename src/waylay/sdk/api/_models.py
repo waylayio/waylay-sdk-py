@@ -189,6 +189,10 @@ class _Model(BaseModel):
         else:
             return obj
 
+    def __repr_name__(self):
+        ## do not show '_Model' in representations
+        return ""
+
 
 Primitive: TypeAlias = Union[
     str, bool, int, float, Decimal, bytes, datetime, date, object, None
