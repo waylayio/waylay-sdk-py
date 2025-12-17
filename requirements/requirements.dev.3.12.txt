@@ -4,7 +4,7 @@ Pygments==2.19.2
 cfgv==3.4.0
 coverage==7.11.3
 distlib==0.4.0
-filelock==3.20.0
+filelock==3.20.1
 identify==2.6.15
 iniconfig==2.3.0
 mypy==1.18.2
