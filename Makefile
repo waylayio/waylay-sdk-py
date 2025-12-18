@@ -144,9 +144,11 @@ ci-install-latest:
 ci-code-qa: exec-lint exec-typecheck ### perform code quality checks
 
 ## TODO: enable test-unit-coverage
-ci-test-unit: test-unit 
+ci-test-unit:
+	pytest test/unit
 
-ci-test-integration: test-integration
+ci-test-integration:
+	pytest test/integration
 
 ci-dist: dist-clean exec-dist
 
