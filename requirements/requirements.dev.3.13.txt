@@ -27,4 +27,4 @@ starlette==0.50.0
 syrupy==5.0.0
 types-appdirs==1.4.3.5
 types-python-dateutil==2.9.0.20251115
-virtualenv==20.35.4
+virtualenv==20.36.1
