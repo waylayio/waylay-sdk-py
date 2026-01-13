@@ -4,7 +4,7 @@ Pygments==2.19.2
 cfgv==3.5.0
 coverage==7.13.0
 distlib==0.4.0
-filelock==3.20.1
+filelock==3.20.3
 identify==2.6.15
 iniconfig==2.3.0
 librt==0.7.4
