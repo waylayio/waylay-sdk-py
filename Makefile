@@ -7,107 +7,35 @@ help:
 	@awk 'BEGIN {FS = ":[^#]*? ## "} /^[a-zA-Z_-]+:[^#]* ## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 .DEFAULT_GOAL := help
 
-VENV_DIR=.venv
-VENV_ACTIVATE_CMD=${VENV_DIR}/bin/activate
-VENV_ACTIVATE=. ${VENV_ACTIVATE_CMD}
-
-REQ_FILE_BUILD=requirements/requirements.build.$$(bin/pyversion).txt
-REQ_FILE=requirements/requirements.$$(bin/pyversion).txt
-REQ_FILE_DEV=requirements/requirements.dev.$$(bin/pyversion).txt
+UV_PYTHON?=3.11
+export UV_PYTHON
 
 PYTEST_ARGS?=''
-PYTEST_CMD=${VENV_ACTIVATE} && pytest ${PYTEST_ARGS}
+PYTEST_CMD=uv run pytest ${PYTEST_ARGS}
 
-${VENV_ACTIVATE_CMD}:
-	python3 -m venv ${VENV_DIR}
-	${VENV_ACTIVATE} && make dev-install
+install: ### Install deps
+	uv sync
 
-install: ${VENV_ACTIVATE_CMD}
+upgrade-deps: ### Upgrade deps
+	uv sync --upgrade
 
-assert-venv:
-	@if [[ "$$(python -c 'import sys; print(sys.prefix)')" != "$$(pwd)/${VENV_DIR}" ]]; \
-	  then ${printMsg} "Please run in the correct python venv: ${VENV_DIR}" "FAILED"; exit 1; fi
+format: ## Format code
+	uv run ruff format
+	uv run ruff check --fix 
+	uv run ruff check --fix --select I
 
-clean: dist-clean
-	rm -fr ${VENV_DIR}
-	rm -fr .*_cache
-	rm -fr **/.*_cache
-	rm -fr **/__pycache__
-	rm -fr src/*.egg-info
+lint: ## Lint code
+	uv run ruff check
 
-exec-dev-dependencies:
-	pip install -r "${REQ_FILE_BUILD}"
-	pip install -e . --no-deps
-	pip install -r "${REQ_FILE}"
-	pip install -r "${REQ_FILE_DEV}"
-	pip install -e test/plugin
-	
-exec-upgrade-buildtools:
-	pip install --upgrade pip
-	pip install --upgrade setuptools
-	pip install --upgrade wheel
-	pip install --upgrade build
+format-check: ## Check code formatting
+	uv run ruff format --check
 
-clean-caches:
-	find . -name '__pycache__' | xargs -L 1 rm -frv 
-	find . -name '.mypy_cache' | xargs -L 1 rm -frv 
-	rm -fr .mypy_cache
-	rm -fr .pytest_cache
-	rm -fr .coverage
-	rm -fr .cache
-	@${printMsg} "clean-caches" "Cleaned caches for pytest, coverage, type inference, ..."
-
-dist-clean:
-	rm -fr dist build
-
-exec-dev-install-pkg:  ## Install waylay-sdk-core with development dependency constraints as specified in the package.
-	pip install -e ".[dev]"
-	pip install -e test/plugin
-
-exec-dev-install: ### Install a development environment with frozen dependencies'
-	make exec-dev-dependencies
-	make exec-dev-install-pkg
-
-exec-install-pkg: ### Install waylay-sdk-core with dependency constraints as specified in the package. (e.g. for notebook tests)
-	pip install -e .
-
-exec-dist:
-	python -m build
-	rm -fr build
-
-dev-install: install
-	@${VENV_ACTIVATE} && make exec-dev-install
-
-dev-reinstall: clean dev-install ### Remove all dependences and reinstall with frozen dependencies
-
-dist: clean install
-	@${VENV_ACTIVATE} && make exec-dist
-
-exec-lint-fix:
-	@ruff check --fix
-
-exec-lint:
-	@ruff check
-
-exec-typecheck:
-	@mypy --check-untyped-defs -p waylay.sdk
-	@mypy --check-untyped-defs test/*/*.py
+typecheck: ## Typecheck code
+	uv run mypy --check-untyped-defs -p waylay.sdk
+	uv run mypy --check-untyped-defs test/*/*.py
 	@${printMsg} typecheck OK
 
-exec-format:
-	@ruff format && ruff check --fix && ruff check --fix --select I
-
-
-exec-code-qa: exec-lint exec-typecheck
-
-exec-test: exec-code-qa
-	pytest ${PYTEST_ARGS} test/unit test/integration
-
-format: install
-	${VENV_ACTIVATE} && make exec-format exec-lint-fix
-
-code-qa: install ### perform code quality checks
-	${VENV_ACTIVATE} && make exec-code-qa
+code-qa: format-check lint typecheck ### perform code quality checks
 
 test-unit: install
 	${PYTEST_CMD} test/unit
@@ -129,82 +57,34 @@ test-integration-coverage-report: install ### generate html coverage report for 
 
 test: format code-qa test-unit ### perform all quality checks and tests, except for integration tests
 
+dist-clean:
+	rm -fr dist
+
+dist: ci-install dist-clean ### Create dist
+	uv build
+
 
 ci-install:
-	make exec-dev-dependencies
-	make exec-dev-install-pkg
+	uv sync --frozen
 
 ci-install-latest:
-	make exec-upgrade-buildtools
-	# latest regular dependencies
-	make exec-install-pkg
-	# frozen development dependencies
-	make exec-dev-dependencies
+	uv sync --upgrade
 
-ci-code-qa: exec-lint exec-typecheck ### perform code quality checks
+ci-code-qa: code-qa
 
 ## TODO: enable test-unit-coverage
 ci-test-unit:
-	pytest test/unit
+	uv run pytest test/unit
 
 ci-test-integration:
-	pytest test/integration
+	uv run pytest test/integration
 
-ci-dist: dist-clean exec-dist
+ci-dist: dist
 
-
-freeze-dependencies: ## perform a full reinstall procedure and regenerate the 'requirements/requirements[.dev][.pyversion].txt' files
-	make clean
-	python3 -m venv ${VENV_DIR}
-	@${VENV_ACTIVATE} && make exec-freeze-deps
-
-
-FREEZE_CMD=bin/freeze-dependencies
-exec-freeze-deps:
-	make exec-upgrade-buildtools
-	REQ_PIP_ARGS="--all" REQ_FILE="${REQ_FILE_BUILD}" ${FREEZE_CMD}
-	make exec-install-pkg
-	REQ_FILE="${REQ_FILE}" REQ_EXCLUDES="${REQ_FILE_BUILD}" ${FREEZE_CMD}
-	make exec-dev-install-pkg
-	REQ_FILE="${REQ_FILE_DEV}" REQ_EXCLUDES="${REQ_FILE_BUILD} ${REQ_FILE}" ${FREEZE_CMD}
-
-
-CONDA_INIT=source $$(conda info --base)/etc/profile.d/conda.sh
-
-
-PYTHON_VERSION?=3.11
-PYTHON_VERSIONS=3.10 3.11 3.12 3.13
-
-freeze-deps-conda:
-	@-conda env remove -y -n waylay-sdk-${PYTHON_VERSION}
-	@conda create -y -n waylay-sdk-${PYTHON_VERSION} python=${PYTHON_VERSION} 
-	@${CONDA_INIT} && conda activate waylay-sdk-${PYTHON_VERSION} && make exec-freeze-deps
-
-install-conda:
-	-conda create -y -n waylay-sdk-${PYTHON_VERSION} python=${PYTHON_VERSION} 
-	@${CONDA_INIT} && conda activate waylay-sdk-${PYTHON_VERSION} && make exec-dev-install
-
-test-conda:
-	@${CONDA_INIT} && conda activate waylay-sdk-${PYTHON_VERSION} && pytest ${PYTEST_ARGS} test/unit test/integration
-
-TARGET?=test-conda
-_exec_all_python_versions:
-	@for ver in ${PYTHON_VERSIONS}; do ${printMsg} "${TARGET}" "$$ver"; PYTHON_VERSION=$$ver make ${TARGET} || exit 1; done
-	@${printMsg} "${TARGET}" "DONE: ${PYTHON_VERSIONS}"
-
-freeze-deps-all:  ## freeze dependencies for all python versions
-	TARGET=freeze-deps-conda make _exec_all_python_versions
-
-test-conda-all:  ## test on all python versions
-	TARGET=test-conda make _exec_all_python_versions
-
-install-conda-all:
-	TARGET=install-conda make _exec_all_python_versions
 
 pdoc: # TODO 
 	rm -fr ./doc/api/
-	${VENV_ACTIVATE} && pip install pdoc
-	${VENV_ACTIVATE} && pdoc -o ./doc/api \
+	uv run pdoc -o ./doc/api \
 		waylay.sdk \
 		waylay.sdk.config \
 		waylay.sdk.config.client \
@@ -226,12 +106,10 @@ pdoc: # TODO
 		waylay.sdk.api.exceptions \
 		waylay.sdk.api.serialization \
 		waylay.sdk.exceptions
-	${VENV_ACTIVATE} && pip uninstall pdoc -y
 
 
 test-publish:
-	${VENV_ACTIVATE} && pip install twine
-	${VENV_ACTIVATE} && python -m twine upload --repository testpypi dist/*
+	uv tool run twine upload --repository testpypi dist/*
 	open https://test.pypi.org/project/waylay-sdk-core
 
 _assert_tagged:
@@ -245,6 +123,5 @@ _assert_tagged:
 	fi
 
 publish: _assert_tagged
-	${VENV_ACTIVATE} && pip install twine
-	${VENV_ACTIVATE} && python -m twine upload dist/*
+	uv tool run twine upload dist/*
 	open https://pypi.org/project/waylay-sdk-core

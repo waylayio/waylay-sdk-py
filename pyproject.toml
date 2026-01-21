@@ -44,7 +44,7 @@ include = ["waylay*"]
 exclude = []
 namespaces = true
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "pytest",
     "pytest-cov",
@@ -61,6 +61,7 @@ dev = [
     'types-python-dateutil',
     'pre-commit',
     'sse-starlette',
+    "pdoc",
 ]
 
 [tool.pytest.ini_options]
