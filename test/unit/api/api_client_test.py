@@ -6,7 +6,7 @@ from collections.abc import AsyncIterator
 from datetime import date, datetime
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 
 import httpx
 import numpy as np
@@ -376,7 +376,7 @@ DESERIALIZE_CASES = [
     (
         "json_list_X_union",
         {"status_code": 200, "json": ["hello", "world", 123, {"key": "value"}]},
-        {"2XX": List[Union[str, int, Dict[str, Any]]]},
+        {"2XX": List[str | int | Dict[str, Any]]},
         None,
     ),
     (
@@ -499,13 +499,13 @@ DESERIALIZE_CASES = [
     (
         "json_dict_union",
         {"status_code": 200, "json": pet_instance_dict},
-        {"200": Union[str, list[Pet], Pet]},
+        {"200": str | list[Pet] | Pet},
         None,
     ),
     (
         "json_dict_*_dummy_union",
         {"status_code": 200, "json": pet_instance_dict},
-        {"*": Union[Pet]},
+        {"*": Pet},
         None,
     ),
     (

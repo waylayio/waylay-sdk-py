@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Annotated, List, Optional, Union
+from typing import Annotated, List, Optional
 
 from pydantic import Field, StrictBool, StrictInt, StrictStr
 from typing_extensions import NotRequired, TypedDict
@@ -49,7 +49,7 @@ class PetOwner(BaseModel):
     }
 
 
-PetUnion = Union[PetList, Pet]
+PetUnion = PetList | Pet
 
 
 class PetType(str, Enum):
