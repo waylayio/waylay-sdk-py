@@ -156,7 +156,7 @@
     b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}',
     200,
     dict({
-      '*': typing.Union[unit.api.example.pet_model.PetList, unit.api.example.pet_model.Pet],
+      '*': unit.api.example.pet_model.PetList | unit.api.example.pet_model.Pet,
     }),
     None,
     'Pet',
@@ -354,7 +354,7 @@
     b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}',
     200,
     dict({
-      '200': typing.Union[str, list[unit.api.example.pet_model.Pet], unit.api.example.pet_model.Pet],
+      '200': str | list[unit.api.example.pet_model.Pet] | unit.api.example.pet_model.Pet,
     }),
     None,
     'Pet',
@@ -382,7 +382,7 @@
     b'{"pets":[{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"},{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}]}',
     200,
     dict({
-      '*': typing.Union[unit.api.example.pet_model.PetList, unit.api.example.pet_model.Pet],
+      '*': unit.api.example.pet_model.PetList | unit.api.example.pet_model.Pet,
     }),
     None,
     'PetList',
