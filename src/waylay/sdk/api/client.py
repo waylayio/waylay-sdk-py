@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Optional, Tuple, Union
 
 from .._version import __version__
 from ..config import WaylayConfig
@@ -11,10 +10,9 @@ from .exceptions import SyncCtxMgtNotSupportedError
 from .http import AsyncClient, HttpClientOptions, Request, Response
 from .serialization import WithSerializationSupport
 
-RESTTimeout = Union[
-    Optional[float],
-    Tuple[Optional[float], Optional[float], Optional[float], Optional[float]],
-]
+RESTTimeout = (
+    float | None | tuple[float | None, float | None, float | None, float | None]
+)
 
 
 class ApiClient(WithSerializationSupport):

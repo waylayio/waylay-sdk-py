@@ -1,7 +1,8 @@
 """Types from the httpx library."""
 
 import ssl
-from typing import IO, List, Mapping, Optional, Sequence, Tuple, Union
+from collections.abc import Mapping, Sequence
+from typing import IO
 
 from httpx._client import (
     AsyncBaseTransport,
@@ -24,23 +25,23 @@ from httpx._types import (
 URLTypes = str
 # allow any IO as request content, converted to an AsyncIterable at
 #  waylay.sdk.api.serialization._convert_content
-RequestContent = Union[_RequestContent, IO[bytes]]
-HeaderTypes = Union[
-    Mapping[str, str],
-    Mapping[bytes, bytes],
-    Sequence[Tuple[str, str]],
-    Sequence[Tuple[bytes, bytes]],
-]
+RequestContent = _RequestContent | IO[bytes]
+HeaderTypes = (
+    Mapping[str, str]
+    | Mapping[bytes, bytes]
+    | Sequence[tuple[str, str]]
+    | Sequence[tuple[bytes, bytes]]
+)
 
-PrimitiveData = Optional[Union[str, int, float, bool]]
-QueryParamTypes = Union[
-    Mapping[str, Union[PrimitiveData, Sequence[PrimitiveData]]],
-    List[Tuple[str, PrimitiveData]],
-    Tuple[Tuple[str, PrimitiveData], ...],
-    str,
-    bytes,
-]
-VerifyTypes = Union[ssl.SSLContext, str, bool]
+PrimitiveData = str | int | float | bool | None
+QueryParamTypes = (
+    Mapping[str, PrimitiveData | Sequence[PrimitiveData]]
+    | list[tuple[str, PrimitiveData]]
+    | tuple[tuple[str, PrimitiveData], ...]
+    | str
+    | bytes
+)
+VerifyTypes = ssl.SSLContext | str | bool
 
 __all__ = [
     "RequestFiles",

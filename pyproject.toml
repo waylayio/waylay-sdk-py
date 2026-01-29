@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "waylay-sdk-core"
 dynamic = ["version"]
 description = "Waylay Python SDK."
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 keywords = ["waylay", "sdk"]
 readme = "README.md"
 authors = [{name = "Waylay", email = "info@waylay.io"}]

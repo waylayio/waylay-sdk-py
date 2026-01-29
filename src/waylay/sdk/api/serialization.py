@@ -22,7 +22,6 @@ from typing import (
     Protocol,
     Type,
     TypeVar,
-    Union,
     cast,
     runtime_checkable,
 )
@@ -69,7 +68,7 @@ EVENT_STREAM_CONTENT_TYPES = [
     TEXT_EVENT_STREAM_CONTENT_TYPE,
     NDJSON_EVENT_STREAM_CONTENT_TYPE,
 ]
-TypeMapping: TypeAlias = Union[Mapping[str, Optional[Type[Any]]], Type[Any], None]
+TypeMapping: TypeAlias = Mapping[str, Optional[Type[Any]]] | Type[Any] | None
 
 
 class WithSerializationSupport:

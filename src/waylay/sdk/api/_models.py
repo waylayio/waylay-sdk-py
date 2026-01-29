@@ -194,9 +194,9 @@ class _Model(BaseModel):
         return ""
 
 
-Primitive: TypeAlias = Union[
-    str, bool, int, float, Decimal, bytes, datetime, date, object, None
-]
+Primitive: TypeAlias = (
+    str | bool | int | float | Decimal | bytes | datetime | date | object | None
+)
 Model: TypeAlias = TypeAliasType(  # type: ignore[misc]  #(https://github.com/python/mypy/issues/16614)
     "Model",
     Annotated[
