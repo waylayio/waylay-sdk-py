@@ -10,7 +10,6 @@ from typing import (
     TYPE_CHECKING,
     Annotated,
     Any,
-    Union,
     get_type_hints,
 )
 
@@ -209,7 +208,7 @@ Primitive: TypeAlias = (
 Model: TypeAlias = TypeAliasType(  # type: ignore[misc]  #(https://github.com/python/mypy/issues/16614)
     "Model",
     Annotated[
-        Union[list["Model"], "_Model", Primitive],  # type: ignore[misc]
+        list["Model"] | _Model | Primitive,  # type: ignore[misc]  # cyclic definition
         "A basic model that acts like a `simpleNamespace` "
         "or a collection over such models.",
     ],
