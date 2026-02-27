@@ -304,7 +304,9 @@ def _deserialize(data: Any, constructor: Any):
             return _deserialized
         except (TypeError, ValidationError):
             try:
-                _deserialized = _MODEL_TYPE_ADAPTER.validate_python(data)
+                _deserialized = _MODEL_TYPE_ADAPTER.validate_python(
+                    data, strict=False, context={"skip_validation": True}
+                )
                 log.warning(
                     "Failed to deserialize response into class %s, "
                     "using backup generic model deserializer instead.",

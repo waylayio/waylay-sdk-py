@@ -80,11 +80,8 @@ class BaseModel(PydanticBaseModel, ABC):
         try:
             return handler(value)
         except ValidationError:
-            context = info.context or {}
             if context.get("skip_validation", False):
                 model = cls.model_construct(**value)
-                if not model.model_fields_set:
-                    raise
 
                 # set missing fields to None
                 model_fields_set = deepcopy(model.model_fields_set)
@@ -102,7 +99,7 @@ class BaseModel(PydanticBaseModel, ABC):
                 for field_name in model_fields_set:
                     field_value = getattr(model, field_name)
                     strict = (info.config or {}).get("strict")
-                    with contextlib.suppress(BaseException):
+                    with contextlib.suppress(ValidationError, ValueError, TypeError):
                         cls.__pydantic_validator__.validate_assignment(
                             model,
                             field_name,
@@ -129,7 +126,6 @@ class BaseModel(PydanticBaseModel, ABC):
         try:
             return handler(value)
         except ValidationError:
-            context = info.context or {}
             if context.get("skip_validation", False):
                 if info.field_name:
                     field_type = get_type_hints(cls).get(info.field_name, Any)
@@ -143,7 +139,7 @@ class BaseModel(PydanticBaseModel, ABC):
                         return TypeAdapter(field_type, config=config).validate_python(
                             value, strict=False, context=context
                         )
-                    except ValidationError:
+                    except (ValidationError, ValueError, TypeError):
                         return value
             else:
                 raise
