@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from typing import (
+    TYPE_CHECKING,
     Any,
-    Callable,
     TypedDict,
 )
 
@@ -20,6 +19,9 @@ from .httpx_types import (
     RequestData,
     RequestFiles,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Mapping
 
 AsyncClient = httpx.AsyncClient
 Response = httpx.Response
@@ -66,3 +68,15 @@ class HttpClientOptions(TypedDict, total=False):
     transport: httpx_types.AsyncBaseTransport
     trust_env: bool
     default_encoding: str | Callable[[bytes], str]
+
+
+__all__ = [
+    "HeaderTypes",
+    "HttpClientOptions",
+    "HttpRequestArguments",
+    "QueryParamTypes",
+    "RequestContent",
+    "RequestData",
+    "RequestFiles",
+    "httpx_types",
+]

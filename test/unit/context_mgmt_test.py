@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from typing import TYPE_CHECKING
 
 import httpx
 import pytest
@@ -10,8 +11,10 @@ from starlette.requests import Request as StarletteRequest
 from starlette.responses import Response as StarletteResponse
 
 from waylay.sdk import WaylayClient, WaylayConfig, WaylayService, WaylayTool
-from waylay.sdk.api import AsyncClient
 from waylay.sdk.api._models import Model, _Model
+
+if TYPE_CHECKING:
+    from waylay.sdk.api import AsyncClient
 
 
 class MyService(WaylayService):
@@ -80,7 +83,7 @@ def _fixture_my_client(config: WaylayConfig, echo_app):
     client.register(MyService)
     client.register(MyService2)
     client.register(MyTool)
-    yield client
+    return client
 
 
 async def assert_call_echo(srv: MyService):

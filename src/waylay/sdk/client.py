@@ -4,14 +4,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from waylay.sdk.services.gateway import GatewayService
-
 from .api import ApiClient
-from .api.http import AsyncClient
 from .config.client import HttpClientOptions, WaylayConfig, WithConfig
 from .plugin.client import WithServicesAndTools
 
 if TYPE_CHECKING:
+    from waylay.sdk.services.gateway import GatewayService
+
+    from .api.http import AsyncClient
     from .plugin.type_stubs import (
         AlarmsService,
         DataService,

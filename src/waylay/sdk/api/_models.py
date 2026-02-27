@@ -10,9 +10,6 @@ from typing import (
     TYPE_CHECKING,
     Annotated,
     Any,
-    Callable,
-    Dict,
-    List,
     Union,
     get_type_hints,
 )
@@ -23,7 +20,10 @@ from typing_extensions import (
 )
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeAlias  # >= Python 3.10
+    from collections.abc import Callable
+    from typing import TypeAlias
+
+    from pydantic.functional_validators import ModelWrapValidatorHandler
 
 from pydantic import (
     BaseModel as PydanticBaseModel,
@@ -40,7 +40,6 @@ from pydantic import (
     model_serializer,
     model_validator,
 )
-from pydantic.functional_validators import ModelWrapValidatorHandler
 
 
 class BaseModel(PydanticBaseModel, ABC):
@@ -125,8 +124,7 @@ class BaseModel(PydanticBaseModel, ABC):
                     model.__pydantic_extra__ = extra_fields
 
                 return model
-            else:
-                raise
+            raise
 
     @field_validator("*", mode="wrap")
     def _field_validator(
@@ -161,7 +159,7 @@ class BaseModel(PydanticBaseModel, ABC):
             else:
                 raise
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert the model instance to dict."""
         return self.model_dump(by_alias=True, exclude_unset=True)
 
@@ -196,11 +194,9 @@ class _Model(BaseModel):
     def __model_construct_recursive(cls, obj: Any):
         if isinstance(obj, list):
             return [cls.__model_construct_recursive(inner) for inner in obj]
-        elif isinstance(obj, dict):
-            model = _Model(**obj)
-            return model
-        else:
-            return obj
+        if isinstance(obj, dict):
+            return _Model(**obj)
+        return obj
 
     def __repr_name__(self):
         ## do not show '_Model' in representations
@@ -213,7 +209,7 @@ Primitive: TypeAlias = (
 Model: TypeAlias = TypeAliasType(  # type: ignore[misc]  #(https://github.com/python/mypy/issues/16614)
     "Model",
     Annotated[
-        Union[List["Model"], "_Model", Primitive],  # type: ignore[misc]
+        Union[list["Model"], "_Model", Primitive],  # type: ignore[misc]
         "A basic model that acts like a `simpleNamespace` "
         "or a collection over such models.",
     ],

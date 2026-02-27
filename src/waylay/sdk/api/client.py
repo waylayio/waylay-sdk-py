@@ -126,3 +126,6 @@ class ApiClient(WithSerializationSupport):
     ) -> Response:
         """Send an http request."""
         return await self.http_client.send(request, stream=stream, **kwargs)
+
+
+__all__ = ["WaylayConfig"]

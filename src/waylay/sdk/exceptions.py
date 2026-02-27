@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from .api.http import Request, Response
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .api.http import Request, Response
 
 
 class WaylayError(Exception):

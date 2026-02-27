@@ -1,5 +1,7 @@
 """Auth exception utilities."""
 
+from __future__ import annotations
+
 import jwt.exceptions as jwt_exc
 
 from ..exceptions import WaylayError

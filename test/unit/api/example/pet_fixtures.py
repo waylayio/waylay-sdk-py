@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from .pet_model import Pet, PetOwner, PetWithAlias
@@ -23,7 +25,7 @@ def pet_instance_dict(pet_instance: Pet) -> dict:
 
 
 @pytest.fixture
-def pet_with_alias_instance(pet_instance: Pet) -> dict:
+def pet_with_alias_instance() -> dict:
     return PetWithAlias(
         name="Lord Biscuit, Master of Naps",
         tag="doggo",

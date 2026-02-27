@@ -1,7 +1,9 @@
 """Test suite for package `waylay.sdk.config`."""
 
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Iterator, Mapping
+from typing import TYPE_CHECKING
 
 import pytest
 from httpx import Request, Response
@@ -19,12 +21,17 @@ from waylay.sdk.exceptions import ConfigError
 
 from .fixtures import MOCK_API_URL, MOCK_DOMAIN, MOCK_TENANT_SETTINGS, WaylayTokenStub
 
+if TYPE_CHECKING:
+    from collections.abc import Iterator, Mapping
 
-def _mock_send_single_request_accounts(target, request: Request, *args) -> Response:
+    from pytest_mock import MockerFixture
+
+
+def _mock_send_single_request_accounts(target, request: Request, *args) -> Response:  # noqa: ARG001
     return Response(status_code=200, request=request, json=MOCK_TENANT_SETTINGS)
 
 
-def _mock_send_single_request_no_accounts(target, request: Request, *args) -> Response:
+def _mock_send_single_request_no_accounts(target, request: Request, *args) -> Response:  # noqa: ARG001
     return Response(status_code=403, request=request)
 
 
@@ -33,19 +40,19 @@ def mock_token(mocker):
     """Mock the auth module to use a WaylayTokenStub."""
     mocker.patch(
         "waylay.sdk.auth.provider.WaylayTokenAuth._request_token_async",
-        lambda *args: "",
+        return_value="",
     )
     mocker.patch(
         "waylay.sdk.auth.provider.WaylayTokenAuth._create_and_validate_token_async",
-        lambda *args: WaylayTokenStub(),
+        return_value=WaylayTokenStub(),
     )
     mocker.patch(
         "waylay.sdk.auth.provider.WaylayTokenAuth._request_token_sync",
-        lambda *args: "",
+        return_value="",
     )
     mocker.patch(
         "waylay.sdk.auth.provider.WaylayTokenAuth._create_and_validate_token_sync",
-        lambda *args: WaylayTokenStub(),
+        return_value=WaylayTokenStub(),
     )
 
 
@@ -113,7 +120,8 @@ def test_doc_config_settings():
     assert cfg.apidoc_url == "B"
 
 
-def test_tenant_settings(mock_httpx_accounts, mock_token):
+@pytest.mark.usefixtures("mock_httpx_accounts", "mock_token")
+def test_tenant_settings():
     """Test handling of tenant accounts settings."""
     local_settings = {"waylay_api": "xxx", "waylay_abc": "http://yyy/"}
     cfg = WaylayConfig(credentials=TokenCredentials("_"), settings=local_settings)
@@ -126,7 +134,8 @@ def test_tenant_settings(mock_httpx_accounts, mock_token):
     assert cfg.get_root_url("abc") == "http://yyy"
 
 
-def test_gateway_settings(mock_httpx_accounts, mock_token):
+@pytest.mark.usefixtures("mock_httpx_accounts", "mock_token")
+def test_gateway_settings():
     """Test resolution of gateway endpoints urls."""
     credentials = ClientCredentials("", "", gateway_url="https://gateway")
     cfg = WaylayConfig(credentials=credentials)
@@ -141,7 +150,8 @@ def test_gateway_settings(mock_httpx_accounts, mock_token):
     assert cfg.global_settings_url == "https://gateway/configs/v1/settings"
 
 
-def test_empty_config_no_accounts(mock_httpx_no_accounts, mock_token):
+@pytest.mark.usefixtures("mock_httpx_no_accounts", "mock_token")
+def test_empty_config_no_accounts():
     """Test handling of failure to retrieve accounts settings."""
     cfg = WaylayConfig(credentials=TokenCredentials("_"))
     assert isinstance(cfg.auth, WaylayTokenAuth)
@@ -152,7 +162,8 @@ def test_empty_config_no_accounts(mock_httpx_no_accounts, mock_token):
     assert cfg.get_root_url("api") is None
 
 
-def test_get_set_root_url(mock_httpx_accounts, mock_token):
+@pytest.mark.usefixtures("mock_httpx_accounts", "mock_token")
+def test_get_set_root_url():
     """Test setting of root urls for services."""
     cfg = WaylayConfig(credentials=TokenCredentials("_"))
 
@@ -201,7 +212,8 @@ def test_get_set_root_url(mock_httpx_accounts, mock_token):
     assert cfg.get_root_url("api") == MOCK_API_URL
 
 
-def test_representations(mock_httpx_accounts, mock_token):
+@pytest.mark.usefixtures("mock_httpx_accounts", "mock_token")
+def test_representations():
     """Test the __str__ and __repr__ representations."""
     cfg = WaylayConfig(credentials=TokenCredentials("_"), settings=dict(a="b"))
     assert '"a": "b"' in str(cfg)
@@ -212,7 +224,8 @@ def test_representations(mock_httpx_accounts, mock_token):
     assert cfg.to_dict(obfuscate=False)["credentials"]["token"] == "_"
 
 
-def test_save_load_delete_profile(mock_token, monkeypatch, mocker):
+@pytest.mark.usefixtures("mock_token")
+def test_save_load_delete_profile(monkeypatch, mocker):
     """Test saving, loading and deletion of config profiles."""
     responses: Iterator[Mapping] = iter(
         [
@@ -222,7 +235,7 @@ def test_save_load_delete_profile(mock_token, monkeypatch, mocker):
         ]
     )
 
-    def respond_http(target, request, *args):
+    def respond_http(target, request, *args):  # noqa: ARG001
         kwargs = next(responses)
         return Response(request=request, **kwargs)
 
@@ -269,15 +282,16 @@ def test_save_load_delete_profile(mock_token, monkeypatch, mocker):
     assert "not found" in format(exc.value)
 
 
-def test_load_interactive(mocker, mock_token):
+@pytest.mark.usefixtures("mock_token")
+def test_load_interactive(mocker: MockerFixture):
     """Test the interactive handling of loading a config."""
     mocker.patch(
         "waylay.sdk.config.model.request_client_credentials_interactive",
-        lambda default_gateway_url: TokenCredentials("_"),
+        return_value=TokenCredentials("_"),
     )
     mocker.patch(
         "waylay.sdk.config.model.request_store_config_interactive",
-        lambda profile, save_callback: save_callback(),
+        lambda profile, save_callback: save_callback(),  # noqa: ARG005
     )
 
     profile_name = f"_unit_test_{int(datetime.now().timestamp())}"

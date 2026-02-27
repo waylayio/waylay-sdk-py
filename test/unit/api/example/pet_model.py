@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Annotated
+from typing import Annotated, ClassVar
 
 from pydantic import Field, StrictBool, StrictInt, StrictStr
 from typing_extensions import NotRequired, TypedDict
@@ -14,7 +14,7 @@ class PetList(BaseModel):
 
     pets: list[Pet]
 
-    model_config = {
+    model_config: ClassVar[dict] = {
         "populate_by_name": True,
         "protected_namespaces": (),
     }
@@ -27,7 +27,7 @@ class Pet(BaseModel):
     owner: PetOwner
     tag: StrictStr | None = None
 
-    model_config = {
+    model_config: ClassVar[dict] = {
         "populate_by_name": True,
         "protected_namespaces": (),
     }
@@ -39,7 +39,7 @@ class PetOwner(BaseModel):
     id: StrictInt
     name: StrictStr
 
-    model_config = {
+    model_config: ClassVar[dict] = {
         "populate_by_name": True,
         "protected_namespaces": (),
     }
@@ -60,7 +60,7 @@ class PetWithAlias(Pet):
 
     id: StrictInt = Field(alias="pet_id")
 
-    model_config = {
+    model_config: ClassVar[dict] = {
         "populate_by_name": True,
         "protected_namespaces": (),
     }

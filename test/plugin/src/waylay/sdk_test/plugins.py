@@ -1,5 +1,7 @@
 """Test plugins."""
 
+from __future__ import annotations
+
 from waylay.sdk import WaylayService, WaylayTool
 
 

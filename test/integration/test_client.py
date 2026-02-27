@@ -1,5 +1,7 @@
 """Integration tests for waylay.sdk.auth module."""
 
+from __future__ import annotations
+
 from collections.abc import Mapping
 
 import waylay.sdk.auth.interactive

@@ -18,9 +18,7 @@ from collections.abc import (
 from inspect import isclass
 from typing import (
     Any,
-    Optional,
     Protocol,
-    Type,
     TypeAlias,
     TypeVar,
     cast,
@@ -66,7 +64,7 @@ EVENT_STREAM_CONTENT_TYPES = [
     TEXT_EVENT_STREAM_CONTENT_TYPE,
     NDJSON_EVENT_STREAM_CONTENT_TYPE,
 ]
-TypeMapping: TypeAlias = Mapping[str, Optional[Type[Any]]] | Type[Any] | None
+TypeMapping: TypeAlias = Mapping[str, Any | None] | Any | None
 
 
 class WithSerializationSupport:
@@ -95,7 +93,7 @@ class WithSerializationSupport:
         timeout: httpxc.TimeoutTypes | None = None,
         extensions: httpxc.RequestExtensions | None = None,
         # Deserialization arguments
-        response_type: Mapping[str, Type | None] | Type | None = None,
+        response_type: Mapping[str, type | None] | type | None = None,
         select_path: str = "",
         raw_response: bool = False,
         # Additional parameters passed on to the http client
@@ -209,10 +207,9 @@ class WithSerializationSupport:
             return _iter_event_stream(
                 response, response_type=_response_type, select_path=select_path
             )
-        else:
-            return _deserialize_response(
-                response, response_type=_response_type, select_path=select_path
-            )
+        return _deserialize_response(
+            response, response_type=_response_type, select_path=select_path
+        )
 
 
 _CHUNK_SIZE = 65_536
@@ -265,7 +262,7 @@ def _interpolate_resource_path(
         return resource_path
     for k, v in path_params.items():
         # specified safe chars, encode everything
-        resource_path = resource_path.replace("{%s}" % k, quote(str(v)))
+        resource_path = resource_path.replace(f"{{{k}}}", quote(str(v)))
     return resource_path
 
 
@@ -344,12 +341,11 @@ def _extract_selected(data, select_path: str):
         return data
     jsonpath_expr = jsonpath_parse(select_path)
     match_values = [match.value for match in jsonpath_expr.find(data)]
-    data = (
+    return (
         match_values[0]
         if not re.search(r"\[(\*|.*:.*|.*,.*)\]", select_path)
         else match_values
     )
-    return data
 
 
 T = TypeVar("T")
@@ -367,7 +363,7 @@ def _deserialize_response(
         ):
             _content = response.content
             try:
-                return_data = cast(T, _content)
+                return_data = cast("T", _content)
             except (TypeError, ValueError):
                 return_data = _content  # type: ignore
         elif response_type is not None:
@@ -445,7 +441,7 @@ def __parse_event(event_str: str, content_type: str):
             if keyword or data:
                 event[keyword] = _data
         return event
-    elif content_type == NDJSON_EVENT_STREAM_CONTENT_TYPE:
+    if content_type == NDJSON_EVENT_STREAM_CONTENT_TYPE:
         try:
             event = json_lib.loads(event_str)
         except (ValueError, TypeError):
@@ -453,3 +449,15 @@ def __parse_event(event_str: str, content_type: str):
     else:
         return event_str
     return event
+
+
+__all__ = [
+    "AsyncClient",
+    "HeaderTypes",
+    "QueryParamTypes",
+    "Request",
+    "RequestContent",
+    "RequestData",
+    "RequestFiles",
+    "Response",
+]

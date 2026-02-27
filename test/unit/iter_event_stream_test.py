@@ -1,19 +1,26 @@
+from __future__ import annotations
+
 import json
 from asyncio import sleep
-from collections.abc import AsyncIterator
+from typing import TYPE_CHECKING
 
 import httpx
 import pytest
 from sse_starlette.sse import EventSourceResponse as EventSourceStarletteResponse
 from starlette.applications import Starlette
-from starlette.requests import Request as StarletteRequest
 from starlette.routing import Route as StarletteRoute
 
 from waylay.sdk.api._models import BaseModel as WaylayBaseModel
 from waylay.sdk.api.client import ApiClient
-from waylay.sdk.api.http import HttpClientOptions
 from waylay.sdk.auth.model import NoCredentials
 from waylay.sdk.config.model import WaylayConfig
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
+
+    from starlette.requests import Request as StarletteRequest
+
+    from waylay.sdk.api.http import HttpClientOptions
 
 
 @pytest.fixture(name="events", scope="session")
@@ -31,7 +38,7 @@ def _sse_app_fixture(events: list):
             await sleep(0.3)
             yield event
 
-    async def event_stream_endpoint(request: StarletteRequest):
+    async def event_stream_endpoint(_request: StarletteRequest):
         generator = event_generator(events)
         return EventSourceStarletteResponse(generator)
 
@@ -49,7 +56,7 @@ async def _app_transport_fixture(sse_app):
 
 @pytest.fixture(name="config", scope="session")
 def _config_fixture():
-    yield WaylayConfig(NoCredentials())
+    return WaylayConfig(NoCredentials())
 
 
 @pytest.fixture(name="client", scope="session")
@@ -59,7 +66,7 @@ async def _client_fixture(config, app_transport):
         "base_url": "http://test",
         "auth": None,
     }
-    yield ApiClient(config, http_opts)
+    return ApiClient(config, http_opts)
 
 
 class EventData(WaylayBaseModel):
@@ -109,8 +116,7 @@ CASES = [
 
 
 def list_to_async_iterator(lst):
-    for item in lst:
-        yield item
+    yield from lst
 
 
 @pytest.mark.parametrize(

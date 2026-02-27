@@ -78,8 +78,7 @@ def _create_client_from_profile_or_creds(
     profile = os.getenv("WAYLAY_TEST_PROFILE")
     if profile:
         return WaylayClient.from_profile(profile)
-    else:
-        return WaylayClient.from_credentials(credentials)
+    return WaylayClient.from_credentials(credentials)
 
 
 @pytest.fixture(scope="session", name="waylay_session_test_client")

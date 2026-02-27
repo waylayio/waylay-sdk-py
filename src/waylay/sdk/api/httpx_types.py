@@ -1,5 +1,7 @@
 """Types from the httpx library."""
 
+from __future__ import annotations
+
 import ssl
 from collections.abc import Mapping, Sequence
 from typing import IO
@@ -44,19 +46,19 @@ QueryParamTypes = (
 VerifyTypes = ssl.SSLContext | str | bool
 
 __all__ = [
-    "RequestFiles",
-    "RequestData",
-    "URLTypes",
-    "RequestContent",
-    "AuthTypes",
-    "TimeoutTypes",
-    "CookieTypes",
-    "QueryParamTypes",
-    "RequestExtensions",
-    "VerifyTypes",
-    "ProxyTypes",
     "AsyncBaseTransport",
-    "Limits",
+    "AuthTypes",
     "CertTypes",
+    "CookieTypes",
+    "Limits",
     "ProxyTypes",
+    "ProxyTypes",
+    "QueryParamTypes",
+    "RequestContent",
+    "RequestData",
+    "RequestExtensions",
+    "RequestFiles",
+    "TimeoutTypes",
+    "URLTypes",
+    "VerifyTypes",
 ]
