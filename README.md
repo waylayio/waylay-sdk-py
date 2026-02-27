@@ -8,7 +8,7 @@ See [Waylay Docs](https://docs.waylay.io/#/api/sdk/python) for documentation.
 
 ## Installation
 
-This package requires a python runtime `3.9` or higher.
+This package requires a python runtime `3.10` or higher.
 
 The basic client can be installed with
 ```bash

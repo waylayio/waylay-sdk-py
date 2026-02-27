@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Annotated, List, Optional
+from typing import Annotated
 
 from pydantic import Field, StrictBool, StrictInt, StrictStr
 from typing_extensions import NotRequired, TypedDict
@@ -12,7 +12,7 @@ from waylay.sdk.api._models import BaseModel
 class PetList(BaseModel):
     """Pet List."""
 
-    pets: List[Pet]
+    pets: list[Pet]
 
     model_config = {
         "populate_by_name": True,
@@ -25,11 +25,7 @@ class Pet(BaseModel):
 
     name: StrictStr
     owner: PetOwner
-    # workaround: on python 3.9, when using
-    #   tag: StrictStr | None = None
-    # {"skip_validation": True} does not work in type_adapter.validate_python
-    # leading to other snapshots (_Model i.o Pet)
-    tag: Optional[StrictStr] = None  # noqa: UP007
+    tag: StrictStr | None = None
 
     model_config = {
         "populate_by_name": True,
