@@ -51,7 +51,7 @@ class AboutApi(WithApiClient):
         query: QueryParamTypes | None = None,
         raw_response: Literal[False] = False,
         select_path: Literal[""] = "",
-        response_type: T,
+        response_type: type[T],
         headers: HeaderTypes | None = None,
         **kwargs,
     ) -> T: ...
@@ -87,7 +87,7 @@ class AboutApi(WithApiClient):
         query: QueryParamTypes | None = None,
         raw_response: Literal[False] = False,
         select_path: str,
-        response_type: T,
+        response_type: type[T],
         headers: HeaderTypes | None = None,
         **kwargs,
     ) -> T: ...
@@ -98,7 +98,7 @@ class AboutApi(WithApiClient):
         query: QueryParamTypes | None = None,
         raw_response: bool = False,
         select_path: str = "",
-        response_type: T | None = None,
+        response_type: type[T] | None = None,
         headers: HeaderTypes | None = None,
         **kwargs,
     ) -> GatewayResponse | T | Response | Model:
