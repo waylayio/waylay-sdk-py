@@ -21,6 +21,7 @@ from typing import (
     Optional,
     Protocol,
     Type,
+    TypeAlias,
     TypeVar,
     cast,
     runtime_checkable,
@@ -32,9 +33,6 @@ from httpx import USE_CLIENT_DEFAULT, ResponseNotRead
 from jsonpath_ng import parse as jsonpath_parse  # type: ignore[import-untyped]
 from pydantic import BaseModel, ConfigDict, TypeAdapter, ValidationError
 from pydantic_core import to_jsonable_python
-from typing_extensions import (
-    TypeAlias,  # >=3.9
-)
 
 from ._models import Model
 from .exceptions import ApiError, ApiValueError, RestResponseError

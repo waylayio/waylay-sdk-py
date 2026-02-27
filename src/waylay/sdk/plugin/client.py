@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import sys
 import warnings
 from importlib.metadata import entry_points
 from typing import Dict, Type
@@ -31,12 +30,7 @@ class WithServicesAndTools(WithApiClient):
     def _load_plugins(self):
         ep_group = "dynamic"
         ep_name = "waylay_sdk_plugins"
-        if sys.version_info >= (3, 10):
-            waylay_entry_points = entry_points(group=ep_group, name=ep_name)
-        else:
-            waylay_entry_points = [
-                ep for ep in entry_points().get(ep_group, []) if ep.name == ep_name
-            ]
+        waylay_entry_points = entry_points(group=ep_group, name=ep_name)
         for ep in waylay_entry_points:
             for plugin_class in ep.load():
                 self.register(plugin_class)
