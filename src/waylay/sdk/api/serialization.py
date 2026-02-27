@@ -168,7 +168,7 @@ class WithSerializationSupport:
 
     def serialize(self, data):
         """Serialize to a jsonable python data structure."""
-        return to_jsonable_python(data, by_alias=True, exclude_none=True)
+        return to_jsonable_python(data, by_alias=True)
 
     def deserialize(
         self,

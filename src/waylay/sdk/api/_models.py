@@ -52,12 +52,14 @@ class BaseModel(PydanticBaseModel, ABC):
     @model_serializer(mode="wrap")
     def _model_serializer(
         self, handler: Callable, info: SerializationInfo
-    ) -> Dict[StrictStr, Any]:
+    ) -> dict[StrictStr, Any] | None:
         """Get the default serializer of the model.
 
         * Excludes `None` fields that were not set at model initialization.
         """
         model_dict = handler(self, info)
+        if model_dict is None:
+            return None
         return {
             k: v
             for k, v in model_dict.items()
@@ -146,7 +148,7 @@ class BaseModel(PydanticBaseModel, ABC):
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert the model instance to dict."""
-        return self.model_dump(by_alias=True, exclude_none=True)
+        return self.model_dump(by_alias=True, exclude_unset=True)
 
     def to_json(self) -> str:
         """Convert the model instance to a JSON-encoded string."""
