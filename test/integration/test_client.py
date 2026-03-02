@@ -6,6 +6,7 @@ from collections.abc import Mapping
 
 import waylay.sdk.auth.interactive
 from waylay.sdk import WaylayClient
+from waylay.sdk.auth.model import ClientCredentials
 from waylay.sdk.config import DEFAULT_PROFILE
 
 # Matches versions like v1.2.3, v1.2, v1 or 0+untagged.1.gd418139
@@ -27,6 +28,7 @@ async def test_create_client_from_credentials(
     assert cfg.profile == DEFAULT_PROFILE
 
     cred = cfg.credentials
+    assert isinstance(cred, ClientCredentials)
     assert cred.api_key == waylay_test_user_id
     assert cred.api_secret == waylay_test_user_secret
     assert cred.gateway_url == waylay_test_gateway_url

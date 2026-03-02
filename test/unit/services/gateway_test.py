@@ -21,6 +21,7 @@ def test_gateway_service_loaded(client: WaylayClient):
 @pytest.mark.asyncio
 async def test_gateway_about(client: WaylayClient, httpx_mock: HTTPXMock):
     """Test gateway about status check"""
+    assert isinstance(client.config.gateway_url, str)
     httpx_mock.add_response(
         method="GET",
         url=client.config.gateway_url + "/",

@@ -13,12 +13,12 @@ if TYPE_CHECKING:
 
     from .api.http import AsyncClient
     from .plugin.type_stubs import (
-        AlarmsService,
-        DataService,
-        RegistryService,
-        ResourcesService,
-        RulesService,
-        StorageService,
+        AlarmsService,  # type: ignore
+        DataService,  # type: ignore
+        RegistryService,  # type: ignore
+        ResourcesService,  # type: ignore
+        RulesService,  # type: ignore
+        StorageService,  # type: ignore
     )
 
 

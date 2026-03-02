@@ -9,7 +9,7 @@ import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, ClassVar
+from typing import Any, ClassVar, cast
 
 import jwt
 from jwt.exceptions import PyJWTError
@@ -268,13 +268,16 @@ class TokenCredentials(CredentialsBase):
 class WaylayToken:
     """Holds a Waylay JWT token."""
 
+    token_data: dict
+
     def __init__(self, token_string: str, token_data: dict | None = None):
         """Create a Waylay Token holder object from given token string or data."""
         self.token_string = token_string
         if token_data is None:
             try:
-                token_data = jwt.decode(
-                    token_string, options=dict(verify_signature=False)
+                token_data = cast(
+                    "dict",
+                    jwt.decode(token_string, options=dict(verify_signature=False)),
                 )
             except (TypeError, ValueError, PyJWTError) as exc:
                 raise TokenParseError(exc) from exc
@@ -284,7 +287,7 @@ class WaylayToken:
         """Verify essential assertions, and its expiry state.
 
         This implementation does not verify the signature of a token, as
-        this is seen the responsability of a server implementation.
+        this is seen the responsibility of a server implementation.
 
         """
         if not self.token_string:

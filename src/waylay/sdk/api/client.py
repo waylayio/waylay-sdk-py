@@ -41,7 +41,7 @@ class ApiClient(WithSerializationSupport):
         self.config = config
         self.http_options = {}
         self._http_client = None
-        self.base_url = self.config.gateway_url
+        self.base_url = self.config.gateway_url  # pyright: ignore[reportAttributeAccessIssue]
         if http_options:
             self.set_options(http_options)
 

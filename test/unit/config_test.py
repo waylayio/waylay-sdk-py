@@ -128,6 +128,7 @@ def test_tenant_settings():
     assert cfg.local_settings == local_settings
     assert cfg.tenant_settings == MOCK_TENANT_SETTINGS
     assert cfg.settings == {**MOCK_TENANT_SETTINGS, **local_settings}
+    assert isinstance(cfg.credentials, TokenCredentials)
     assert cfg.credentials.token == "_"
     assert cfg.get_root_url("a_service") is None
     assert cfg.get_root_url("api") == "https://xxx"
@@ -237,7 +238,7 @@ def test_save_load_delete_profile(monkeypatch, mocker):
 
     def respond_http(target, request, *args):  # noqa: ARG001
         kwargs = next(responses)
-        return Response(request=request, **kwargs)
+        return Response(request=request, **kwargs)  # type: ignore[arg-type]
 
     mocker.patch("httpx._client.Client._send_single_request", respond_http)
     user_dialog = iter(
@@ -270,6 +271,7 @@ def test_save_load_delete_profile(monkeypatch, mocker):
     cfg.save()
 
     cfg_saved = WaylayConfig.load(profile_name)
+    assert cfg_saved is not None
     assert cfg_saved.get_settings(resolve=False) == cfg.get_settings(resolve=False)
 
     assert any(profile_name in profile for profile in WaylayConfig.list_profiles())
@@ -297,6 +299,8 @@ def test_load_interactive(mocker: MockerFixture):
     profile_name = f"_unit_test_{int(datetime.now().timestamp())}"
     cfg = WaylayConfig.load(profile_name)
 
+    assert cfg is not None
+    assert isinstance(cfg.credentials, TokenCredentials)
     assert cfg.credentials.token == "_"
 
     assert any(profile_name in profile for profile in WaylayConfig.list_profiles())

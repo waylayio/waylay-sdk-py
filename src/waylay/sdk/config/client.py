@@ -44,7 +44,9 @@ class WithConfig:
         """
         return cls(
             WaylayConfig.load(
-                profile, interactive=interactive, gateway_url=gateway_url
+                profile,
+                interactive=interactive,
+                gateway_url=gateway_url,  # pyright: ignore[reportArgumentType]
             ),
             options=options,
         )

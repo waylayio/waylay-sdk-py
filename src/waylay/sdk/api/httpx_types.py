@@ -6,10 +6,8 @@ import ssl
 from collections.abc import Mapping, Sequence
 from typing import IO
 
-from httpx._client import (
-    AsyncBaseTransport,
-    Limits,
-)
+from httpx._config import Limits
+from httpx._transports.base import AsyncBaseTransport
 from httpx._types import (
     AuthTypes,
     CertTypes,

@@ -61,6 +61,7 @@ dev = [
     'pre-commit',
     'sse-starlette',
     "pdoc",
+    "pyright>=1.1.408",
 ]
 
 [tool.pytest.ini_options]
@@ -91,3 +92,6 @@ required-imports = ["from __future__ import annotations"]
 exclude_also = [
     "if TYPE_CHECKING:"
 ]
+
+[tool.pyright]
+include = ["src", "test"]

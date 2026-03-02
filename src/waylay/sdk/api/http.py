@@ -2,11 +2,7 @@
 
 from __future__ import annotations
 
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    TypedDict,
-)
+from typing import TYPE_CHECKING, Any, TypeAlias, TypedDict
 
 import httpx
 from typing_extensions import Required  # >=3.11
@@ -23,9 +19,9 @@ from .httpx_types import (
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
 
-AsyncClient = httpx.AsyncClient
-Response = httpx.Response
-Request = httpx.Request
+AsyncClient: TypeAlias = httpx.AsyncClient
+Response: TypeAlias = httpx.Response
+Request: TypeAlias = httpx.Request
 
 
 class HttpRequestArguments(TypedDict, total=False):

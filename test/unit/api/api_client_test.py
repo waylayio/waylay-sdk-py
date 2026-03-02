@@ -204,7 +204,7 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
 async def test_call_invalid_content(waylay_api_client: ApiClient):
     """Cannot use a dict as `content` argument."""
     with pytest.raises(TypeError, match="Unexpected type"):
-        waylay_api_client.build_request("POST", "", content={"should": "not work"})
+        waylay_api_client.build_request("POST", "", content={"should": "not work"})  # type: ignore[arg-type]
 
 
 DESERIALIZE_CASES = [
@@ -690,7 +690,7 @@ def test_deserialize(
     response_kwargs = _retrieve_fixture_values(request, response_kwargs)
     response = Response(**response_kwargs)
     deserialized = waylay_api_client.deserialize(
-        response, response_type=response_type, select_path=select_path
+        response, response_type=response_type, select_path=select_path or ""
     )
     assert (
         response.content,
