@@ -86,7 +86,7 @@ def _fixture_my_client(config: WaylayConfig, echo_app):
     return client
 
 
-async def assert_call_echo(srv: MyService):
+async def assert_call_echo(srv: MyService | MyTool):
     """Invoke the remote service."""
     data = {"message": "hello world"}
     api_response = await srv.echo(data)
@@ -156,7 +156,7 @@ async def test_lazy_init(my_client: WaylayClient):
     await assert_call_echo(my_client.tst)
     assert isinstance(my_client.tst2, MyService)
     await assert_call_echo(my_client.tst2)
-    assert isinstance(my_client.tst_tool, MyService)
+    assert isinstance(my_client.tst_tool, MyTool)
     await assert_call_echo(my_client.tst_tool)
 
     assert http_client.is_closed is False
