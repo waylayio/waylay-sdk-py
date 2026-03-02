@@ -49,6 +49,8 @@ class BaseModel(PydanticBaseModel, ABC):
     Includes a custom validator and serializer.
     """
 
+    model_config = ConfigDict(extra="allow")
+
     @model_serializer(mode="wrap")
     def _model_serializer(
         self, handler: Callable, info: SerializationInfo
@@ -81,15 +83,19 @@ class BaseModel(PydanticBaseModel, ABC):
         context = info.context or {}
         try:
             return handler(value)
-        except ValidationError:
+        except ValidationError as exc:
             if context.get("skip_validation", False):
-                model = cls.model_construct(**value)
+                try:
+                    model = cls.model_construct(**value)
+                except TypeError:
+                    # `value` is not dict/model-like so we can't convert it
+                    raise exc from exc
 
                 # set missing fields to None
                 model_fields_set = deepcopy(model.model_fields_set)
                 model_fields_missing = [
                     field_name
-                    for [field_name, field_info] in model.model_fields.items()
+                    for [field_name, field_info] in cls.model_fields.items()
                     if field_name not in model_fields_set and field_info.is_required()
                 ]
                 for field_name in model_fields_missing:
@@ -109,6 +115,15 @@ class BaseModel(PydanticBaseModel, ABC):
                             strict=strict,
                             context=context,
                         )
+
+                # preserve extra fields in __pydantic_extra__
+                model_field_names = set(cls.model_fields.keys())
+                extra_fields = {
+                    k: v for k, v in value.items() if k not in model_field_names
+                }
+                if extra_fields:
+                    model.__pydantic_extra__ = extra_fields
+
                 return model
             else:
                 raise
