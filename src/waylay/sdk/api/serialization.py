@@ -409,8 +409,12 @@ async def _iter_event_stream(
             event = __parse_event(event_str, content_type)
             if not event:
                 continue
-            if _ignore_retry_events and "retry" in event and len(event) == 1:
-                continue
+            if _ignore_retry_events:
+                try:
+                    if "retry" in event and len(event) == 1:
+                        continue
+                except TypeError:
+                    pass
             _deserialized_event = _deserialize(
                 _extract_selected(event, select_path), _response_type
             )

@@ -585,7 +585,7 @@
     }),
     None,
     'PetList',
-    PetList(pets=[Pet(name=111, owner=PetOwner(id='invalidId', name='Simon'), tag=None), Pet(name='Chop', tag=None, owner=None)]),
+    PetList(pets=[Pet(name=111, owner=PetOwner(id='invalidId', name='Simon'), tag=None), Pet(name='Chop', owner=None, tag=None)]),
   )
 # ---
 # name: test_deserialize[json_model_invalid_submodule_list]
@@ -599,7 +599,7 @@
     'list',
     list([
       Pet(name=111, owner=PetOwner(id='invalidId', name='Simon'), tag=None),
-      Pet(name='Chop', tag=None, owner=None),
+      Pet(name='Chop', owner=None, tag=None),
     ]),
   )
 # ---
@@ -612,7 +612,7 @@
     }),
     None,
     'Pet',
-    Pet(owner=PetOwner(id=456, name='Simontis'), tag=None, name=None),
+    Pet(name=None, owner=PetOwner(id=456, name='Simontis'), tag=None),
   )
 # ---
 # name: test_deserialize[json_model_missing_submodel_field]
@@ -624,7 +624,7 @@
     }),
     None,
     'Pet',
-    Pet(name='Chop', tag=None, owner=None),
+    Pet(name='Chop', owner=None, tag=None),
   )
 # ---
 # name: test_deserialize[json_number]
