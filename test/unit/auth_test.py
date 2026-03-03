@@ -48,7 +48,7 @@ CASES: list[tuple[str, str | None, dict[str, Any] | None, type | None, str]] = [
 
 
 @pytest.mark.parametrize(
-    "token_string, token_data, err_class, err_text",
+    ("token_string", "token_data", "err_class", "err_text"),
     [c[1:] for c in CASES],
     ids=[c[0] for c in CASES],
 )
@@ -59,15 +59,12 @@ def test_tokens(
     err_text: str,
 ):
     """Test token validation (without signature verification)."""
-    try:
-        maybe_empty_token_string = cast(str, token_string)
+    maybe_empty_token_string = cast("str", token_string)
+    if err_class is None:
         token = WaylayToken(maybe_empty_token_string, token_data)
         assert token.token_string == token_string
         assert token == token.validate()
-        assert err_class is None
-    except AssertionError:
-        raise
-    except Exception as e:
-        assert err_class is not None
-        assert isinstance(e, err_class)
-        assert err_text in str(e)
+    else:
+        with pytest.raises(err_class) as excinfo:
+            WaylayToken(maybe_empty_token_string, token_data).validate()
+        assert err_text in str(excinfo.value)

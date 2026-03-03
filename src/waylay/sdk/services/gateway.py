@@ -2,15 +2,17 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, Literal, TypeVar, overload
+from typing import TYPE_CHECKING, Any, Literal, TypeVar, overload
 
 from pydantic import ConfigDict
 
 from waylay.sdk.api._models import BaseModel as WaylayBaseModel
 from waylay.sdk.api._models import Model
-from waylay.sdk.api.client import ApiClient
-from waylay.sdk.api.http import HeaderTypes, QueryParamTypes, Response
 from waylay.sdk.plugin.base import WaylayService, WithApiClient
+
+if TYPE_CHECKING:
+    from waylay.sdk.api.client import ApiClient
+    from waylay.sdk.api.http import HeaderTypes, QueryParamTypes, Response
 
 T = TypeVar("T")
 
@@ -132,7 +134,7 @@ class AboutApi(WithApiClient):
         :raises APIError: If the http request has a status code different from `2XX`.
             This object wraps both the http Response and any parsed data.
         """
-        response_type_map: Dict[str, Any] = (
+        response_type_map: dict[str, Any] = (
             {"2XX": response_type}
             if response_type is not None
             else {

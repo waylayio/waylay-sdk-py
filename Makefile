@@ -30,7 +30,10 @@ lint: ## Lint code
 format-check: ## Check code formatting
 	uv run ruff format --check
 
+# mypy is missing a lot of potential problems that pyright does detect.
+# But for now, we'll keep running mypy as it's still used by the sdk plugins
 typecheck: ## Typecheck code
+	uv run pyright
 	uv run mypy --check-untyped-defs -p waylay.sdk
 	uv run mypy --check-untyped-defs test/*/*.py
 	@${printMsg} typecheck OK

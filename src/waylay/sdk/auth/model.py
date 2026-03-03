@@ -9,7 +9,7 @@ import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, cast
 
 import jwt
 from jwt.exceptions import PyJWTError
@@ -28,7 +28,7 @@ class CredentialsType(str, Enum):
 
     CLIENT = "client_credentials"
     APPLICATION = "application_credentials"
-    TOKEN = "token"
+    TOKEN = "token"  # noqa: S105
     CALLBACK = "interactive"
 
     def __str__(self):
@@ -49,7 +49,7 @@ class WaylayCredentials(abc.ABC):
     accounts_url: str | None = None
 
     @abc.abstractmethod
-    def to_dict(self, obfuscate=True) -> Dict[str, Any]:
+    def to_dict(self, obfuscate=True) -> dict[str, Any]:
         """Convert the credentials to a json-serialisable representation."""
 
     @property
@@ -60,7 +60,7 @@ class WaylayCredentials(abc.ABC):
 
     def __repr__(self):
         """Show the implementing class and public information."""
-        return f"<{self.__class__.__name__}({str(self)})>"
+        return f"<{self.__class__.__name__}({self!s})>"
 
     def __str__(self):
         """Show the credential attributes, with secrets obfuscated."""
@@ -166,7 +166,7 @@ class NoCredentials(CredentialsBase):
 
     credentials_type: ClassVar[CredentialsType] = CredentialsType.CALLBACK
 
-    def to_dict(self, obfuscate=True):  # pylint: disable=unused-argument
+    def to_dict(self, obfuscate=True):  # noqa: ARG002
         """Convert the credentials to a json-serialisable representation."""
         return dict(
             type=str(self.credentials_type),
@@ -268,23 +268,26 @@ class TokenCredentials(CredentialsBase):
 class WaylayToken:
     """Holds a Waylay JWT token."""
 
-    def __init__(self, token_string: str, token_data: Dict | None = None):
+    token_data: dict
+
+    def __init__(self, token_string: str, token_data: dict | None = None):
         """Create a Waylay Token holder object from given token string or data."""
         self.token_string = token_string
         if token_data is None:
             try:
-                token_data = jwt.decode(
-                    token_string, options=dict(verify_signature=False)
+                token_data = cast(
+                    "dict",
+                    jwt.decode(token_string, options=dict(verify_signature=False)),
                 )
             except (TypeError, ValueError, PyJWTError) as exc:
                 raise TokenParseError(exc) from exc
         self.token_data = token_data
 
-    def validate(self) -> "WaylayToken":
+    def validate(self) -> WaylayToken:
         """Verify essential assertions, and its expiry state.
 
         This implementation does not verify the signature of a token, as
-        this is seen the responsability of a server implementation.
+        this is seen the responsibility of a server implementation.
 
         """
         if not self.token_string:
@@ -317,17 +320,17 @@ class WaylayToken:
         return self.token_data.get("sub", None)
 
     @property
-    def licenses(self) -> List[str]:
+    def licenses(self) -> list[str]:
         """Get the licenses asserted by the token."""
         return self.token_data.get("licenses", [])
 
     @property
-    def groups(self) -> List[str]:
+    def groups(self) -> list[str]:
         """Get the groups asserted by the token."""
         return self.token_data.get("groups", [])
 
     @property
-    def permissions(self) -> List[str]:
+    def permissions(self) -> list[str]:
         """Get the permissions asserted by the token."""
         return self.token_data.get("permissions", [])
 

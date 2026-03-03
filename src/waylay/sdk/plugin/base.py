@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator, Mapping
-from typing import Generic, Type, TypeVar
+from typing import Generic, TypeVar
 
 from ..api import ApiClient, HttpClientOptions
 from ..api.exceptions import SyncCtxMgtNotSupportedError
@@ -73,9 +73,9 @@ class WaylayService(WaylayPlugin):
 class PluginAccess(Mapping[str, P], Generic[P]):
     """A lookup API for tools or services."""
 
-    base_class: Type[P]
+    base_class: type[P]
 
-    def __init__(self, items: Mapping[str, P], base_class: Type[P]):
+    def __init__(self, items: Mapping[str, P], base_class: type[P]):
         """Create accessor for SDK plugins."""
         self._items = items
         self.base_class = base_class
@@ -92,7 +92,7 @@ class PluginAccess(Mapping[str, P], Generic[P]):
         """Count registred SDK plugin."""
         return self._items.__len__()
 
-    def iter(self, item_class: Type[PI], name: str | None = None) -> Iterator[PI]:
+    def iter(self, item_class: type[PI], name: str | None = None) -> Iterator[PI]:
         """Iterate over the plugins that satisfy the requirements."""
         if name:
             plug = self._items.get(name, None)
@@ -103,11 +103,11 @@ class PluginAccess(Mapping[str, P], Generic[P]):
             if isinstance(plug, item_class):
                 yield plug
 
-    def select(self, item_class: Type[PI], name: str | None = None) -> PI | None:
+    def select(self, item_class: type[PI], name: str | None = None) -> PI | None:
         """Select the first SDK plugin that satifies the class and name requirements."""
         return next(self.iter(item_class, name), None)
 
-    def require(self, item_class: Type[PI], name: str | None = None) -> PI:
+    def require(self, item_class: type[PI], name: str | None = None) -> PI:
         """Get the SDK plugin for the given class or raise a ConfigError."""
         item = self.select(item_class, name)
         if item is None:
@@ -128,16 +128,19 @@ class WaylayTool(WaylayPlugin):
     """A tool extension for the waylay sdk."""
 
     _services: PluginAccess[WaylayService]
-    _tools: "PluginAccess[WaylayTool]"
+    _tools: PluginAccess[WaylayTool]
 
     def __init__(
         self,
         api_client: ApiClient,
         *,
         services: PluginAccess[WaylayService],
-        tools: "PluginAccess[WaylayTool]",
+        tools: PluginAccess[WaylayTool],
     ):
         """Create a Waylay Tool."""
         super().__init__(api_client)
         self._services = services
         self._tools = tools
+
+
+__all__ = ["ApiClient", "HttpClientOptions"]
