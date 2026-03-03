@@ -1,9 +1,12 @@
 """Test tools and services."""
 
-from typing import List, Type
+from __future__ import annotations
 
-from waylay.sdk import WaylayPlugin
+from typing import TYPE_CHECKING
 
 from .plugins import ExampleService, ExampleTool
 
-PLUGINS: List[Type[WaylayPlugin]] = [ExampleService, ExampleTool]
+if TYPE_CHECKING:
+    from waylay.sdk import WaylayPlugin
+
+PLUGINS: list[type[WaylayPlugin]] = [ExampleService, ExampleTool]

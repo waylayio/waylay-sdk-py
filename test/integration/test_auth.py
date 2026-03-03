@@ -1,5 +1,7 @@
 """Integration tests for waylay.sdk.auth module."""
 
+from __future__ import annotations
+
 from waylay.sdk.auth.provider import TokenCredentials, WaylayTokenAuth
 
 

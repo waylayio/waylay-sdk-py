@@ -1,6 +1,8 @@
 """Parse credentials."""
 
-from typing import Any, Dict
+from __future__ import annotations
+
+from typing import Any
 
 from .model import (
     ApplicationCredentials,
@@ -11,7 +13,7 @@ from .model import (
 )
 
 
-def parse_credentials(json_obj: Dict[str, Any]) -> WaylayCredentials:
+def parse_credentials(json_obj: dict[str, Any]) -> WaylayCredentials:
     """Convert a parsed json representation to a WaylayCredentials object."""
     cred_type = json_obj.get("type")
     if cred_type is None:

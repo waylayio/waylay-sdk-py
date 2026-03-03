@@ -1,5 +1,7 @@
 """Shared unit test fixtures."""
 
+from __future__ import annotations
+
 from datetime import datetime
 
 import pytest
@@ -30,14 +32,14 @@ class WaylayTokenStub(WaylayToken):
 
 @pytest.fixture(name="credentials")
 def _fixture_credentials():
-    yield NoCredentials(gateway_url="http://test")
+    return NoCredentials(gateway_url="http://test")
 
 
 @pytest.fixture(name="config")
 def _fixture_config(credentials):
-    yield WaylayConfig(credentials)
+    return WaylayConfig(credentials)
 
 
 @pytest.fixture(name="client")
 def _fixture_client(config):
-    yield WaylayClient(config)
+    return WaylayClient(config)

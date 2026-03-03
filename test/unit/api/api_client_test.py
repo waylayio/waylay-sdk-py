@@ -2,16 +2,14 @@
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator
 from datetime import date, datetime
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any
 
 import httpx
 import numpy as np
 import pytest
-from pytest_httpx import HTTPXMock
 from syrupy.filters import paths
 
 from waylay.sdk.api import ApiClient
@@ -30,6 +28,11 @@ from .example.pet_fixtures import (
     pet_with_alias_instance_dict,
 )
 from .example.pet_model import Pet, PetList, PetType, PetUnion, PetWithAlias
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
+
+    from pytest_httpx import HTTPXMock
 
 
 @pytest.fixture(name="waylay_credentials")
@@ -176,7 +179,7 @@ async def test_serialize_and_call(
     test_input = _retrieve_fixture_values(request, test_input)
     mocker.patch(
         "httpx._models.get_multipart_boundary_from_content_type",
-        lambda content_type: b"---boundary---",
+        return_value=b"---boundary---",
     )
     request = waylay_api_client.build_request(**test_input)
     httpx_mock.add_response()
@@ -201,7 +204,7 @@ async def test_call_invalid_method(waylay_api_client: ApiClient):
 async def test_call_invalid_content(waylay_api_client: ApiClient):
     """Cannot use a dict as `content` argument."""
     with pytest.raises(TypeError, match="Unexpected type"):
-        waylay_api_client.build_request("POST", "", content={"should": "not work"})
+        waylay_api_client.build_request("POST", "", content={"should": "not work"})  # type: ignore[arg-type]
 
 
 DESERIALIZE_CASES = [
@@ -296,7 +299,7 @@ DESERIALIZE_CASES = [
                 "code": "RESOURCE_NOT_FOUND",
             },
         },
-        {"201": Dict[str, str]},
+        {"201": dict[str, str]},
         None,
     ),
     (
@@ -308,7 +311,7 @@ DESERIALIZE_CASES = [
                 "code": "RESOURCE_NOT_FOUND",
             },
         },
-        {"2XX": Dict[str, str]},
+        {"2XX": dict[str, str]},
         None,
     ),
     (
@@ -332,7 +335,7 @@ DESERIALIZE_CASES = [
                 "code": "RESOURCE_NOT_FOUND",
             },
         },
-        {"4XX": Dict[str, str]},  # no response mapping
+        {"4XX": dict[str, str]},  # no response mapping
         None,
     ),
     # binary response types
@@ -370,13 +373,13 @@ DESERIALIZE_CASES = [
     (
         "json_list_XX_list_int",
         {"status_code": 200, "json": ["11", "22", 33]},
-        {"2XX": List[int]},
+        {"2XX": list[int]},
         None,
     ),
     (
         "json_list_X_union",
         {"status_code": 200, "json": ["hello", "world", 123, {"key": "value"}]},
-        {"2XX": List[str | int | Dict[str, Any]]},
+        {"2XX": list[str | int | dict[str, Any]]},
         None,
     ),
     (
@@ -556,25 +559,25 @@ DESERIALIZE_CASES = [
     (
         "json_list_model_path_pets",
         {"status_code": 200, "json": pet_list_instance_dict},
-        {"200": List[Pet]},
+        {"200": list[Pet]},
         "pets",
     ),
     (
         "json_list_any_model_path_pets",
         {"status_code": 200, "json": pet_list_instance_dict},
-        {"200": List[Model]},
+        {"200": list[Model]},
         "pets",
     ),
     (
         "json_list_list_path_[*].name",
         {"status_code": 200, "json": [pet_instance_dict]},
-        {"200": List["str"]},
+        {"200": list["str"]},
         "[*].name",
     ),
     (
         "json_list_list_path_pets[*].name",
         {"status_code": 200, "json": pet_list_instance_dict},
-        {"200": List[str]},
+        {"200": list[str]},
         "pets[*].name",
     ),
     (
@@ -586,7 +589,7 @@ DESERIALIZE_CASES = [
     (
         "json_list_list_path_pets[1:].name",
         {"status_code": 200, "json": pet_list_instance_dict},
-        {"200": List[str]},
+        {"200": list[str]},
         "pets[1:].name",
     ),
     # invalid/partial data
@@ -646,7 +649,7 @@ DESERIALIZE_CASES = [
                 {"name": "Chop"},
             ],
         },  # 0: id type is str instead of int, 1: missing owner
-        {"200": List[Pet]},
+        {"200": list[Pet]},
         None,
     ),
     (
@@ -671,14 +674,14 @@ DESERIALIZE_CASES = [
 
 
 @pytest.mark.parametrize(
-    "response_kwargs,response_type,select_path",
+    ("response_kwargs", "response_type", "select_path"),
     [c[1:] for c in DESERIALIZE_CASES],
     ids=[c[0] for c in DESERIALIZE_CASES],
 )
 def test_deserialize(
     snapshot,
     waylay_api_client: ApiClient,
-    response_kwargs: Dict[str, Any],
+    response_kwargs: dict[str, Any],
     response_type: Any,
     select_path: str | None,
     request,
@@ -687,7 +690,7 @@ def test_deserialize(
     response_kwargs = _retrieve_fixture_values(request, response_kwargs)
     response = Response(**response_kwargs)
     deserialized = waylay_api_client.deserialize(
-        response, response_type=response_type, select_path=select_path
+        response, response_type=response_type, select_path=select_path or ""
     )
     assert (
         response.content,
@@ -700,7 +703,7 @@ def test_deserialize(
 
 
 class BytesResponseStream(httpx.AsyncByteStream):
-    def __init__(self, chunks: List[bytes]):
+    def __init__(self, chunks: list[bytes]):
         self.chunks_iter = iter(chunks)
 
     async def __aiter__(self) -> AsyncIterator[bytes]:
@@ -720,7 +723,7 @@ ERROR_RESP_CASES = [
                 "code": "RESOURCE_NOT_FOUND",
             },
         },
-        {"404": Dict[str, str]},
+        {"404": dict[str, str]},
     ),
     (
         {
@@ -773,19 +776,19 @@ ERROR_RESP_CASES = [
 ]
 
 
-@pytest.mark.parametrize("response_kwargs,response_type", ERROR_RESP_CASES)
+@pytest.mark.parametrize(("response_kwargs", "response_type"), ERROR_RESP_CASES)
 async def test_deserialize_error_responses(
     snapshot,
     waylay_api_client: ApiClient,
-    response_kwargs: Dict[str, Any],
+    response_kwargs: dict[str, Any],
     response_type: Any,
     request,
 ):
     """Test REST param deserializer when error response."""
     response_kwargs = _retrieve_fixture_values(request, response_kwargs)
+    resp = Response(**response_kwargs)
+    await resp.aread()
     with pytest.raises(ApiError) as excinfo:
-        resp = Response(**response_kwargs)
-        await resp.aread()
         waylay_api_client.deserialize(resp, response_type=response_type)
     assert (
         str(excinfo.value),
@@ -828,11 +831,11 @@ def test_deserialize_error_response_with_select_path(waylay_api_client: ApiClien
             response_type={"404": dict[str, str]},
             select_path="entity",
         )
-        assert excinfo.value.data is not None
-        assert excinfo.value.data.get("code") == "RESOURCE_NOT_FOUND"
+    assert excinfo.value.data is not None
+    assert excinfo.value.data.get("code") == "RESOURCE_NOT_FOUND"
 
 
-def _retrieve_fixture_values(request, kwargs: Dict[str, Any]) -> Dict[str, Any]:
+def _retrieve_fixture_values(request, kwargs: dict[str, Any]) -> dict[str, Any]:
     for arg_key, arg_value in kwargs.items():
 
         def _update_fixture_value(x):
@@ -849,32 +852,32 @@ def _retrieve_fixture_values(request, kwargs: Dict[str, Any]) -> Dict[str, Any]:
 
 
 @pytest.mark.parametrize(
-    "method, url, timeout, expected_timeout",
+    ("method", "url", "timeout", "expected_timeout"),
     [
-        [
+        (
             "GET",
             "https://example.com/foo/",
             10.0,
             {"connect": 10.0, "read": 10.0, "write": 10.0, "pool": 10.0},
-        ],
-        [
+        ),
+        (
             "GET",
             "https://example.com/foo/",
             10,
             {"connect": 10.0, "read": 10.0, "write": 10.0, "pool": 10.0},
-        ],
-        [
+        ),
+        (
             "GET",
             "https://example.com/foo/",
             (10, 5, 5, 5),
             {"connect": 10, "read": 5, "write": 5, "pool": 5},
-        ],  # (connect, read, write, pool)
-        [
+        ),  # (connect, read, write, pool)
+        (
             "GET",
             "https://example.com/foo/",
             None,
             {"connect": 5.0, "read": 5.0, "write": 5.0, "pool": 5.0},
-        ],
+        ),
     ],
 )
 async def test_request_timeout(

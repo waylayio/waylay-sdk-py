@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from ..exceptions import RequestError, RestResponseError, WaylayError
-from .http import Response
+
+if TYPE_CHECKING:
+    from .http import Response
 
 
 class ApiValueError(RequestError, ValueError):
@@ -29,7 +31,7 @@ class ApiValueError(RequestError, ValueError):
         full_msg = msg
         if path_to_item:
             full_msg = f"{msg} at {render_path(path_to_item)}"
-        super(ApiValueError, self).__init__(full_msg)
+        super().__init__(full_msg)
 
 
 class ApiError(RestResponseError):

@@ -61,6 +61,7 @@ dev = [
     'pre-commit',
     'sse-starlette',
     "pdoc",
+    "pyright>=1.1.408",
 ]
 
 [tool.pytest.ini_options]
@@ -70,17 +71,27 @@ asyncio_mode = "auto"
 include = ["pyproject.toml", "src/**/*.py", "test/**/*.py"]
 
 [tool.ruff.lint]
-select = ["E", "F", "B", "SIM", "FA", "D", "UP007", "I001", "PIE790"]
-ignore = ["D203", "D213"]
+extend-select = ["E", "F", "UP", "B", "SIM", "I", "D", "PLE", "D","FA","PIE","RET","RUF","S","ARG","PT", "TC"]
+ignore = [
+    "D203",    # blank line required before class docstring
+    "D213",    # multi-line-summary-second-line
+]
 
 [tool.ruff.lint.isort]
 from-first = false
 known-first-party = ["waylay*"]
+required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.per-file-ignores]
-"test/**/*.py" = ["D"] # no docstyle required
+"**/test/**/*.py" = [
+    "D",  # no docstyle required
+    "S",  # disable security rules for tests
+]
 
 [tool.coverage.report]
 exclude_also = [
     "if TYPE_CHECKING:"
 ]
+
+[tool.pyright]
+include = ["src", "test"]

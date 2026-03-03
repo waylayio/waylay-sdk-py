@@ -8,7 +8,7 @@ import os
 import re
 from collections.abc import Mapping, MutableMapping
 from pathlib import Path
-from typing import Any, Type
+from typing import Any
 
 import httpx
 from appdirs import user_config_dir
@@ -64,7 +64,7 @@ class WaylayConfig:
     _auth: WaylayTokenAuth
     _local_settings: Settings
     _tenant_settings: TenantSettings | None = None
-    _token_auth_provider: Type[WaylayTokenAuth] = WaylayTokenAuth
+    _token_auth_provider: type[WaylayTokenAuth] = WaylayTokenAuth
 
     def __init__(
         self,
@@ -127,8 +127,7 @@ class WaylayConfig:
             url_override = _root_url_for(url_override)
             if url_override.endswith(default_root_path):
                 return url_override
-            else:
-                return f"{url_override}{default_root_path}"
+            return f"{url_override}{default_root_path}"
         if default_url is not None:
             return _root_url_for(default_url)
         return None
@@ -297,7 +296,7 @@ class WaylayConfig:
                 )
                 if interactive:
                     if request_migrate_to_gateway_interactive(profile, msg):
-                        gateway_url = ask_gateway(waylay_config.accounts_url)
+                        gateway_url = ask_gateway(waylay_config.accounts_url)  # pyright: ignore[reportArgumentType]
                         waylay_config.credentials.gateway_url = gateway_url
                         waylay_config.save()
                 else:
@@ -378,7 +377,7 @@ class WaylayConfig:
 
     def __repr__(self):
         """Show the implementation class an main attributes."""
-        return f"<WaylayConfig({str(self)})>"
+        return f"<WaylayConfig({self!s})>"
 
     def __str__(self):
         """Show the main (obfuscated) attributes as a string."""
