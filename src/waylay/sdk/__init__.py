@@ -1,5 +1,7 @@
 """The Waylay Python SDK."""
 
+from __future__ import annotations
+
 from ._version import __version__
 from .api import ApiClient
 from .auth import (
@@ -16,19 +18,19 @@ from .exceptions import WaylayError
 from .plugin import PluginAccess, WaylayPlugin, WaylayService, WaylayTool
 
 __all__ = [
+    "ApiClient",
+    "ApplicationCredentials",
+    "ClientCredentials",
+    "NoCredentials",
+    "PluginAccess",
+    "TokenCredentials",
     "WaylayClient",
     "WaylayConfig",
     "WaylayCredentials",
-    "ClientCredentials",
-    "ApplicationCredentials",
-    "TokenCredentials",
-    "NoCredentials",
-    "WaylayToken",
-    "WaylayService",
-    "WaylayTool",
-    "WaylayPlugin",
-    "PluginAccess",
-    "ApiClient",
     "WaylayError",
+    "WaylayPlugin",
+    "WaylayService",
+    "WaylayToken",
+    "WaylayTool",
     "__version__",
 ]

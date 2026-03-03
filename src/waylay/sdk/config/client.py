@@ -23,7 +23,7 @@ class WithConfig:
     config: WaylayConfig
     http_options: HttpClientOptions
 
-    def __init__(self, config: WaylayConfig, **args):
+    def __init__(self, config: WaylayConfig, **_args):
         """Create a configured entity."""
         self.config = config
 
@@ -44,7 +44,9 @@ class WithConfig:
         """
         return cls(
             WaylayConfig.load(
-                profile, interactive=interactive, gateway_url=gateway_url
+                profile,
+                interactive=interactive,
+                gateway_url=gateway_url,  # pyright: ignore[reportArgumentType]
             ),
             options=options,
         )
@@ -106,3 +108,6 @@ def _auth_urls(
         gateway_url = gateway_url or settings.get(SERVICE_KEY_GATEWAY)
         accounts_url = accounts_url or settings.get(SERVICE_KEY_ACCOUNTS)
     return {"gateway_url": gateway_url, "accounts_url": accounts_url}
+
+
+__all__ = ["AsyncClient", "HttpClientOptions"]

@@ -17,10 +17,9 @@ from collections.abc import (
 )
 from inspect import isclass
 from typing import (
+    TYPE_CHECKING,
     Any,
-    Optional,
     Protocol,
-    Type,
     TypeAlias,
     TypeVar,
     cast,
@@ -28,7 +27,6 @@ from typing import (
 )
 from urllib.parse import quote
 
-import httpx._client as httpxc
 from httpx import USE_CLIENT_DEFAULT, ResponseNotRead
 from jsonpath_ng import parse as jsonpath_parse  # type: ignore[import-untyped]
 from pydantic import BaseModel, ConfigDict, TypeAdapter, ValidationError
@@ -46,6 +44,9 @@ from .http import (
     RequestFiles,
     Response,
 )
+
+if TYPE_CHECKING:
+    from httpx._types import CookieTypes, RequestExtensions, TimeoutTypes
 
 _DEFAULT_RESPONSE_TYPE = Model
 _PRIMITIVE_BYTE_TYPES = (bytes, bytearray)
@@ -66,7 +67,7 @@ EVENT_STREAM_CONTENT_TYPES = [
     TEXT_EVENT_STREAM_CONTENT_TYPE,
     NDJSON_EVENT_STREAM_CONTENT_TYPE,
 ]
-TypeMapping: TypeAlias = Mapping[str, Optional[Type[Any]]] | Type[Any] | None
+TypeMapping: TypeAlias = Mapping[str, Any | None] | Any | None
 
 
 class WithSerializationSupport:
@@ -91,11 +92,11 @@ class WithSerializationSupport:
         files: RequestFiles | None = None,
         data: RequestData | None = None,
         headers: HeaderTypes | None = None,
-        cookies: httpxc.CookieTypes | None = None,
-        timeout: httpxc.TimeoutTypes | None = None,
-        extensions: httpxc.RequestExtensions | None = None,
+        cookies: CookieTypes | None = None,
+        timeout: TimeoutTypes | None = None,
+        extensions: RequestExtensions | None = None,
         # Deserialization arguments
-        response_type: Mapping[str, Type | None] | Type | None = None,
+        response_type: Mapping[str, type | None] | type | None = None,
         select_path: str = "",
         raw_response: bool = False,
         # Additional parameters passed on to the http client
@@ -145,9 +146,9 @@ class WithSerializationSupport:
         files: RequestFiles | None = None,
         data: RequestData | None = None,
         headers: HeaderTypes | None = None,
-        cookies: httpxc.CookieTypes | None = None,
-        timeout: httpxc.TimeoutTypes | None = None,
-        extensions: httpxc.RequestExtensions | None = None,
+        cookies: CookieTypes | None = None,
+        timeout: TimeoutTypes | None = None,
+        extensions: RequestExtensions | None = None,
     ) -> Request:
         """Build the HTTP request params needed by the request."""
         method = _validate_method(method)
@@ -199,7 +200,7 @@ class WithSerializationSupport:
             raise ApiError.from_response(
                 "Error response.",
                 response,
-                _deserialize_response(response, response_type=_response_type),
+                _deserialize_response(response, response_type=_response_type),  # pyright: ignore[reportArgumentType]
             )
         content_type = response.headers.get("content-type", "")
         is_event_stream = any(
@@ -207,12 +208,15 @@ class WithSerializationSupport:
         )
         if stream and is_event_stream:
             return _iter_event_stream(
-                response, response_type=_response_type, select_path=select_path
+                response,
+                response_type=_response_type,  # pyright: ignore[reportArgumentType]
+                select_path=select_path,
             )
-        else:
-            return _deserialize_response(
-                response, response_type=_response_type, select_path=select_path
-            )
+        return _deserialize_response(
+            response,
+            response_type=_response_type,  # pyright: ignore[reportArgumentType]
+            select_path=select_path,
+        )
 
 
 _CHUNK_SIZE = 65_536
@@ -224,6 +228,7 @@ class Readable(Protocol):
 
     def read(self, n: int = -1) -> bytes:
         """Read a binary chunk."""
+        ...
 
 
 def _convert_content(content: Any):
@@ -265,7 +270,7 @@ def _interpolate_resource_path(
         return resource_path
     for k, v in path_params.items():
         # specified safe chars, encode everything
-        resource_path = resource_path.replace("{%s}" % k, quote(str(v)))
+        resource_path = resource_path.replace(f"{{{k}}}", quote(str(v)))
     return resource_path
 
 
@@ -344,12 +349,11 @@ def _extract_selected(data, select_path: str):
         return data
     jsonpath_expr = jsonpath_parse(select_path)
     match_values = [match.value for match in jsonpath_expr.find(data)]
-    data = (
+    return (
         match_values[0]
         if not re.search(r"\[(\*|.*:.*|.*,.*)\]", select_path)
         else match_values
     )
-    return data
 
 
 T = TypeVar("T")
@@ -367,7 +371,7 @@ def _deserialize_response(
         ):
             _content = response.content
             try:
-                return_data = cast(T, _content)
+                return_data = cast("T", _content)
             except (TypeError, ValueError):
                 return_data = _content  # type: ignore
         elif response_type is not None:
@@ -379,9 +383,9 @@ def _deserialize_response(
                 _data = response.text
             if _data is not None:
                 try:
-                    return_data = _deserialize(_data, response_type)
+                    return_data = _deserialize(_data, response_type)  # pyright: ignore[reportAssignmentType]
                 except (TypeError, ValueError):
-                    return _data
+                    return _data  # pyright: ignore[reportReturnType]
             else:
                 return_data = response.content  # type: ignore
         elif response_type is None:
@@ -416,7 +420,7 @@ async def _iter_event_stream(
             _deserialized_event = _deserialize(
                 _extract_selected(event, select_path), _response_type
             )
-            yield _deserialized_event
+            yield _deserialized_event  # pyright: ignore[reportReturnType]
     finally:
         await response.aclose()
 
@@ -445,11 +449,21 @@ def __parse_event(event_str: str, content_type: str):
             if keyword or data:
                 event[keyword] = _data
         return event
-    elif content_type == NDJSON_EVENT_STREAM_CONTENT_TYPE:
+    if content_type == NDJSON_EVENT_STREAM_CONTENT_TYPE:
         try:
-            event = json_lib.loads(event_str)
+            return json_lib.loads(event_str)
         except (ValueError, TypeError):
             log.warning("Cannot deserialize event\n%s", event_str, exc_info=True)
-    else:
-        return event_str
-    return event
+    return event_str
+
+
+__all__ = [
+    "AsyncClient",
+    "HeaderTypes",
+    "QueryParamTypes",
+    "Request",
+    "RequestContent",
+    "RequestData",
+    "RequestFiles",
+    "Response",
+]

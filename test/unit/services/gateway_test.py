@@ -1,9 +1,16 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pytest
-from pytest_httpx import HTTPXMock
 from typeguard import check_type
 
-from waylay.sdk.client import WaylayClient
 from waylay.sdk.services.gateway import GatewayResponse, GatewayService
+
+if TYPE_CHECKING:
+    from pytest_httpx import HTTPXMock
+
+    from waylay.sdk.client import WaylayClient
 
 
 def test_gateway_service_loaded(client: WaylayClient):
@@ -14,6 +21,7 @@ def test_gateway_service_loaded(client: WaylayClient):
 @pytest.mark.asyncio
 async def test_gateway_about(client: WaylayClient, httpx_mock: HTTPXMock):
     """Test gateway about status check"""
+    assert isinstance(client.config.gateway_url, str)
     httpx_mock.add_response(
         method="GET",
         url=client.config.gateway_url + "/",

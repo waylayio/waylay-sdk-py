@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import AsyncGenerator
-from typing import Callable, Generator, Optional
+from collections.abc import AsyncGenerator, Callable, Generator
 
 import httpx
 
@@ -19,7 +18,7 @@ from .model import (
     WaylayToken,
 )
 
-CredentialsCallback = Callable[[Optional[str]], WaylayCredentials]
+CredentialsCallback = Callable[[str | None], WaylayCredentials]
 
 
 class WaylayTokenAuth(httpx.Auth):
