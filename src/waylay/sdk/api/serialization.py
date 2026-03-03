@@ -199,9 +199,7 @@ class WithSerializationSupport:
             raise ApiError.from_response(
                 "Error response.",
                 response,
-                _deserialize_response(
-                    response, response_type=_response_type, select_path=select_path
-                ),
+                _deserialize_response(response, response_type=_response_type),
             )
         content_type = response.headers.get("content-type", "")
         is_event_stream = any(
