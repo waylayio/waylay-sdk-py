@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import warnings
 from importlib.metadata import entry_points
-from typing import Dict, Type
 
 from ..api import ApiClient
 from .base import PluginAccess, WaylayPlugin, WaylayService, WaylayTool, WithApiClient
@@ -15,8 +14,8 @@ class WithServicesAndTools(WithApiClient):
 
     services: PluginAccess[WaylayService]
     tools: PluginAccess[WaylayTool]
-    _services: Dict[str, WaylayService]
-    _tools: Dict[str, WaylayTool]
+    _services: dict[str, WaylayService]
+    _tools: dict[str, WaylayTool]
 
     def __init__(self, api_client: ApiClient):
         """Create a WaylayConfig instance."""
@@ -35,7 +34,7 @@ class WithServicesAndTools(WithApiClient):
             for plugin_class in ep.load():
                 self.register(plugin_class)
 
-    def register(self, plugin_class: Type[WaylayPlugin]) -> WaylayPlugin | None:
+    def register(self, plugin_class: type[WaylayPlugin]) -> WaylayPlugin | None:
         """Register and instantiate plugin class."""
         if issubclass(plugin_class, WaylayService):
             service = plugin_class(self.api_client)
@@ -61,3 +60,6 @@ class WithServicesAndTools(WithApiClient):
         raise AttributeError(
             f"'{self.__class__.__name__}' object has no attribute '{name}'"
         )
+
+
+__all__ = ["ApiClient"]

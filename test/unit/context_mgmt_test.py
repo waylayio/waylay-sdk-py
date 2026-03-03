@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from typing import TYPE_CHECKING
 
 import httpx
 import pytest
@@ -10,8 +11,10 @@ from starlette.requests import Request as StarletteRequest
 from starlette.responses import Response as StarletteResponse
 
 from waylay.sdk import WaylayClient, WaylayConfig, WaylayService, WaylayTool
-from waylay.sdk.api import AsyncClient
 from waylay.sdk.api._models import Model, _Model
+
+if TYPE_CHECKING:
+    from waylay.sdk.api import AsyncClient
 
 
 class MyService(WaylayService):
@@ -80,15 +83,15 @@ def _fixture_my_client(config: WaylayConfig, echo_app):
     client.register(MyService)
     client.register(MyService2)
     client.register(MyTool)
-    yield client
+    return client
 
 
-async def assert_call_echo(srv: MyService):
+async def assert_call_echo(srv: MyService | MyTool):
     """Invoke the remote service."""
     data = {"message": "hello world"}
     api_response = await srv.echo(data)
     assert api_response == _Model(**data)
-    assert api_response.message == data["message"]
+    assert api_response.message == data["message"]  # type: ignore[attr-defined]
     message = await srv.echo(data, select_path="message")
     assert message == data["message"]
     response = await srv.echo(data, with_http_info=True)
@@ -149,8 +152,11 @@ async def test_lazy_init(my_client: WaylayClient):
     # using it does not open or close http clients
     assert my_client.tst.api_client.http_client is http_client
     assert my_client.tst2.api_client.http_client is http_client
+    assert isinstance(my_client.tst, MyService)
     await assert_call_echo(my_client.tst)
+    assert isinstance(my_client.tst2, MyService)
     await assert_call_echo(my_client.tst2)
+    assert isinstance(my_client.tst_tool, MyTool)
     await assert_call_echo(my_client.tst_tool)
 
     assert http_client.is_closed is False
@@ -170,7 +176,9 @@ async def test_client_ctx(my_client: WaylayClient):
         assert not ctx_http_client.is_closed
         assert m.api_client.http_client is ctx_http_client
         assert m.tst.api_client.http_client is ctx_http_client
+        assert isinstance(m.tst, MyService)
         await assert_call_echo(m.tst)
+        assert isinstance(m.tst2, MyService)
         await assert_call_echo(m.tst2)
 
     assert ctx_http_client.is_closed
@@ -209,6 +217,7 @@ async def test_used_client_ctx(my_client: WaylayClient):
         # ALT: separate state for in_cxt client and shared client.
         tst2_ctx_api_client = tst2.api_client
         assert tst2_ctx_api_client is not tst_client
+        assert isinstance(tst2, MyService)
         await assert_call_echo(tst2)
 
     # TBD: original client is not restored

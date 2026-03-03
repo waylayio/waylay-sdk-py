@@ -1,5 +1,7 @@
 """Client configuration."""
 
+from __future__ import annotations
+
 from .model import (
     DEFAULT_PROFILE,
     SERVICE_KEY_ACCOUNTS,
@@ -9,9 +11,9 @@ from .model import (
 )
 
 __all__ = [
-    "WaylayConfig",
-    "TenantSettings",
     "DEFAULT_PROFILE",
-    "SERVICE_KEY_GATEWAY",
     "SERVICE_KEY_ACCOUNTS",
+    "SERVICE_KEY_GATEWAY",
+    "TenantSettings",
+    "WaylayConfig",
 ]

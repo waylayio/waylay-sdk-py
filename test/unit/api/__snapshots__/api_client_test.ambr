@@ -168,7 +168,7 @@
     b'{"message":"some not found message","code":"RESOURCE_NOT_FOUND"}',
     201,
     dict({
-      '2XX': typing.Dict[str, str],
+      '2XX': dict[str, str],
     }),
     None,
     'dict',
@@ -229,7 +229,7 @@
     b'{"message":"some not found message","code":"RESOURCE_NOT_FOUND"}',
     201,
     dict({
-      '201': typing.Dict[str, str],
+      '201': dict[str, str],
     }),
     None,
     'dict',
@@ -299,7 +299,7 @@
     b'{"message":"some not found message","code":"RESOURCE_NOT_FOUND"}',
     201,
     dict({
-      '4XX': typing.Dict[str, str],
+      '4XX': dict[str, str],
     }),
     None,
     '_Model',
@@ -394,7 +394,7 @@
     b'["11","22",33]',
     200,
     dict({
-      '2XX': typing.List[int],
+      '2XX': list[int],
     }),
     None,
     'list',
@@ -410,7 +410,7 @@
     b'["hello","world",123,{"key":"value"}]',
     200,
     dict({
-      '2XX': typing.List[typing.Union[str, int, typing.Dict[str, typing.Any]]],
+      '2XX': list[str | int | dict[str, typing.Any]],
     }),
     None,
     'list',
@@ -441,7 +441,7 @@
     b'{"pets":[{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"},{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}]}',
     200,
     dict({
-      '200': typing.List[Model],
+      '200': list[Model],
     }),
     'pets',
     'list',
@@ -456,7 +456,7 @@
     b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}',
     200,
     dict({
-      '200': typing.List[ForwardRef('str')],
+      '200': list['str'],
     }),
     '[*].name',
     'list',
@@ -470,7 +470,7 @@
     b'{"pets":[{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"},{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}]}',
     200,
     dict({
-      '200': typing.List[str],
+      '200': list[str],
     }),
     'pets[*].name',
     'list',
@@ -497,7 +497,7 @@
     b'{"pets":[{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"},{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}]}',
     200,
     dict({
-      '200': typing.List[str],
+      '200': list[str],
     }),
     'pets[1:].name',
     'list',
@@ -523,7 +523,7 @@
     b'{"pets":[{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"},{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}]}',
     200,
     dict({
-      '200': typing.List[unit.api.example.pet_model.Pet],
+      '200': list[unit.api.example.pet_model.Pet],
     }),
     'pets',
     'list',
@@ -593,7 +593,7 @@
     b'[{"name":111,"owner":{"id":"invalidId","name":"Simon"}},{"name":"Chop"}]',
     200,
     dict({
-      '200': typing.List[unit.api.example.pet_model.Pet],
+      '200': list[unit.api.example.pet_model.Pet],
     }),
     None,
     'list',
@@ -836,7 +836,7 @@
     'some_text_resopnse',
   )
 # ---
-# name: test_deserialize_error_responses[response_kwargs0-response_type0][{'404': typing.Dict[str, str]}]
+# name: test_deserialize_error_responses[response_kwargs0-response_type0][{'404': dict[str, str]}]
   tuple(
     '''
       ApiError('Error response.')
