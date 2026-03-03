@@ -808,6 +808,30 @@ async def test_deserialize_partially_fetched_error_stream(
     assert (str(excinfo.value),) == snapshot()
 
 
+def test_deserialize_error_response_with_select_path(waylay_api_client: ApiClient):
+    """Test that error responses with select_path raise ApiError, not IndexError.
+
+    When a non-2XX response is received with a select_path parameter,
+    the select_path should not be applied to the error response structure.
+    Instead, it should raise an ApiError with the full error response data.
+    """
+    resp = Response(
+        status_code=404,
+        json={
+            "message": "Resource not found",
+            "code": "RESOURCE_NOT_FOUND",
+        },
+    )
+    with pytest.raises(ApiError) as excinfo:
+        waylay_api_client.deserialize(
+            resp,
+            response_type={"404": dict[str, str]},
+            select_path="entity",
+        )
+        assert excinfo.value.data is not None
+        assert excinfo.value.data.get("code") == "RESOURCE_NOT_FOUND"
+
+
 def _retrieve_fixture_values(request, kwargs: Dict[str, Any]) -> Dict[str, Any]:
     for arg_key, arg_value in kwargs.items():
 
