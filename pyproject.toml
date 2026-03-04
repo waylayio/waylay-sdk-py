@@ -33,6 +33,7 @@ Repository = "https://github.com/waylayio/waylay-sdk-py.git"
 
 [tool.setuptools-git-versioning]
 enabled = true
+tag_filter = "^v?[0-9]+\\.[0-9]+\\.[0-9]+(rc|alpha|a|beta|b)?[0-9]*$"
 
 [tool.setuptools.package-data]
 waylay = ["py.typed"]
