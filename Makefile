@@ -115,6 +115,8 @@ test-publish:
 	uv tool run twine upload --repository testpypi dist/*
 	open https://test.pypi.org/project/waylay-sdk-core
 
+VENV_ACTIVATE=source .venv/bin/activate
+
 _assert_tagged:
 	@ ${VENV_ACTIVATE} && export _PKG_VERSION_SCRIPT='from importlib.metadata import version; print(version("waylay-sdk-core"))' && \
 		export _PKG_VERSION=$$(python -c "$${_PKG_VERSION_SCRIPT}") && \
