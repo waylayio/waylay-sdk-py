@@ -20,7 +20,7 @@ dependencies = [
     "typeguard",
     "jsonpath-ng",
     "pydantic >= 2.6.0",
-    "waylay-beta==0.0.999",
+    "waylay-beta==0.7.3",
 ]
 
 [project.urls]
