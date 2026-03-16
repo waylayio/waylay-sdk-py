@@ -13,7 +13,7 @@ updates:
   - package-ecosystem: "uv"
     directory: "/"
     exclude-paths:
-      - "/LICENSE.txt"
+      - "LICENSE.txt"
     schedule:
       interval: "weekly"
       day: "thursday"
