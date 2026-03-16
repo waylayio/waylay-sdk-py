@@ -6,12 +6,14 @@
 version: 2
 updates:
   - package-ecosystem: "github-actions"
-    directory: "/requirements/"
+    directory: "/"
     schedule:
       interval: "weekly"
       day: "thursday"
   - package-ecosystem: "uv"
     directory: "/"
+    exclude-paths:
+      - "/LICENSE.txt"
     schedule:
       interval: "weekly"
       day: "thursday"
