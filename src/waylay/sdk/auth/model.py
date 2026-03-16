@@ -9,12 +9,15 @@ import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, ClassVar, cast
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 import jwt
 from jwt.exceptions import PyJWTError
 
 from .exceptions import AuthError, TokenParseError
+
+if TYPE_CHECKING:
+    from jwt.types import Options
 
 
 class CredentialsType(str, Enum):
@@ -275,9 +278,10 @@ class WaylayToken:
         self.token_string = token_string
         if token_data is None:
             try:
+                decode_options: Options = {"verify_signature": False}
                 token_data = cast(
                     "dict",
-                    jwt.decode(token_string, options=dict(verify_signature=False)),
+                    jwt.decode(token_string, options=decode_options),
                 )
             except (TypeError, ValueError, PyJWTError) as exc:
                 raise TokenParseError(exc) from exc
