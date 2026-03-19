@@ -1,0 +1,31 @@
+name: Update Dependencies
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 7 * * 1"
+
+jobs:
+  freeze-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+      - name: Set up Git with token to access other private repositories
+        run: git config --global url."https://${{ secrets.OTOMATOR_PAT }}@github".insteadOf https://github
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: '3.10'
+      - name: Update the dependency freeze files
+        run: make upgrade-deps
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          commit-message: 'chore: update dependencies'
+          title: 'Dependencies Updated'
+          body: 'Updates the dependency lock file (`uv.lock`) to the latest compatible versions.'
+          branch: chore/freeze_dependencie
+          base: main
+          token: ${{ secrets.OTOMATOR_PAT }}
