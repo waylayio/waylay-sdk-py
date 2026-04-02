@@ -363,8 +363,8 @@ def _deserialize_response(
     response: Response,
     response_type: type[T],
     select_path: str = "",
-) -> T:
-    return_data: T = None  # type: ignore
+) -> T | None:
+    return_data: T | None = None
     try:
         if response_type in _PRIMITIVE_BYTE_TYPES + tuple(
             t.__name__ for t in _PRIMITIVE_BYTE_TYPES
