@@ -29,6 +29,7 @@ class WaylayTokenAuth(httpx.Auth):
 
     AUTH_EXCEPTION = AuthError
     current_token: WaylayToken | None
+    _refresh_token: str | None
     credentials: WaylayCredentials
     http_client_sync: httpx.Client
     http_client_async: httpx.AsyncClient
@@ -42,6 +43,7 @@ class WaylayTokenAuth(httpx.Auth):
         """Create a Waylay Token authentication provider."""
         self.credentials = credentials
         self.current_token = None
+        self._refresh_token = None
         self.http_client_sync = (
             http_client if isinstance(http_client, httpx.Client) else httpx.Client()
         )
@@ -72,11 +74,14 @@ class WaylayTokenAuth(httpx.Auth):
         """Validate the current token and request a new one if invalid."""
         if self.current_token and self.current_token.is_valid:
             return self.current_token
-        credentials = self._validate_credentials()
-        if isinstance(credentials, TokenCredentials):
-            token_str = credentials.token
+        if self._refresh_token:
+            token_str = self._request_token_sync_via_refresh()
         else:
-            token_str = self._request_token_sync(credentials)
+            credentials = self._validate_credentials()
+            if isinstance(credentials, TokenCredentials):
+                token_str = credentials.token
+            else:
+                token_str = self._request_token_sync(credentials)
         self.current_token = self._create_and_validate_token_sync(token_str)
         return self.current_token
 
@@ -84,11 +89,14 @@ class WaylayTokenAuth(httpx.Auth):
         """Validate the current token and request a new one if invalid."""
         if self.current_token and self.current_token.is_valid:
             return self.current_token
-        credentials = self._validate_credentials()
-        if isinstance(credentials, TokenCredentials):
-            token_str = credentials.token
+        if self._refresh_token:
+            token_str = await self._request_token_async_via_refresh()
         else:
-            token_str = await self._request_token_async(credentials)
+            credentials = self._validate_credentials()
+            if isinstance(credentials, TokenCredentials):
+                token_str = credentials.token
+            else:
+                token_str = await self._request_token_async(credentials)
         self.current_token = await self._create_and_validate_token_async(token_str)
         return self.current_token
 
@@ -125,6 +133,7 @@ class WaylayTokenAuth(httpx.Auth):
             json = {
                 "clientId": credentials.api_key,
                 "clientSecret": credentials.api_secret,
+                "renewal": True,
             }
             return http_client.build_request("POST", url, params=params, json=json)
         if isinstance(credentials, ApplicationCredentials):
@@ -146,10 +155,24 @@ class WaylayTokenAuth(httpx.Auth):
     def _parse_token_response(self, response: httpx.Response) -> str:
         try:
             response.raise_for_status()
-            token_resp_json = response.json()
-            return token_resp_json["token"]
+            data = response.json()
+            self._refresh_token = data.get("refresh_token")
+            return data["token"]
         except httpx.HTTPError as exc:
             raise self.AUTH_EXCEPTION("Could not obtain waylay token") from exc
+
+    def _refresh_token_request(self) -> httpx.Request:
+        http_client = self.http_client_async or self.http_client_sync
+        token_url_prefix = (
+            self.credentials.accounts_url
+            or f"{self.credentials.gateway_url}/accounts/v1"
+        )
+        return http_client.build_request(
+            "POST",
+            f"{token_url_prefix}/tokens",
+            params={"grant_type": "refresh_token"},
+            json={"token": self._refresh_token},
+        )
 
     def _request_token_sync(self, credentials: KeySecretCredentials) -> str:
         return self._parse_token_response(
@@ -159,4 +182,14 @@ class WaylayTokenAuth(httpx.Auth):
     async def _request_token_async(self, credentials: KeySecretCredentials) -> str:
         return self._parse_token_response(
             await self.http_client_async.send(self._token_request(credentials))
+        )
+
+    def _request_token_sync_via_refresh(self) -> str:
+        return self._parse_token_response(
+            self.http_client_sync.send(self._refresh_token_request())
+        )
+
+    async def _request_token_async_via_refresh(self) -> str:
+        return self._parse_token_response(
+            await self.http_client_async.send(self._refresh_token_request())
         )
