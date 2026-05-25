@@ -14,6 +14,7 @@ from waylay.sdk.auth.model import ClientCredentials, WaylayToken
 from waylay.sdk.auth.provider import WaylayTokenAuth
 
 GATEWAY_URL = "https://gateway.example.com"
+TEST_SIGNING_KEY = "test-signing-key-for-unit-tests1"
 
 
 def _make_token(exp_offset: int = 100_000) -> str:
@@ -24,7 +25,7 @@ def _make_token(exp_offset: int = 100_000) -> str:
             "sub": "users/user-1",
             "exp": int(datetime.now().timestamp()) + exp_offset,
         },
-        key="",
+        key=TEST_SIGNING_KEY,
     )
 
 

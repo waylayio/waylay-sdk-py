@@ -11,6 +11,7 @@ from waylay.sdk import WaylayToken
 from waylay.sdk.auth.exceptions import AuthError, TokenParseError
 
 OK = "--OK--"
+TEST_SIGNING_KEY = "test-signing-key-for-unit-tests1"
 TOKEN_CASES: list[tuple[str, dict[str, Any], str]] = [
     ("valid", {"tenant": "xyz", "exp": 1999999999}, OK),
     ("expired", {"tenant": "xyz", "exp": 0}, "token expired"),
@@ -37,7 +38,7 @@ CASES: list[tuple[str, str | None, dict[str, Any] | None, type | None, str]] = [
     *(
         (
             f"t-{case}",
-            jwt.encode(token_data, key=""),
+            jwt.encode(token_data, key=TEST_SIGNING_KEY),
             None,
             AuthError if err_text is not OK else None,
             err_text,
