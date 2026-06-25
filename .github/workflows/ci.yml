@@ -15,7 +15,7 @@ jobs:
           python-version: ['3.10', '3.11', '3.12', '3.13']
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Git with token to access other private repositories
         run: git config --global url."https://${{ secrets.OTOMATOR_PAT }}@github".insteadOf https://github
       - name: Install uv
@@ -30,7 +30,7 @@ jobs:
     name: Unit and Integration Test Python 3.11
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Git with token to access other private repositories
         run: git config --global url."https://${{ secrets.OTOMATOR_PAT }}@github".insteadOf https://github
       - name: Install uv
