@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any
@@ -89,7 +89,9 @@ SERIALIZE_CASES = {
         "json": {
             "array_key": ["val1", "val2"],
             "tuple_key": ("val3", 123, {"key": "value"}, None),
-            "timestamp": datetime(1999, 9, 28, hour=12, minute=30, second=59),
+            "timestamp": datetime(
+                1999, 9, 28, hour=12, minute=30, second=59, tzinfo=timezone.utc
+            ),
         },
     },
     "files": {
@@ -399,7 +401,7 @@ DESERIALIZE_CASES = [
         "text_str_datetime",
         {
             "status_code": 200,
-            "text": datetime(2023, 12, 25, minute=1).isoformat(),
+            "text": datetime(2023, 12, 25, minute=1, tzinfo=timezone.utc).isoformat(),
         },
         {"200": datetime},
         None,
@@ -426,7 +428,7 @@ DESERIALIZE_CASES = [
         "text_datestr_str",
         {
             "status_code": 200,
-            "text": datetime(2023, 12, 25, minute=1).isoformat(),
+            "text": datetime(2023, 12, 25, minute=1, tzinfo=timezone.utc).isoformat(),
         },
         {"2XX": str},
         None,
@@ -435,7 +437,7 @@ DESERIALIZE_CASES = [
         "text_str",
         {
             "status_code": 200,
-            "text": datetime(2023, 12, 25, minute=1).isoformat(),
+            "text": datetime(2023, 12, 25, minute=1, tzinfo=timezone.utc).isoformat(),
         },
         {},  # no response type
         None,

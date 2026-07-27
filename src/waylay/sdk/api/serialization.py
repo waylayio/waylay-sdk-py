@@ -204,7 +204,7 @@ class WithSerializationSupport:
             )
         content_type = response.headers.get("content-type", "")
         is_event_stream = any(
-            [content_type.startswith(ect) for ect in EVENT_STREAM_CONTENT_TYPES]
+            content_type.startswith(ect) for ect in EVENT_STREAM_CONTENT_TYPES
         )
         if stream and is_event_stream:
             return _iter_event_stream(

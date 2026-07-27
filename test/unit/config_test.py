@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 import pytest
@@ -216,7 +216,7 @@ def test_get_set_root_url():
 @pytest.mark.usefixtures("mock_httpx_accounts", "mock_token")
 def test_representations():
     """Test the __str__ and __repr__ representations."""
-    cfg = WaylayConfig(credentials=TokenCredentials("_"), settings=dict(a="b"))
+    cfg = WaylayConfig(credentials=TokenCredentials("_"), settings={"a": "b"})
     assert '"a": "b"' in str(cfg)
     assert '"token": "***' in str(cfg)
     assert '"a": "b"' in repr(cfg)
@@ -230,9 +230,9 @@ def test_save_load_delete_profile(monkeypatch, mocker):
     """Test saving, loading and deletion of config profiles."""
     responses: Iterator[Mapping] = iter(
         [
-            dict(status_code=400),
-            dict(status_code=401),
-            dict(status_code=200, json=MOCK_TENANT_SETTINGS),
+            {"status_code": 400},
+            {"status_code": 401},
+            {"status_code": 200, "json": MOCK_TENANT_SETTINGS},
         ]
     )
 
@@ -259,13 +259,13 @@ def test_save_load_delete_profile(monkeypatch, mocker):
 
     monkeypatch.setattr(waylay.sdk.auth.interactive, "ask", mock_ask)
 
-    profile_name = f"_unit_test_{int(datetime.now().timestamp())}"
+    profile_name = f"_unit_test_{int(datetime.now(tz=timezone.utc).timestamp())}"
     with pytest.raises(ConfigError) as exc:
         WaylayConfig.load(profile_name, interactive=False)
     assert "not found" in format(exc.value)
 
     cfg = WaylayConfig(
-        profile=profile_name, credentials=TokenCredentials("_"), settings=dict(a="b")
+        profile=profile_name, credentials=TokenCredentials("_"), settings={"a": "b"}
     )
 
     cfg.save()
@@ -296,7 +296,7 @@ def test_load_interactive(mocker: MockerFixture):
         lambda profile, save_callback: save_callback(),  # noqa: ARG005
     )
 
-    profile_name = f"_unit_test_{int(datetime.now().timestamp())}"
+    profile_name = f"_unit_test_{int(datetime.now(tz=timezone.utc).timestamp())}"
     cfg = WaylayConfig.load(profile_name)
 
     assert cfg is not None

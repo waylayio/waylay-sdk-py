@@ -50,7 +50,6 @@ __all__ = [
     "CookieTypes",
     "Limits",
     "ProxyTypes",
-    "ProxyTypes",
     "QueryParamTypes",
     "RequestContent",
     "RequestData",

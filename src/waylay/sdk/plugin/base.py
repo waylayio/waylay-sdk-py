@@ -80,7 +80,7 @@ class PluginAccess(Mapping[str, P], Generic[P]):
         self._items = items
         self.base_class = base_class
 
-    def __getitem__(self, __key: str) -> P:
+    def __getitem__(self, __key: str, /) -> P:
         """Get an SDK plugin by key."""
         return self._items.__getitem__(__key)
 

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pytest
 
@@ -18,7 +18,7 @@ MOCK_TOKEN_DATA = {
     "domain": MOCK_DOMAIN,
     "tenant": "9999999999999999999999",
     "sub": "users/999999999999999",
-    "exp": datetime.now().timestamp() + 100000,
+    "exp": datetime.now(tz=timezone.utc).timestamp() + 100000,
 }
 
 
