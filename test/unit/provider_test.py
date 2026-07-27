@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
 import httpx
@@ -23,7 +23,7 @@ def _make_token(exp_offset: int = 100_000) -> str:
             "domain": "example.waylay.io",
             "tenant": "tenant-abc",
             "sub": "users/user-1",
-            "exp": int(datetime.now().timestamp()) + exp_offset,
+            "exp": int(datetime.now(tz=timezone.utc).timestamp()) + exp_offset,
         },
         key=TEST_SIGNING_KEY,
     )

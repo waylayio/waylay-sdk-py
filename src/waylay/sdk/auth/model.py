@@ -131,13 +131,13 @@ class KeySecretCredentials(CredentialsBase):
 
     def to_dict(self, obfuscate=True):
         """Convert the credentials to a json-serialisable representation."""
-        return dict(
-            type=self.credentials_type.value,  # type: ignore
-            api_key=self.api_key,
-            api_secret="********" if obfuscate else self.api_secret,
-            gateway_url=self.gateway_url,
-            accounts_url=self.accounts_url,
-        )
+        return {
+            "type": self.credentials_type.value,  # type: ignore
+            "api_key": self.api_key,
+            "api_secret": "********" if obfuscate else self.api_secret,
+            "gateway_url": self.gateway_url,
+            "accounts_url": self.accounts_url,
+        }
 
     def is_well_formed(self) -> bool:
         """Validate that these credentials are well-formed.
@@ -171,11 +171,11 @@ class NoCredentials(CredentialsBase):
 
     def to_dict(self, obfuscate=True):  # noqa: ARG002
         """Convert the credentials to a json-serialisable representation."""
-        return dict(
-            type=str(self.credentials_type),
-            gateway_url=self.gateway_url,
-            accounts_url=self.accounts_url,
-        )
+        return {
+            "type": str(self.credentials_type),
+            "gateway_url": self.gateway_url,
+            "accounts_url": self.accounts_url,
+        }
 
     def is_well_formed(self) -> bool:
         """Validate that these credentials are well-formed."""
@@ -252,12 +252,12 @@ class TokenCredentials(CredentialsBase):
 
     def to_dict(self, obfuscate=True):
         """Get the credential attributes."""
-        return dict(
-            type=str(self.credentials_type),
-            token="*********" if obfuscate else self.token,
-            gateway_url=self.gateway_url,
-            accounts_url=self.accounts_url,
-        )
+        return {
+            "type": str(self.credentials_type),
+            "token": "*********" if obfuscate else self.token,
+            "gateway_url": self.gateway_url,
+            "accounts_url": self.accounts_url,
+        }
 
     def is_well_formed(self) -> bool:
         """Validate that these credentials are well-formed."""
@@ -387,13 +387,13 @@ class WaylayToken:
 
     def to_dict(self):
         """Get the main token attributes."""
-        return dict(
-            tenant=self.tenant,
-            domain=self.domain,
-            subject=self.subject,
-            expires_at=str(self.expires_at),
-            is_valid=self.is_valid,
-        )
+        return {
+            "tenant": self.tenant,
+            "domain": self.domain,
+            "subject": self.subject,
+            "expires_at": str(self.expires_at),
+            "is_valid": self.is_valid,
+        }
 
     def __repr__(self) -> str:
         """Show the implementing class an main attributes."""
@@ -408,7 +408,7 @@ class WaylayToken:
         return self.is_valid
 
 
-def _utc_datetime(posix_ts: float | int | None) -> datetime | None:
+def _utc_datetime(posix_ts: float | None) -> datetime | None:
     """Parse posix seconds to an utc datetime."""
     if posix_ts is None:
         return None

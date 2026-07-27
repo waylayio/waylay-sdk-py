@@ -41,7 +41,7 @@ class AboutApi(WithApiClient):
         query: QueryParamTypes | None = None,
         raw_response: Literal[False] = False,
         select_path: Literal[""] = "",
-        response_type: Literal[None] = None,
+        response_type: None = None,
         headers: HeaderTypes | None = None,
         **kwargs,
     ) -> GatewayResponse: ...
@@ -65,7 +65,7 @@ class AboutApi(WithApiClient):
         query: QueryParamTypes | None = None,
         raw_response: Literal[True],
         select_path: Literal["_not_used_"] = "_not_used_",
-        response_type: Literal[None] = None,  # not used
+        response_type: None = None,  # not used
         headers: HeaderTypes | None = None,
         **kwargs,
     ) -> Response: ...
@@ -77,7 +77,7 @@ class AboutApi(WithApiClient):
         query: QueryParamTypes | None = None,
         raw_response: Literal[False] = False,
         select_path: str,
-        response_type: Literal[None] = None,
+        response_type: None = None,
         headers: HeaderTypes | None = None,
         **kwargs,
     ) -> Model: ...
