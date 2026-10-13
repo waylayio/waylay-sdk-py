@@ -289,7 +289,7 @@ def _deserialize(data: Any, constructor: Any):
         if not isclass(constructor) or not issubclass(constructor, BaseModel)
         else None
     )
-    type_adapter = TypeAdapter(constructor, config=config)
+    type_adapter = TypeAdapter(cast("Any", constructor), config=config)
     try:
         return type_adapter.validate_python(data)
     except (TypeError, ValidationError) as exc:

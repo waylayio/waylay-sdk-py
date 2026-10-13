@@ -29,7 +29,6 @@ from pydantic import (
 )
 from pydantic import (
     ConfigDict,
-    SerializationInfo,
     StrictStr,
     TypeAdapter,
     ValidationError,
@@ -50,14 +49,12 @@ class BaseModel(PydanticBaseModel, ABC):
     model_config = ConfigDict(extra="allow")
 
     @model_serializer(mode="wrap")
-    def _model_serializer(
-        self, handler: Callable, info: SerializationInfo
-    ) -> dict[StrictStr, Any] | None:
+    def _model_serializer(self, handler: Callable) -> dict[StrictStr, Any] | None:
         """Get the default serializer of the model.
 
         * Excludes `None` fields that were not set at model initialization.
         """
-        model_dict = handler(self, info)
+        model_dict = handler(self)
         if model_dict is None:
             return None
         return {
