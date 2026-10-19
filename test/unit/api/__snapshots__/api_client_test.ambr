@@ -453,7 +453,7 @@
 # ---
 # name: test_deserialize[json_list_list_path_[*].name]
   tuple(
-    b'{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}',
+    b'[{"name":"Lord Biscuit, Master of Naps","owner":{"id":123,"name":"Simon"},"tag":"doggo"}]',
     200,
     dict({
       '200': list['str'],
