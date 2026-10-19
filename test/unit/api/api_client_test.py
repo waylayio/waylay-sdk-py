@@ -836,19 +836,17 @@ def test_deserialize_error_response_with_select_path(waylay_api_client: ApiClien
 
 
 def _retrieve_fixture_values(request, kwargs: dict[str, Any]) -> dict[str, Any]:
-    for arg_key, arg_value in kwargs.items():
+    def _resolve(value: Any) -> Any:
+        if callable(value):
+            return request.getfixturevalue(value.__name__)
+        return value
 
-        def _update_fixture_value(x):
-            if callable(x):
-                _arg_value = request.getfixturevalue(x.__name__)
-                kwargs.update({arg_key: _arg_value})  # noqa: B023
-
-        if isinstance(arg_value, list):
-            for x in arg_value:
-                _update_fixture_value(x)
-        else:
-            _update_fixture_value(arg_value)
-    return kwargs
+    return {
+        key: [_resolve(item) for item in value]
+        if isinstance(value, list)
+        else _resolve(value)
+        for key, value in kwargs.items()
+    }
 
 
 @pytest.mark.parametrize(
